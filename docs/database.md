@@ -28,6 +28,7 @@ Only the migration runner, `migrateDatabase`, creates or changes tables.
 - **The dashboard.** It never changes the schema. It checks the schema through `assertSchemaCurrent` in `apps/web/src/lib/server/services.ts`.
   - While the database is behind (never migrated, tables without records, or pending migrations), the dashboard cannot start. `/api/ready` answers `503`, and the server log names the pending migrations.
   - `/api/health` stays `200` and reports `MIGRATION_PENDING`. So Docker does not restart the dashboard while the bot migrates.
+  - When the database has contract migrations this dashboard does not know, `/api/health` stays `200` and reports `SCHEMA_INCOMPATIBLE`, and `/api/ready` answers `503`; deploy the matching release or restore the pre-deploy dump.
   - The next request tries again. The dashboard recovers by itself when the bot or `ririko db:migrate` has migrated the database. The same downgrade guard applies.
 - **`ririko db:copy`.** It prepares its PostgreSQL target with `migrateDatabase`. The target gets the exact tables the bot expects and its own migration records. The migration records of the source are never copied.
 - **Tests.** `createDatabaseClient({ autoMigrate: true })` runs `migrateDatabase` after it connects. It is for tests and throwaway databases (`:memory:`) and is off by default. `describeDialects` and the bot test harness migrate the same way. `createSqliteClient` creates no tables, not even in a new file.

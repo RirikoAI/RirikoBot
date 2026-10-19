@@ -48,7 +48,11 @@ function writeSource(name: string, journal: 'DELETE' | 'WAL' = 'DELETE'): Databa
   return db;
 }
 
-describe('copyDatabase', () => {
+// A real file database is slow to create on some machines (a Windows drive takes ten times
+// longer than a Linux disk), so these suites get more than the 5 s default.
+const FILE_DATABASE_TIMEOUT_MS = 30_000;
+
+describe('copyDatabase', { timeout: FILE_DATABASE_TIMEOUT_MS }, () => {
   beforeEach(() => {
     vi.mocked(migrateDatabase).mockClear();
   });

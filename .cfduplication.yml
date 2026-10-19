@@ -1,0 +1,30 @@
+# CodeFactor duplication check configuration.
+# See docs/development.md section 2 ("CodeFactor") for what it does and the
+# Ignore Files patterns set in the CodeFactor repository settings.
+
+# duplication threshold [20 - 100]
+MinLineCount: 20
+
+# files/patterns to exclude
+IgnorePatterns:
+  - '**/test/**'
+  - '**/tests/**'
+  - '**/unittests/**'
+  - '**/*.unittest*/**'
+  - '**/spec/**'
+  - '**/*.spec.*'
+  - '**/__tests__/**'
+  - '**/mocks/**'
+  - '**/schema.*'
+  - '**/migrations/**'
+  - '**/migration/**'
+  - '**/migrate/**'
+  - '**/dist/**'
+  # Ririko additions: generated code, test fixtures and tests that sit next to their source.
+  - 'packages/database/migrations/**'
+  - 'packages/database/src/migrations/generated/**'
+  - 'packages/database/src/schema/*/ddl.ts'
+  - '**/__fixtures__/**'
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - 'apps/web/e2e/**'

@@ -2760,7 +2760,7 @@
       "id": "STORY-190",
       "title": "README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader",
       "points": 13,
-      "status": "TODO",
+      "status": "DONE",
       "description": "The README is the first page for everyone from a first-time self-hoster to a long-term contributor. Rework it (later, once the docs site exists) into a unique front page with a promotional feature image, a deterministic quick start, badges (CircleCI, Codecov, CodeFactor, Docker pulls, all-contributors) and the all-contributors list carried over from master. Add a short CONTRIBUTING.md in simple English.",
       "context": {
         "files": [
@@ -9322,23 +9322,28 @@
       "parent": "STORY-190",
       "title": "CodeFactor Integration and Config",
       "points": 1,
-      "status": "BACKLOG",
-      "description": "CodeFactor already reports on master (1.x). After 2.0 is on master, configure it for the monorepo so generated code does not count, and add the badge (TASK-1901).",
+      "status": "DONE",
+      "description": "CodeFactor already reports on master, and master now holds 2.0. CodeFactor has no repository config file for excluding paths: file exclusions are a repository setting (Settings, Ignore Files). The one repository file it reads for this is .cfduplication.yml, which configures its duplication check. Add that file, document the Ignore Files patterns and the maintainer steps, and keep the existing master badge.",
       "context": {
         "files": [
-          ".codefactor.yml",
+          ".cfduplication.yml",
+          "docs/development.md",
           "README.md"
         ],
         "symbols": [],
+        "entry_points": [
+          "docs/development.md section 2 (Check Your Work)"
+        ],
         "codegraph_queries": [
-          "build-status-site renderBoard"
+          "packages/database migrations generated ddl embedded db:generate-migrations"
         ]
       },
       "acceptance": [
-        "A CodeFactor config excludes generated files (packages/database/migrations/, packages/database/src/migrations/generated/, packages/database/src/schema/*/ddl.ts, apps/web/.next) and test fixtures.",
-        "The PROGRESS entry lists the maintainer steps (CodeFactor app access to the repository, default branch) and the badge URL."
+        ".cfduplication.yml at the repository root keeps CodeFactor's default keys and values (MinLineCount 20 and every default IgnorePatterns entry, copied in the GROOMING entry) and adds the generated and fixture paths listed there.",
+        "docs/development.md has a short CodeFactor subsection in section 2: what CodeFactor grades (master), that .cfduplication.yml configures the duplication check, the exact Ignore Files patterns (one per line) for the repository settings, and the maintainer steps in order.",
+        "README.md keeps its CodeFactor badge for master unchanged; the PROGRESS entry lists the badge URL and the maintainer steps."
       ],
-      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet && node -e \"const s=require('fs').readFileSync('.cfduplication.yml','utf8');for(const k of ['MinLineCount: 20','IgnorePatterns:','packages/database/migrations/**','**/__fixtures__/**'])if(!s.includes(k))throw new Error('missing '+k)\""
     },
     {
       "children": [],
@@ -11166,7 +11171,7 @@
       "parent": "EPIC-020",
       "title": "bootstrap.sh Says \"CI deploy key: NOT installed\" When It Kept the Existing Key",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "description": "Rerunning bootstrap.sh without --deploy-key keeps the deploy user's authorized_keys, but the summary says \"CI deploy key: NOT installed (run again with --deploy-key)\". Seen on staging on 2026-10-11.",
       "context": {
         "files": [
@@ -11201,14 +11206,16 @@
       "parent": "EPIC-020",
       "title": "Make the Test Suite Pass on a Windows Development Machine",
       "points": 2,
-      "status": "TODO",
+      "status": "REVIEW",
       "description": "On the maintainer's Windows machine (Git Bash, repository on a slower drive) the full suite fails where CI passes: scripts/deploy-host.test.ts \"deploys the first release of staging\" because Git Bash sha256sum prints \"<hash> *<file>\", several deploy-host tests time out at 5 s, and file-SQLite tests (client/factory WAL test, db-migrate adoption test, copy-database suites) sometimes pass 5 s under load.",
       "context": {
         "files": [
           "scripts/deploy-host.test.ts",
           "vitest.config.ts",
           "packages/database/src/client/factory.test.ts",
-          "apps/cli/src/commands/db-migrate.test.ts"
+          "apps/cli/src/commands/db-migrate.test.ts",
+          "apps/cli/src/commands/db-copy.test.ts",
+          "packages/database/src/copy/copy-database.flow.test.ts"
         ],
         "symbols": [],
         "codegraph_queries": [
@@ -11240,14 +11247,16 @@
       "parent": "EPIC-020",
       "title": "Dashboard /health Reports SCHEMA_INCOMPATIBLE for a Downgrade-Guard Refusal",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "description": "When the database holds contract migrations the dashboard does not know, assertSchemaCurrent throws SchemaNotReadyError with an empty pending list and /health reports MIGRATION_PENDING with pending []. The status codes are right; the label is misleading.",
       "context": {
         "files": [
           "apps/web/src/lib/server/schema-guard.ts",
           "apps/web/src/lib/server/health.ts",
           "apps/web/src/lib/server/health.test.ts",
-          "apps/web/src/lib/server/schema-guard.test.ts"
+          "apps/web/src/lib/server/schema-guard.test.ts",
+          "docs/deployment.md",
+          "docs/database.md"
         ],
         "symbols": [
           "SchemaNotReadyError",
@@ -11260,7 +11269,8 @@
       },
       "acceptance": [
         "SchemaNotReadyError carries a reason (pending or incompatible). /health reports database.status MIGRATION_PENDING with the ids for pending, and SCHEMA_INCOMPATIBLE for the downgrade-guard case; both stay 200 for liveness and 503 for /ready.",
-        "Tests cover both reasons."
+        "Tests cover both reasons.",
+        "docs/deployment.md (section 6, the paragraph on pending migrations) and docs/database.md (the dashboard bullets) also describe SCHEMA_INCOMPATIBLE: /health stays 200 with database.status SCHEMA_INCOMPATIBLE when a newer release recorded contract migrations this dashboard does not know, /ready answers 503, and the fix is the matching release or the pre-deploy dump."
       ],
       "verify_cmd": "pnpm vitest run apps/web/src/lib/server && pnpm format:check && pnpm lint --quiet"
     },
@@ -12747,7 +12757,7 @@
       "parent": "EPIC-020",
       "title": "/lyrics Finds Nothing for Music Videos Whose Length Differs From the Song by More Than 3 Seconds",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "description": "LrclibClient.findForTrack only takes a search hit within 3 s of the track duration (BUG-0040, as groomed). Music videos with an intro or outro miss even when LRCLIB has the song, and the user sees \"no lyrics found\".",
       "context": {
         "files": [

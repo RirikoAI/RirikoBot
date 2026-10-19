@@ -38,6 +38,7 @@ describe('assertSchemaCurrent', () => {
     );
     expect((error as SchemaNotReadyError).message).toContain('ririko db:migrate');
     expect((error as SchemaNotReadyError).pending).toEqual(ids);
+    expect((error as SchemaNotReadyError).reason).toBe('pending');
     expect(
       db.raw.prepare("SELECT count(*) AS n FROM sqlite_master WHERE type = 'table'").get(),
     ).toEqual({ n: 0 });
@@ -64,8 +65,13 @@ describe('assertSchemaCurrent', () => {
     db.raw.exec(
       `INSERT INTO ${MIGRATIONS_TABLE} (id, checksum, contract, adopted, applied_at) VALUES ('9999_future_drop', 'x', 1, 0, 0)`,
     );
-    await expect(assertSchemaCurrent(db)).rejects.toThrow(
+    const error = await assertSchemaCurrent(db).catch((reason: unknown) => reason);
+
+    expect(error).toBeInstanceOf(SchemaNotReadyError);
+    expect((error as SchemaNotReadyError).message).toMatch(
       /contract migration\(s\) this dashboard release does not know \(9999_future_drop\)/,
     );
+    expect((error as SchemaNotReadyError).reason).toBe('incompatible');
+    expect((error as SchemaNotReadyError).pending).toEqual([]);
   });
 });

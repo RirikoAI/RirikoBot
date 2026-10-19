@@ -88,15 +88,95 @@ describe('LrclibClient', () => {
     expect(result?.plainLyrics).toBe('right length');
   });
 
-  it('returns null when no search hit is close enough in length', async () => {
+  it('takes the closest hit within 60 seconds when none is within 3 seconds', async () => {
     const fetchFn = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(notFound())
-      .mockResolvedValueOnce(jsonResponse([rawHit({ duration: 400 })]));
+      .mockResolvedValueOnce(
+        jsonResponse([
+          rawHit({ id: 1, duration: 290, plainLyrics: 'too far' }),
+          rawHit({ id: 2, duration: 250, artistName: 'Other', plainLyrics: 'farther in range' }),
+          rawHit({ id: 3, duration: 240, artistName: 'Other', plainLyrics: 'closest in range' }),
+          rawHit({ id: 4, duration: 240, artistName: 'Other', plainLyrics: 'tie, later' }),
+        ]),
+      );
 
     const result = await makeClient(fetchFn).findForTrack({
       title: 'Idol',
       artist: 'YOASOBI',
+      durationSeconds: 213,
+    });
+
+    expect(result?.id).toBe(3);
+  });
+
+  it('prefers a hit within 3 seconds over a closer-in-order hit within 60 seconds', async () => {
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(notFound())
+      .mockResolvedValueOnce(
+        jsonResponse([rawHit({ id: 1, duration: 230 }), rawHit({ id: 2, duration: 216 })]),
+      );
+
+    const result = await makeClient(fetchFn).findForTrack({
+      title: 'Idol',
+      artist: 'YOASOBI',
+      durationSeconds: 213,
+    });
+
+    expect(result?.id).toBe(2);
+  });
+
+  it('takes the first hit by the queried artist when none is within 60 seconds', async () => {
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(notFound())
+      .mockResolvedValueOnce(
+        jsonResponse([
+          rawHit({ id: 1, duration: 400, artistName: 'Someone Else' }),
+          rawHit({ id: 2, duration: 400, artistName: '  yoasobi ' }),
+          rawHit({ id: 3, duration: 500, artistName: 'YOASOBI' }),
+        ]),
+      );
+
+    const result = await makeClient(fetchFn).findForTrack({
+      title: 'Idol',
+      artist: 'YOASOBI',
+      durationSeconds: 213,
+    });
+
+    expect(result?.id).toBe(2);
+  });
+
+  it('returns null when no hit is near in length and none is by the queried artist', async () => {
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(notFound())
+      .mockResolvedValueOnce(
+        jsonResponse([
+          rawHit({ id: 1, duration: 400, artistName: 'Someone Else' }),
+          rawHit({ id: 2, duration: null, artistName: 'Another' }),
+        ]),
+      );
+
+    const result = await makeClient(fetchFn).findForTrack({
+      title: 'Idol',
+      artist: 'YOASOBI',
+      durationSeconds: 213,
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it('returns null without an artist match when the queried artist is blank', async () => {
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(notFound())
+      .mockResolvedValueOnce(jsonResponse([rawHit({ id: 1, duration: 400, artistName: '' })]));
+
+    const result = await makeClient(fetchFn).findForTrack({
+      title: 'Idol',
+      artist: ' ',
       durationSeconds: 213,
     });
 
