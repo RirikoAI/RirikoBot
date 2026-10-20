@@ -11215,7 +11215,8 @@
           "packages/database/src/client/factory.test.ts",
           "apps/cli/src/commands/db-migrate.test.ts",
           "apps/cli/src/commands/db-copy.test.ts",
-          "packages/database/src/copy/copy-database.flow.test.ts"
+          "packages/database/src/copy/copy-database.flow.test.ts",
+          "apps/cli/src/installer/server.test.ts"
         ],
         "symbols": [],
         "codegraph_queries": [

@@ -65,3 +65,41 @@ A baseline run on 2026-10-19 (Linux container, another vitest run in parallel) o
 - [ ] 3: still open. CI passes in this container's equivalent run. The run on the maintainer's Windows machine has not happened yet.
 
 **Outcome**: stays in REVIEW until the maintainer runs `pnpm test:coverage` on the Windows machine. If it passes there: DONE. If it fails: REWORK with the failing test names.
+
+---
+
+## REVIEW · 2026-10-20T09:00:00Z · claude-opus-5-5 (coordinator) · REWORK
+
+**Windows run by the maintainer** (2026-10-20, `Y:\Projects\RirikoBot`, branch `ccr-627f34ca-qm008t`): 39 files and 249 tests failed. The coordinator grouped the failures by their first error line:
+- **Stale `dist/` (most of them).** The packages were not rebuilt after the checkout: `UserConsentRepository is not a constructor`, `describeErrorForLog is not a function`, `erasedMarker is not a function`, `createNoticeMiddleware is not a function`, version `2.0.0` instead of `2.0.1`, and `no such table: economy_item_categories`. CI runs `pnpm build` before the tests. Not a test problem.
+- **Tracked files missing from the working tree.** `assets/memes/*.jpg`, `assets/tcg/elements/fire.png`, `assets/tcg/catalog/bosses/s1_infernal_crucible.json` and `assets/installer/images/replicate.png` are all tracked in git but missing on that disk. Not a test problem.
+- **`deploy-host.test.ts` ran 33 of 313 tests (280 skipped)**, so bash was not found: the run was not from Git Bash. The sha256 and timeout fixes were not exercised.
+- **One real Windows failure in a test**: `apps/cli/src/installer/server.test.ts:666-667` reads `docs/legal/<file>.md` and takes `.split('\n')[0]`. With `core.autocrlf=true` the file has CRLF, so the expected text is `Terms of Service\r`, which the page does not contain.
+
+**Rework**
+- `server.test.ts:667`: split with `/\r?\n/` so the first line has no `\r`. Change nothing else in that test. `server.test.ts` is added to `context.files`.
+- Keep every earlier change of this chore.
+
+**Outcome**: REWORK. Back to TODO. After the fix, the maintainer reruns from Git Bash after `pnpm build`, on a clean working tree.
+
+---
+
+## PROGRESS · 2026-10-20T15:35:00Z · claude-medium (claude-sonnet-5-5) · REVIEW
+
+**Rework pass** for the 2026-10-20 REWORK entry. All earlier changes stay.
+
+**Files changed**
+- `apps/cli/src/installer/server.test.ts:667`: `.split('\n')[0]` is now `.split(/\r?\n/)[0]`, so the first line of `docs/legal/<file>.md` has no `\r` on a CRLF checkout (`core.autocrlf=true`). Nothing else in that test changed.
+- `docs/kanban/board.json`, `BOARD.md`: ticket status.
+
+**Verification**
+- `pnpm vitest run apps/cli/src/installer`: 7 files, 230 tests passed.
+- `pnpm test:coverage && pnpm format:check && pnpm lint --quiet` on Linux: pass. 443 files passed, 1 skipped, 5189 tests passed, 509 skipped. Coverage 81.52% statements, 71.69% branches, 84.72% functions, 82.72% lines.
+- Acceptance 3 (Windows run from Git Bash after `pnpm build`, clean working tree) is the maintainer's to check; it was not run here. A CRLF input was not exercised on Linux, the regex split is the standard fix.
+- No commit or push.
+
+**New CodeGraph queries**
+- None (CodeGraph was unavailable in this container).
+
+**Next steps**
+- Maintainer: rerun `pnpm test:coverage` from Git Bash after `pnpm build` on a clean tree, then coordinator review.
