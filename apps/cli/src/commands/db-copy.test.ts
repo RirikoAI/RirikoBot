@@ -136,7 +136,11 @@ describe('formatCopyReport', () => {
   });
 });
 
-describe('runDbCopy', () => {
+// A real file database is slow to create on some machines (a Windows drive takes ten times
+// longer than a Linux disk), so these suites get more than the 5 s default.
+const FILE_DATABASE_TIMEOUT_MS = 30_000;
+
+describe('runDbCopy', { timeout: FILE_DATABASE_TIMEOUT_MS }, () => {
   let dir: string;
   let source: string;
   let opened: string[];
@@ -287,7 +291,7 @@ describe('runDbCopy', () => {
   });
 });
 
-describe('ririko db:copy command', () => {
+describe('ririko db:copy command', { timeout: FILE_DATABASE_TIMEOUT_MS }, () => {
   let dir: string;
   let source: string;
   let out: string[];

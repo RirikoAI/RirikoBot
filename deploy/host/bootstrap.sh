@@ -362,6 +362,21 @@ render_deploy_authorized_keys() {
   done
 }
 
+# deploy_key_state <authorized_keys file>
+# Prints the app role's CI deploy key state for the summary: "installed" when --deploy-key wrote the
+# key this run, "kept (already installed)" when the file already holds the forced-command line that
+# render_deploy_authorized_keys writes, and the NOT installed hint otherwise. grep -s is quiet when the
+# file is missing, and the if keeps set -e from stopping on a grep with no match.
+deploy_key_state() {
+  if [[ -n $DEPLOY_KEY ]]; then
+    echo 'installed'
+  elif grep -qs '^restrict,command="/usr/local/bin/ririko-deploy-ssh" ' "$1"; then
+    echo 'kept (already installed)'
+  else
+    echo 'NOT installed (run again with --deploy-key)'
+  fi
+}
+
 setup_deploy_user() {
   if ! id -u deploy >/dev/null 2>&1; then
     log 'creating the deploy user'
@@ -641,8 +656,9 @@ print_next_steps() {
   local token_state='service present'
   unit_exists cloudflared.service || token_state='NOT installed (run again with --tunnel-token-file)'
   if [[ $ROLE == app ]]; then
-    local key_state='installed'
-    [[ -n $DEPLOY_KEY ]] || key_state='NOT installed (run again with --deploy-key)'
+    local key_state home
+    home=$(getent passwd deploy | cut -d: -f6)
+    key_state=$(deploy_key_state "$home/.ssh/authorized_keys")
     cat <<EOF
 
 [bootstrap] Done: $REPO @ $REF (role app).

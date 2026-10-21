@@ -23,3 +23,14 @@ See docs/kanban/protocol.md section 6.
 - Drop the Render deploy button.
 - Feature image: a tall, sectioned, layered image (TASK-1903, now TODO). The README itself is still reworked later (TASK-1901, BACKLOG).
 - "Unique" is the coordinator's call when TASK-1901 is groomed: the layered image first, then a 5-step quick start, then links by reader.
+
+---
+
+## REVIEW · 2026-10-19T16:55:00Z · claude-opus-5-5 (coordinator) · DONE
+
+**verify_cmd rerun**: `pnpm format:check && pnpm lint --quiet` pass.
+
+**Acceptance**
+- [x] TASK-1901 to TASK-1904 are DONE. TASK-1904 closed today: `.cfduplication.yml` and the CodeFactor subsection in `docs/development.md`.
+
+**Outcome**: DONE. Stopping for the maintainer before commit and push (protocol 8.2).

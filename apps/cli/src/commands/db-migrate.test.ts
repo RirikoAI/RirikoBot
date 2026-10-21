@@ -23,7 +23,11 @@ const IDS = SQLITE_MIGRATIONS.map((migration) => migration.id);
 const LATEST = IDS.at(-1)!;
 const APPLIED_ALL = `Applied ${IDS.length} migration(s): ${IDS.join(', ')}`;
 
-describe('ririko db:migrate on a SQLite file', () => {
+// A real file database is slow to create on some machines (a Windows drive takes ten times
+// longer than a Linux disk), so these suites get more than the 5 s default.
+const FILE_DATABASE_TIMEOUT_MS = 30_000;
+
+describe('ririko db:migrate on a SQLite file', { timeout: FILE_DATABASE_TIMEOUT_MS }, () => {
   let dir: string;
   let file: string;
   let env: Record<string, string>;
@@ -365,7 +369,7 @@ describe('ririko db:migrate failures', () => {
   });
 });
 
-describe('ririko db:migrate command', () => {
+describe('ririko db:migrate command', { timeout: FILE_DATABASE_TIMEOUT_MS }, () => {
   let dir: string;
   let out: string[];
   const saved = { dialect: process.env.DATABASE_DIALECT, url: process.env.DATABASE_URL };

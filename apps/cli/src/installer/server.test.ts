@@ -664,7 +664,7 @@ describe('assets and legal texts', () => {
     ] as const) {
       const res = await get(s, path);
       const firstLine = readFileSync(join(REPO_ROOT, 'docs', 'legal', file), 'utf-8')
-        .split('\n')[0]
+        .split(/\r?\n/)[0]
         ?.replace(/^#\s+/, '');
       expect(res.status).toBe(200);
       expect(res.body).toContain(firstLine);

@@ -16,13 +16,8 @@
 ## 🎯 To Do
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
-| `STORY-190` | Story | README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader | 13 | EPIC-020 | STORY-189 | yes | large |
 | `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188, STORY-192, STORY-193 | yes | large |
-| `CHORE-2001` | Chore | bootstrap.sh Says "CI deploy key: NOT installed" When It Kept the Existing Key | 1 | EPIC-020 | — | yes | small |
-| `CHORE-2002` | Chore | Make the Test Suite Pass on a Windows Development Machine | 2 | EPIC-020 | — | yes | medium |
-| `CHORE-2003` | Chore | Dashboard /health Reports SCHEMA_INCOMPATIBLE for a Downgrade-Guard Refusal | 1 | EPIC-020 | — | yes | small |
 | `CHORE-2004` | Chore | Add the New Discord, Gemini, OpenAI, YouTube and Spotify Screenshots to the Setup Wizard Guides | 1 | EPIC-020 | TASK-1924 | yes | small |
-| `BUG-0045` | Bug | /lyrics Finds Nothing for Music Videos Whose Length Differs From the Song by More Than 3 Seconds | 2 | EPIC-020 | — | yes | medium |
 
 ## 🔍 Review
 *None.*
@@ -138,6 +133,7 @@
 | `STORY-187` | Story | Privacy and Secret Audit Before 2.0.0 Goes Public on master | 5 | EPIC-020 | [STORY-187.md](./handovers/STORY-187.md) |
 | `STORY-188` | Story | Docs Cleanup: Archive Development Docs, Rewrite User Docs as Deterministic Current Steps | 13 | EPIC-020 | [STORY-188.md](./handovers/STORY-188.md) |
 | `STORY-189` | Story | Docusaurus Documentation Site on ririko.ai Replaces the GitHub Wiki | 21 | EPIC-020 | [STORY-189.md](./handovers/STORY-189.md) |
+| `STORY-190` | Story | README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader | 13 | EPIC-020 | [STORY-190.md](./handovers/STORY-190.md) |
 | `STORY-192` | Story | Guided Setup Wizard: the 1.x Installer Rebuilt as ririko setup | 21 | EPIC-020 | [STORY-192.md](./handovers/STORY-192.md) |
 | `STORY-193` | Story | Privacy Notice, AI Consent and Data Retention Before the Public Bot Runs 2.0 | 21 | EPIC-020 | [STORY-193.md](./handovers/STORY-193.md) |
 | `STORY-194` | Story | Complete User Data Erasure Tool for Data Requests | 5 | EPIC-020 | [STORY-194.md](./handovers/STORY-194.md) |
@@ -397,6 +393,7 @@
 | `TASK-1901` | Task | Rework README.md Into a Standout Front Page With Quick Start, Badges and All-Contributors | 5 | STORY-190 | [TASK-1901.md](./handovers/TASK-1901.md) |
 | `TASK-1902` | Task | Write a Short CONTRIBUTING.md in Simple English | 2 | STORY-190 | [TASK-1902.md](./handovers/TASK-1902.md) |
 | `TASK-1903` | Task | Tall Layered Feature Image for the README and the Site, With Replaceable Placeholders | 5 | STORY-190 | [TASK-1903.md](./handovers/TASK-1903.md) |
+| `TASK-1904` | Task | CodeFactor Integration and Config | 1 | STORY-190 | [TASK-1904.md](./handovers/TASK-1904.md) |
 | `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | [TASK-1911.md](./handovers/TASK-1911.md) |
 | `TASK-1912` | Task | Production Go-Live Checklist in docs/release.md | 3 | STORY-191 | [TASK-1912.md](./handovers/TASK-1912.md) |
 | `TASK-1913` | Task | Docker Hub and GitHub Repository Texts for 2.0.0 | 2 | STORY-191 | [TASK-1913.md](./handovers/TASK-1913.md) |
@@ -436,6 +433,9 @@
 | `CHORE-0004` | Chore | Disable unused FloweryTTS source in Lavalink config | 1 | EPIC-005 | [CHORE-0004.md](./handovers/CHORE-0004.md) |
 | `CHORE-1704` | Chore | Ship the ririko CLI in the Bot Image So Operators Run It With docker exec | 3 | EPIC-017 | [CHORE-1704.md](./handovers/CHORE-1704.md) |
 | `CHORE-1901` | Chore | Runbook: Rerun bootstrap.sh Before the First Deploy With the Migration Runner (Host Scripts Do Not Self-Update) | 1 | EPIC-019 | [CHORE-1901.md](./handovers/CHORE-1901.md) |
+| `CHORE-2001` | Chore | bootstrap.sh Says "CI deploy key: NOT installed" When It Kept the Existing Key | 1 | EPIC-020 | [CHORE-2001.md](./handovers/CHORE-2001.md) |
+| `CHORE-2002` | Chore | Make the Test Suite Pass on a Windows Development Machine | 2 | EPIC-020 | [CHORE-2002.md](./handovers/CHORE-2002.md) |
+| `CHORE-2003` | Chore | Dashboard /health Reports SCHEMA_INCOMPATIBLE for a Downgrade-Guard Refusal | 1 | EPIC-020 | [CHORE-2003.md](./handovers/CHORE-2003.md) |
 | `CHORE-2005` | Chore | Publish the Kanban Board on Vercel as a Static Read-Only Site, and Bind the Local Board Server to 127.0.0.1 by Default | 3 | EPIC-020 | [CHORE-2005.md](./handovers/CHORE-2005.md) |
 | `CHORE-2006` | Chore | Dependabot Targets develop, Not master | 1 | EPIC-020 | [CHORE-2006.md](./handovers/CHORE-2006.md) |
 | `CHORE-2007` | Chore | Docker Hub Texts After latest Moved to 2.0.0 | 1 | EPIC-020 | [CHORE-2007.md](./handovers/CHORE-2007.md) |
@@ -483,6 +483,7 @@
 | `BUG-0041` | Bug | SQLite Adoption Refuses Databases Whose Adventure Tables Were Created as BIGINT by the Old ensureAdventureSchema | 3 | EPIC-019 | [BUG-0041.md](./handovers/BUG-0041.md) |
 | `BUG-0042` | Bug | Dashboard Liveness Probes Fail While Migrations Are Pending, Failing the CircleCI Docker Smoke Check | 3 | EPIC-019 | [BUG-0042.md](./handovers/BUG-0042.md) |
 | `BUG-0043` | Bug | ririko db:migrate Prints Adoption Notes and the Backup Twice and Ends With "Nothing to do" After Adopting | 1 | EPIC-019 | [BUG-0043.md](./handovers/BUG-0043.md) |
+| `BUG-0045` | Bug | /lyrics Finds Nothing for Music Videos Whose Length Differs From the Song by More Than 3 Seconds | 2 | EPIC-020 | [BUG-0045.md](./handovers/BUG-0045.md) |
 | `BUG-0046` | Bug | `pnpm installer` Fails on a Fresh Clone: Workspace Packages Not Built, Native Install Scripts Blocked | 2 | STORY-192 | [BUG-0046.md](./handovers/BUG-0046.md) |
 | `BUG-0047` | Bug | Setup Wizard Pages Do Not Mirror the 1.x Installer: Font Sizes, Note and Guide Button Placement, Switch-Gated Guides, Minimal Look | 3 | STORY-192 | [BUG-0047.md](./handovers/BUG-0047.md) |
 | `BUG-0048` | Bug | Landing Page Demo Messages Overlap Once the Chat Overflows | 1 | STORY-189 | [BUG-0048.md](./handovers/BUG-0048.md) |
@@ -498,7 +499,6 @@
 ## 📋 Backlog
 | ID | Type | Title | Pts | Parent |
 |---|---|---|---|---|
-| `TASK-1904` | Task | CodeFactor Integration and Config | 1 | STORY-190 |
 | `BUG-0044` | Bug | Free Games Notification Links Are Broken (Needs Deeper Grooming) | 3 | EPIC-020 |
 
 ## 🗺️ Epics

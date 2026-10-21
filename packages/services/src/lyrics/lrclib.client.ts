@@ -47,6 +47,12 @@ const USER_AGENT = 'RirikoBot/2.0 (+https://github.com/RirikoAI/RirikoBot)';
 const DURATION_TOLERANCE_SECONDS = 3;
 
 /**
+ * Music videos carry an intro or outro, so when nothing is within the tolerance the closest hit
+ * is still taken if it is within this many seconds.
+ */
+const DURATION_FALLBACK_SECONDS = 60;
+
+/**
  * LRCLIB client (https://lrclib.net/docs). The API is free and needs no key; it asks clients to
  * name themselves in the User-Agent. A miss is `null`; every other failure status throws, so a
  * caller can tell "no lyrics" from "LRCLIB is down".
@@ -69,6 +75,8 @@ export class LrclibClient {
   /**
    * Looks up the lyrics of a known track: an exact `/api/get` match first, then the first
    * `/api/search` hit whose length is within 3 seconds (any hit when the length is unknown).
+   * When none is that close, the hit with the closest length within 60 seconds, then the first hit
+   * by the same artist (case and spacing ignored), else `null`.
    */
   async findForTrack(query: LrclibTrackQuery): Promise<LrclibLyrics | null> {
     const title = query.title.trim();
@@ -86,13 +94,7 @@ export class LrclibClient {
     const searchParams = new URLSearchParams({ track_name: title });
     if (artist) searchParams.set('artist_name', artist);
     const hits = await this.searchRaw(searchParams);
-    const hit = knownDuration
-      ? hits.find(
-          (h) =>
-            typeof h.duration === 'number' &&
-            Math.abs(h.duration - duration) <= DURATION_TOLERANCE_SECONDS,
-        )
-      : hits[0];
+    const hit = knownDuration ? pickByDuration(hits, duration, artist) : hits[0];
     return hit ? mapLyrics(hit) : null;
   }
 
@@ -125,6 +127,40 @@ export class LrclibClient {
     if (!res.ok) throw new Error(`LRCLIB request failed: HTTP ${res.status}`);
     return (await res.json()) as T;
   }
+}
+
+/** Lower case, with runs of whitespace collapsed, so "  YOASOBI " equals "yoasobi". */
+function normalizeName(name: string | null | undefined): string {
+  return (name ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+/**
+ * Picks the search hit for a track of known length: the first one within the tolerance, else the
+ * closest one within the fallback range, else the first one by the queried artist.
+ */
+function pickByDuration(
+  hits: RawLyrics[],
+  duration: number,
+  artist: string,
+): RawLyrics | undefined {
+  const withLength = hits.filter(
+    (h): h is RawLyrics & { duration: number } => typeof h.duration === 'number',
+  );
+  const near = withLength.find(
+    (h) => Math.abs(h.duration - duration) <= DURATION_TOLERANCE_SECONDS,
+  );
+  if (near) return near;
+
+  let closest: (RawLyrics & { duration: number }) | undefined;
+  for (const h of withLength) {
+    const gap = Math.abs(h.duration - duration);
+    if (gap > DURATION_FALLBACK_SECONDS) continue;
+    if (!closest || gap < Math.abs(closest.duration - duration)) closest = h;
+  }
+  if (closest) return closest;
+
+  const wanted = normalizeName(artist);
+  return wanted ? hits.find((h) => normalizeName(h.artistName) === wanted) : undefined;
 }
 
 function mapLyrics(raw: RawLyrics): LrclibLyrics {
