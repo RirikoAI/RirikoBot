@@ -3157,8 +3157,10 @@ run deploy 2.1.3 staging`);
     expect(slow.version).toHaveLength(4);
     expect(slow.state['lavalink-staging.current']).toBe('2.1.3|');
 
+    // The script's deadline is in whole seconds, so a 1 s limit can pass before the first check on a loaded machine.
     const never = lavalinkScenario(`
 echo 2.1.3 >"$FAKE_DIR/bad_version"
+conf 'LAVALINK_READY_TIMEOUT=5'
 run deploy 2.1.3 staging`);
     expect(never.rcs).toEqual([5]);
     expect(never.version.length).toBeGreaterThan(1);

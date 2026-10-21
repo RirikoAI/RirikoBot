@@ -1,4 +1,5 @@
 import type { PlayerEnergyRepository, TcgConfigRepository } from '@ririko/database';
+import type { EnergyLifecycleService } from '../energy/energy-lifecycle.service.js';
 import type { ItemGrantService } from '../equipment/item-grant.service.js';
 
 /** Extra stats per consecutive defeat on the same floor. */
@@ -52,6 +53,8 @@ export class DungeonProgressService {
     private readonly configRepo: TcgConfigRepository,
     private readonly energyRepo?: PlayerEnergyRepository | undefined,
     private readonly grants?: ItemGrantService | undefined,
+    /** When set, the defeat refund goes through the daily reset and the bonus-aware cap. */
+    private readonly energyLifecycle?: EnergyLifecycleService | undefined,
   ) {}
 
   private key(userId: string, seasonId: string): string {
@@ -96,12 +99,24 @@ export class DungeonProgressService {
       if (pity?.floor === floorNumber) pity = undefined;
     } else if (!outcome.forfeited) {
       pity = { floor: floorNumber, losses: pity?.floor === floorNumber ? pity.losses + 1 : 1 };
-      if (floorNumber <= ENERGY_REFUND_MAX_FLOOR && outcome.energySpent > 0 && this.energyRepo) {
+      if (
+        floorNumber <= ENERGY_REFUND_MAX_FLOOR &&
+        outcome.energySpent > 0 &&
+        (this.energyLifecycle ?? this.energyRepo)
+      ) {
         energyRefunded = Math.floor(outcome.energySpent * ENERGY_REFUND_SHARE);
-        const energy = await this.energyRepo.getOrCreate(userId);
-        await this.energyRepo.update(userId, {
-          currentEnergy: Math.min(energy.maxEnergy, energy.currentEnergy + energyRefunded),
-        });
+        if (this.energyLifecycle) {
+          await this.energyLifecycle.refundEnergy(userId, energyRefunded);
+        } else if (this.energyRepo) {
+          const energy = await this.energyRepo.getOrCreate(userId);
+          const cap = energy.maxEnergy + energy.bonusEnergy;
+          await this.energyRepo.update(userId, {
+            currentEnergy: Math.max(
+              energy.currentEnergy,
+              Math.min(cap, energy.currentEnergy + energyRefunded),
+            ),
+          });
+        }
       }
     }
 
