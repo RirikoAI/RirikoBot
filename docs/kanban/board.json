@@ -11631,6 +11631,60 @@
         "pnpm vitest run scripts/deploy-host.test.ts passes."
       ],
       "verify_cmd": "pnpm vitest run scripts/deploy-host.test.ts --testTimeout=120000 && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "small",
+      "handovers": [
+        "CHORE-2010",
+        "CHORE-2008",
+        "EPIC-020"
+      ],
+      "id": "CHORE-2010",
+      "parent": "EPIC-020",
+      "points": 1,
+      "status": "DONE",
+      "title": "Version 2.0.2 in Every Workspace package.json",
+      "description": "PRs #731 to #734 (lyrics fallback, /energy and daily energy reset, potion reset date with migration 0005, Epic free games links) ship as the 2.0.2 patch release. docs/release.md section 4 step 2 says package.json must hold the version before the tag. Same files as CHORE-2008.",
+      "context": {
+        "files": [
+          "package.json",
+          "apps/bot/package.json",
+          "apps/cli/package.json",
+          "apps/web/package.json",
+          "packages/ai/package.json",
+          "packages/core/package.json",
+          "packages/database/package.json",
+          "packages/discord/package.json",
+          "packages/music/package.json",
+          "website/package.json",
+          "packages/core/src/index.ts",
+          "apps/bot/src/index.test.ts",
+          "apps/cli/src/program.test.ts",
+          "apps/web/src/app/api/health/route.test.ts",
+          "packages/core/src/index.test.ts",
+          "website/src/components/DiscordDemo/reply.ts",
+          "scripts/website-demo-reply.test.ts"
+        ],
+        "symbols": [
+          "CORE_VERSION"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN"
+        ]
+      },
+      "acceptance": [
+        "The \"version\" field is 2.0.2 in the root package.json, apps/bot, apps/cli, apps/web, packages/ai, packages/core, packages/database, packages/discord, packages/music and website. apps/starter (the npm starter, versioned on its own) and packages/music-private (a separate repository) keep their own versions.",
+        "No other field changes. If pnpm-lock.yaml records these versions, it is updated with pnpm install --lockfile-only and nothing else changes in it.",
+        "CORE_VERSION in packages/core/src/index.ts is 2.0.2, so /api/health and ririko --version report 2.0.2; the three tests that assert it (apps/bot/src/index.test.ts, apps/cli/src/program.test.ts, apps/web/src/app/api/health/route.test.ts) expect 2.0.2. pnpm build, pnpm typecheck, pnpm format:check and those three test files pass."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/bot/src/index.test.ts apps/cli/src/program.test.ts apps/web/src/app/api/health/route.test.ts packages/core/src/index.test.ts && pnpm format:check"
     }
   ],
   "bugs": [

@@ -443,6 +443,7 @@
 | `CHORE-2007` | Chore | Docker Hub Texts After latest Moved to 2.0.0 | 1 | EPIC-020 | [CHORE-2007.md](./handovers/CHORE-2007.md) |
 | `CHORE-2008` | Chore | Version 2.0.1 in Every Workspace package.json | 1 | EPIC-020 | [CHORE-2008.md](./handovers/CHORE-2008.md) |
 | `CHORE-2009` | Chore | Lavalink "Never Ready" Deploy Test Polls Only Once Under Load | 1 | EPIC-020 | [CHORE-2009.md](./handovers/CHORE-2009.md) |
+| `CHORE-2010` | Chore | Version 2.0.2 in Every Workspace package.json | 1 | EPIC-020 | [CHORE-2010.md](./handovers/CHORE-2010.md) |
 | `BUG-0001` | Bug | Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors | 5 | STORY-050 | [BUG-0001.md](./handovers/BUG-0001.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | STORY-050 | [BUG-0002.md](./handovers/BUG-0002.md) |
 | `BUG-0003` | Bug | OpenAI & LLM Providers Function Name Schema Validation & Sanitization | 2 | STORY-060 | [BUG-0003.md](./handovers/BUG-0003.md) |
