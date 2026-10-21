@@ -1,11 +1,109 @@
+import { readFileSync } from 'node:fs';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { EpicGamesProvider } from '../providers/epic.provider.js';
+import { EpicGamesProvider, resolveEpicPageSlug } from '../providers/epic.provider.js';
 import { SteamFreeGamesProvider } from '../providers/steam.provider.js';
 import { FreeGamesEngine } from '../engine.js';
 import type { FreeGameRepository } from '@ririko/database';
 import type { FreeGameItem } from '../types.js';
 
+function fixture(name: string): unknown {
+  return JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8'));
+}
+
 describe('EpicGamesProvider', () => {
+  it('links store page slugs for the live 2026-10-21 promotions fixture', async () => {
+    const payload = fixture('epic-promotions.json');
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => payload } as Response);
+    const games = await new EpicGamesProvider({ fetchFn: mockFetch as any }).fetchFreeGames();
+
+    expect(games.map((g) => [g.title, g.storeUrl, g.isUpcoming])).toEqual(
+      expect.arrayContaining([
+        ['Bad Cheese', 'https://store.epicgames.com/p/bad-cheese-4256d9', false],
+        [
+          'Agent A: A puzzle in disguise',
+          'https://store.epicgames.com/p/agent-a-a-puzzle-in-disguise-42fe5f',
+          false,
+        ],
+        ['Sker Ritual (Coming Soon)', 'https://store.epicgames.com/p/sker-ritual-aac702', true],
+        [
+          'Home - A Unique Horror Adventure (Coming Soon)',
+          'https://store.epicgames.com/p/home-19212a',
+          true,
+        ],
+      ]),
+    );
+    expect(games).toHaveLength(4);
+    for (const g of games) expect(g.storeUrl).not.toMatch(/[0-9a-f]{32}/i);
+  });
+
+  describe('resolveEpicPageSlug', () => {
+    it('strips /home from productSlug', () => {
+      expect(resolveEpicPageSlug({ productSlug: 'thems-fightin-herds/home' })).toBe(
+        'thems-fightin-herds',
+      );
+    });
+    it('rejects a hex urlSlug with no mappings', () => {
+      expect(
+        resolveEpicPageSlug({ urlSlug: 'ae5d8fc5541f42eea105f64121dba382', id: 'x' }),
+      ).toBeNull();
+    });
+    it('accepts a non-hex urlSlug', () => {
+      expect(resolveEpicPageSlug({ urlSlug: 'some-game' })).toBe('some-game');
+    });
+    it('skips non-productHome mappings in favour of a later productHome', () => {
+      expect(
+        resolveEpicPageSlug({
+          productSlug: 'ignored',
+          offerMappings: [
+            { pageType: 'offer', pageSlug: 'wrong' },
+            { pageType: 'productHome', pageSlug: 'right-1a2b3c' },
+          ],
+        }),
+      ).toBe('right-1a2b3c');
+    });
+    it('falls back to catalogNs productHome mappings', () => {
+      expect(
+        resolveEpicPageSlug({
+          offerMappings: [{ pageType: 'offer', pageSlug: 'dlc' }],
+          catalogNs: { mappings: [{ pageType: 'productHome', pageSlug: 'base-game' }] },
+        }),
+      ).toBe('base-game');
+    });
+  });
+
+  it('links the free-games page when no slug resolves', async () => {
+    const payload = {
+      data: {
+        Catalog: {
+          searchStore: {
+            elements: [
+              {
+                id: 'g1',
+                title: 'Mystery',
+                urlSlug: 'ae5d8fc5541f42eea105f64121dba382',
+                promotions: {
+                  promotionalOffers: [
+                    { promotionalOffers: [{ discountSetting: { discountPercentage: 0 } }] },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => payload } as Response);
+    const games = await new EpicGamesProvider({ fetchFn: mockFetch as any }).fetchFreeGames();
+    expect(games[0]).toMatchObject({
+      id: 'epic-g1',
+      storeUrl: 'https://store.epicgames.com/free-games',
+    });
+  });
+
   it('parses active and upcoming free games from Epic promotions API', async () => {
     const mockPayload = {
       data: {
@@ -166,6 +264,15 @@ describe('SteamFreeGamesProvider', () => {
       originalPrice: '19.99 USD',
       isUpcoming: false,
     });
+  });
+
+  it('returns no items for the live steam-featured.json fixture (no 100% discount)', async () => {
+    const payload = fixture('steam-featured.json');
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => payload } as Response);
+    const games = await new SteamFreeGamesProvider({ fetchFn: mockFetch as any }).fetchFreeGames();
+    expect(games).toEqual([]);
   });
 
   it('handles fetch failures safely', async () => {
