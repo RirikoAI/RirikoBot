@@ -75,6 +75,7 @@ export class PlayerEnergyRepository extends BaseRepository<
       dailyEnergyPotsUsed: data.dailyEnergyPotsUsed ?? 0,
       lastReplenishedAt: data.lastReplenishedAt ?? now,
       lastResetDate: data.lastResetDate ?? today,
+      lastPotionResetDate: data.lastPotionResetDate ?? today,
       updatedAt: now,
     };
 
@@ -116,6 +117,7 @@ export class PlayerEnergyRepository extends BaseRepository<
           dailyEnergyPotsUsed: 0,
           lastReplenishedAt: now,
           lastResetDate: today,
+          lastPotionResetDate: today,
           updatedAt: now,
         })
         .onConflictDoUpdate({
@@ -137,6 +139,7 @@ export class PlayerEnergyRepository extends BaseRepository<
           dailyEnergyPotsUsed: 0,
           lastReplenishedAt: now,
           lastResetDate: today,
+          lastPotionResetDate: today,
           updatedAt: now,
         } as unknown as typeof pgSchema.playerEnergy.$inferInsert)
         .onConflictDoUpdate({
@@ -230,9 +233,10 @@ export class PlayerEnergyRepository extends BaseRepository<
       const energyRecord = await this.getForUpdate(userId, txClient);
       const today = this.currentDayKey();
 
-      // Check if the reset day rolled over, which clears the daily usage count
+      // The potion counter follows its own reset day (lastPotionResetDate), falling back to
+      // lastResetDate for rows written before that column existed.
       let currentPotsUsed = energyRecord.dailyEnergyPotsUsed;
-      if (energyRecord.lastResetDate !== today) {
+      if ((energyRecord.lastPotionResetDate ?? energyRecord.lastResetDate) !== today) {
         currentPotsUsed = 0;
       }
 
@@ -260,7 +264,7 @@ export class PlayerEnergyRepository extends BaseRepository<
         {
           currentEnergy: newEnergy,
           dailyEnergyPotsUsed: newPotsUsed,
-          lastResetDate: today,
+          lastPotionResetDate: today,
         },
         txClient,
       );

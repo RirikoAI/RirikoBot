@@ -464,6 +464,7 @@ export async function createBotServices(
   // account-wide level. Capacity, potion and bonus energy rules are the global TCG rules.
   const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo, {
     resetSchedule: resetSchedules.energy,
+    potionResetSchedule: resetSchedules.energyPotions,
     levelResolver: accountLevel,
     rulesResolver: async () => {
       const rules = await tcgRulesService.getRules();

@@ -202,5 +202,13 @@ export const SQLITE_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "bdefff99149b0556df6867fbbd6deea5819df853f5ff99b6706cc7a572ffc6f3",
     "contract": false
+  },
+  {
+    "id": "0005_complex_shiver_man",
+    "statements": [
+      "ALTER TABLE `player_energy` ADD `last_potion_reset_date` text;"
+    ],
+    "checksum": "3133edeed29c29272f0c590cae128169c8e046cc5b18405dd112a50d05eb3c87",
+    "contract": false
   }
 ];

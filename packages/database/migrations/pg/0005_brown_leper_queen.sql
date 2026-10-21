@@ -1,0 +1,1 @@
+ALTER TABLE "player_energy" ADD COLUMN "last_potion_reset_date" varchar(16);

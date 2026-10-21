@@ -198,5 +198,13 @@ export const PG_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "ef2f252da0dd00497fd9103daa5948934ba09b476195f37c27b552b9f545837b",
     "contract": false
+  },
+  {
+    "id": "0005_brown_leper_queen",
+    "statements": [
+      "ALTER TABLE \"player_energy\" ADD COLUMN \"last_potion_reset_date\" varchar(16);"
+    ],
+    "checksum": "674255b99c4b69da1c12181e9c0c27865dbc414d0b7b43eaf6c745f6a8f8d8dc",
+    "contract": false
   }
 ];
