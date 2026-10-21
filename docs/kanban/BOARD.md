@@ -20,9 +20,7 @@
 | `CHORE-2004` | Chore | Add the New Discord, Gemini, OpenAI, YouTube and Spotify Screenshots to the Setup Wizard Guides | 1 | EPIC-020 | TASK-1924 | yes | small |
 
 ## 🔍 Review
-| ID | Type | Title | Pts | Parent | Handover |
-|---|---|---|---|---|---|
-| `CHORE-2002` | Chore | Make the Test Suite Pass on a Windows Development Machine | 2 | EPIC-020 | [CHORE-2002.md](./handovers/CHORE-2002.md) |
+*None.*
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -436,6 +434,7 @@
 | `CHORE-1704` | Chore | Ship the ririko CLI in the Bot Image So Operators Run It With docker exec | 3 | EPIC-017 | [CHORE-1704.md](./handovers/CHORE-1704.md) |
 | `CHORE-1901` | Chore | Runbook: Rerun bootstrap.sh Before the First Deploy With the Migration Runner (Host Scripts Do Not Self-Update) | 1 | EPIC-019 | [CHORE-1901.md](./handovers/CHORE-1901.md) |
 | `CHORE-2001` | Chore | bootstrap.sh Says "CI deploy key: NOT installed" When It Kept the Existing Key | 1 | EPIC-020 | [CHORE-2001.md](./handovers/CHORE-2001.md) |
+| `CHORE-2002` | Chore | Make the Test Suite Pass on a Windows Development Machine | 2 | EPIC-020 | [CHORE-2002.md](./handovers/CHORE-2002.md) |
 | `CHORE-2003` | Chore | Dashboard /health Reports SCHEMA_INCOMPATIBLE for a Downgrade-Guard Refusal | 1 | EPIC-020 | [CHORE-2003.md](./handovers/CHORE-2003.md) |
 | `CHORE-2005` | Chore | Publish the Kanban Board on Vercel as a Static Read-Only Site, and Bind the Local Board Server to 127.0.0.1 by Default | 3 | EPIC-020 | [CHORE-2005.md](./handovers/CHORE-2005.md) |
 | `CHORE-2006` | Chore | Dependabot Targets develop, Not master | 1 | EPIC-020 | [CHORE-2006.md](./handovers/CHORE-2006.md) |

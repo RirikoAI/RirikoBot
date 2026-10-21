@@ -11206,7 +11206,7 @@
       "parent": "EPIC-020",
       "title": "Make the Test Suite Pass on a Windows Development Machine",
       "points": 2,
-      "status": "REVIEW",
+      "status": "DONE",
       "description": "On the maintainer's Windows machine (Git Bash, repository on a slower drive) the full suite fails where CI passes: scripts/deploy-host.test.ts \"deploys the first release of staging\" because Git Bash sha256sum prints \"<hash> *<file>\", several deploy-host tests time out at 5 s, and file-SQLite tests (client/factory WAL test, db-migrate adoption test, copy-database suites) sometimes pass 5 s under load.",
       "context": {
         "files": [

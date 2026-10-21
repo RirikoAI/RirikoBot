@@ -103,3 +103,22 @@ A baseline run on 2026-10-19 (Linux container, another vitest run in parallel) o
 
 **Next steps**
 - Maintainer: rerun `pnpm test:coverage` from Git Bash after `pnpm build` on a clean tree, then coordinator review.
+
+---
+
+## REVIEW · 2026-10-21T09:00:00Z · claude-opus-5-5 (coordinator) · DONE
+
+**verify_cmd rerun** (Linux, 2026-10-20): `pnpm test:coverage` passes every threshold (443 files, 5189 tests passed, 509 skipped). `format:check` and `lint --quiet` pass.
+
+**Worker tier**: medium (Sonnet), matches, both passes.
+
+**Windows runs by the maintainer** (`Y:\Projects\RirikoBot`, after `pnpm build` on a clean tree)
+- Git Bash, before the CRLF fix was pulled: 442 files passed, 1 failed (`server.test.ts`, the legal title with `\r`), 520 tests skipped. bash was found, so the `deploy-host.test.ts` changes ran and passed.
+- After the pull (HEAD `f83d22f`, line 667 `.split(/\r?\n/)[0]`, `terms.md` checked out with CRLF): 443 files passed, 1 skipped, 0 failed.
+
+**Acceptance**
+- [x] 1: the sha256 comparison accepts both forms. The deploy-host tests pass on Linux and in Git Bash.
+- [x] 2: per-file and per-suite 30 s timeouts. The default is unchanged.
+- [x] 3: the suite passes on the maintainer's Windows machine and on Linux. CI runs on the next push.
+
+**Outcome**: DONE.
