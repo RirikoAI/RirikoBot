@@ -486,6 +486,7 @@
 | `BUG-0041` | Bug | SQLite Adoption Refuses Databases Whose Adventure Tables Were Created as BIGINT by the Old ensureAdventureSchema | 3 | EPIC-019 | [BUG-0041.md](./handovers/BUG-0041.md) |
 | `BUG-0042` | Bug | Dashboard Liveness Probes Fail While Migrations Are Pending, Failing the CircleCI Docker Smoke Check | 3 | EPIC-019 | [BUG-0042.md](./handovers/BUG-0042.md) |
 | `BUG-0043` | Bug | ririko db:migrate Prints Adoption Notes and the Backup Twice and Ends With "Nothing to do" After Adopting | 1 | EPIC-019 | [BUG-0043.md](./handovers/BUG-0043.md) |
+| `BUG-0044` | Bug | Free Games Notification Links Are Broken: Epic Links Use the Internal urlSlug Instead of the Store Page Slug | 3 | EPIC-020 | [BUG-0044.md](./handovers/BUG-0044.md) |
 | `BUG-0045` | Bug | /lyrics Finds Nothing for Music Videos Whose Length Differs From the Song by More Than 3 Seconds | 2 | EPIC-020 | [BUG-0045.md](./handovers/BUG-0045.md) |
 | `BUG-0046` | Bug | `pnpm installer` Fails on a Fresh Clone: Workspace Packages Not Built, Native Install Scripts Blocked | 2 | STORY-192 | [BUG-0046.md](./handovers/BUG-0046.md) |
 | `BUG-0047` | Bug | Setup Wizard Pages Do Not Mirror the 1.x Installer: Font Sizes, Note and Guide Button Placement, Switch-Gated Guides, Minimal Look | 3 | STORY-192 | [BUG-0047.md](./handovers/BUG-0047.md) |
@@ -502,9 +503,7 @@
 | `CHORE-0602` | Chore | Boot-Time Repair for Gear Stranded on Deleted or Transferred Cards | 1 | — |
 
 ## 📋 Backlog
-| ID | Type | Title | Pts | Parent |
-|---|---|---|---|---|
-| `BUG-0044` | Bug | Free Games Notification Links Are Broken (Needs Deeper Grooming) | 3 | EPIC-020 |
+*None.*
 
 ## 🗺️ Epics
 | ID | Title | Status | Pts | Children | Handover |

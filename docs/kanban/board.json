@@ -12850,34 +12850,36 @@
       ],
       "id": "BUG-0044",
       "parent": "EPIC-020",
-      "title": "Free Games Notification Links Are Broken (Needs Deeper Grooming)",
+      "title": "Free Games Notification Links Are Broken: Epic Links Use the Internal urlSlug Instead of the Store Page Slug",
       "points": 3,
-      "status": "BACKLOG",
-      "description": "Reported by the maintainer on 2026-10-11: the links in free games notifications are broken. Needs a deeper grooming with live samples before it can enter TODO; the estimate is provisional.",
+      "status": "DONE",
+      "description": "Reported by the maintainer on 2026-10-11. A live freeGamesPromotions sample (2026-10-21) shows most Epic games have productSlug null and urlSlug set to a 32-character hex id, so EpicGamesProvider builds https://store.epicgames.com/p/<hex id>, which is not a store page. Both games free now (Bad Cheese: ae5d8fc5..., Agent A: urlSlug without the page suffix) and both upcoming free games (Sker Ritual, Home) get a wrong slug. The page slug is in offerMappings / catalogNs.mappings with pageType productHome. Steam links (/app/<id>/) are the standard format and need no change.",
       "context": {
         "files": [
           "packages/services/src/free-games/providers/epic.provider.ts",
-          "packages/services/src/free-games/providers/steam.provider.ts",
-          "packages/services/src/free-games/engine.ts",
           "packages/services/src/free-games/__tests__/free-games.test.ts",
-          "apps/bot/src/commands/streams/free-games.command.ts",
-          "packages/database/src/migration/transformer.ts"
+          "packages/services/src/free-games/__tests__/fixtures/epic-promotions.json",
+          "packages/services/src/free-games/__tests__/fixtures/steam-featured.json"
         ],
         "symbols": [
           "EpicGamesProvider.fetchFreeGames",
-          "SteamFreeGamesProvider.fetchFreeGames",
-          "FreeGamesEngine.formatGameEmbed",
-          "FreeGamesEngine.formatAnnouncement",
-          "freeGameId"
+          "SteamFreeGamesProvider.fetchFreeGames"
+        ],
+        "entry_points": [
+          "FreeGamesEngine poll -> EpicGamesProvider.fetchFreeGames",
+          "/freegames"
         ],
         "codegraph_queries": [
           "EpicGamesProvider fetchFreeGames SteamFreeGamesProvider formatGameEmbed formatAnnouncement"
         ]
       },
       "acceptance": [
-        "To be written at the deeper grooming, from live API samples of both providers and real broken links."
+        "EpicGamesProvider resolves the store page slug in this order: the pageSlug of the first offerMappings entry with pageType \"productHome\"; the same in catalogNs.mappings; productSlug with a trailing \"/home\" removed; urlSlug only when it is not a 32-character hex id. With none of these, storeUrl is https://store.epicgames.com/free-games. Pages stay https://store.epicgames.com/p/<slug>. game.id is never used as a slug.",
+        "A test feeds the real fixture epic-promotions.json (captured 2026-10-21) through the provider and asserts the exact items: currently free Bad Cheese -> /p/bad-cheese-4256d9 and Agent A -> /p/agent-a-a-puzzle-in-disguise-42fe5f; upcoming Sker Ritual -> /p/sker-ritual-aac702 and Home - A Unique Horror Adventure -> /p/home-19212a; no non-free element is returned. No storeUrl contains a 32-character hex id.",
+        "Unit tests cover each fallback step: productSlug with /home, a hex urlSlug with no mappings (free-games page), a non-hex urlSlug, and a mapping that is not productHome being skipped in favour of a later productHome mapping.",
+        "A test feeds steam-featured.json through SteamFreeGamesProvider: it has no 100% discount today, so it returns no items. Existing tests and the item id format (epic-<game.id>) are unchanged."
       ],
-      "verify_cmd": "pnpm vitest run packages/services/src/free-games && pnpm format:check && pnpm lint --quiet"
+      "verify_cmd": "pnpm vitest run packages/services/src/free-games && pnpm --filter @ririko/services typecheck && pnpm format:check && pnpm lint --quiet"
     },
     {
       "children": [],
