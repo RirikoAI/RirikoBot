@@ -1,5 +1,10 @@
 import type { PlayerEnergyRepository, PlayerEnergy, XpRepository } from '@ririko/database';
-import { DEFAULT_RESET_SCHEDULE, getResetDayKey, type ResetSchedule } from '@ririko/core';
+import {
+  DEFAULT_RESET_SCHEDULE,
+  getNextResetAt,
+  getResetDayKey,
+  type ResetSchedule,
+} from '@ririko/core';
 
 export const DEFAULT_GLOBAL_ENERGY_CAP = 300;
 
@@ -120,6 +125,11 @@ export class EnergyLifecycleService {
   async rules(): Promise<EnergyRules> {
     if (this.rulesResolver) return this.rulesResolver();
     return { ...DEFAULT_ENERGY_RULES, globalCap: this.globalCap, dailyBonusIncrement: 0 };
+  }
+
+  /** The instant of the next daily energy reset, on the energy reset schedule. */
+  nextResetAt(now: Date = new Date()): Date {
+    return getNextResetAt(now, this.resetSchedule);
   }
 
   /** Energy potions a player may use per reset day. */
@@ -244,15 +254,16 @@ export class EnergyLifecycleService {
   }
 
   /**
-   * Refunds energy back into the pool, clamped to the player's capacity. Backs the documented
-   * half-energy refund on defeats in the early dungeon floors.
+   * Refunds energy back into the pool, clamped to the player's capacity (`maxEnergy` plus bonus
+   * energy). A refund never lowers energy: a pool above capacity keeps what it has. Backs the
+   * documented half-energy refund on defeats in the early dungeon floors.
    */
   async refundEnergy(userId: string, amount: number): Promise<PlayerEnergy> {
     const record = await this.getOrReconcileUserEnergy(userId);
     if (amount <= 0) return record;
 
     const cap = record.maxEnergy + record.bonusEnergy;
-    const restored = Math.min(cap, record.currentEnergy + amount);
+    const restored = Math.max(record.currentEnergy, Math.min(cap, record.currentEnergy + amount));
     if (restored === record.currentEnergy) return record;
 
     return this.energyRepo.update(userId, { currentEnergy: restored });

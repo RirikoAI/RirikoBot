@@ -2,7 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createDungeonCommand } from '../dungeon.command.js';
 import type { BotServices } from '../../../services.js';
 import type { CommandContext } from '@ririko/discord';
+import { DEFAULT_RESET_SCHEDULE, getResetDayKey } from '@ririko/core';
 import {
+  EnergyLifecycleService,
   ScalingEngine,
   DungeonRunner,
   TutorialService,
@@ -12,6 +14,7 @@ import {
 
 describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
   let services: BotServices;
+  let mockEnergyRepo: any;
   let replyMock: any;
   let mockProgressRepo: any;
 
@@ -53,12 +56,24 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
       ]),
     };
 
-    const mockEnergyRepo: any = {
+    mockEnergyRepo = {
       getOrCreate: vi.fn().mockResolvedValue({
         userId: 'user_123',
         currentEnergy: 100,
         maxEnergy: 100,
+        bonusEnergy: 0,
+        dailyEnergyPotsUsed: 0,
+        lastResetDate: getResetDayKey(new Date(), DEFAULT_RESET_SCHEDULE),
       }),
+      update: vi
+        .fn()
+        .mockImplementation(async (_userId: string, data: Record<string, unknown>) => ({
+          userId: 'user_123',
+          currentEnergy: 100,
+          maxEnergy: 100,
+          bonusEnergy: 0,
+          ...data,
+        })),
       consumeEnergy: vi.fn().mockResolvedValue({
         success: true,
         currentEnergy: 90,
@@ -140,6 +155,7 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
       dungeonSeasonRepo: mockSeasonRepo,
       userDungeonProgressRepo: mockProgressRepo,
       playerEnergyRepo: mockEnergyRepo,
+      energyLifecycleService: new EnergyLifecycleService(mockEnergyRepo, DEFAULT_RESET_SCHEDULE),
       waifuCardRepo: mockCardRepo,
       loadoutService: mockLoadoutService,
       scalingEngine,
@@ -178,6 +194,34 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
     expect(embed.description).toContain('Season 1: Infernal Crucible');
     expect(embed.description).toContain('Floor 0');
     expect(embed.description).toContain('100/100 Energy');
+  });
+
+  it('shows the refilled pool, with bonus energy, after the daily reset has passed', async () => {
+    // Yesterday's leftovers: 10/100 with 5 bonus, last reset long ago.
+    const stale = {
+      userId: 'user_123',
+      currentEnergy: 10,
+      maxEnergy: 100,
+      bonusEnergy: 5,
+      dailyEnergyPotsUsed: 2,
+      lastResetDate: '2000-01-01',
+    };
+    mockEnergyRepo.getOrCreate.mockResolvedValue(stale);
+    mockEnergyRepo.update.mockImplementation(
+      async (_userId: string, data: Record<string, unknown>) => ({ ...stale, ...data }),
+    );
+    const cmd = createDungeonCommand(services);
+
+    await cmd.execute(createMockContext({ action: 'status' }, ['status']));
+
+    // Reset: the pool refills to maxEnergy + bonus (100 + 5).
+    expect(mockEnergyRepo.update).toHaveBeenCalledWith(
+      'user_123',
+      expect.objectContaining({ currentEnergy: 105, dailyEnergyPotsUsed: 0 }),
+    );
+    const embed = replyMock.mock.calls[0]![0].embeds[0].data;
+    expect(embed.description).toContain('105/105 Energy');
+    expect(embed.description).not.toContain('10/100 Energy');
   });
 
   it('should inspect specific floor attributes and strategic checks', async () => {

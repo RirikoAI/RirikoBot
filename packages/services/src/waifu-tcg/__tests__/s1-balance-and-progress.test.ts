@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { resolveWorkspacePath } from '@ririko/core';
+import { DEFAULT_RESET_SCHEDULE, getResetDayKey, resolveWorkspacePath } from '@ririko/core';
 import {
   createDatabaseClient,
   DungeonBossRepository,
@@ -13,6 +13,7 @@ import {
   type SqliteDatabaseClient,
 } from '@ririko/database';
 import { CANONICAL_ITEMS } from '../equipment/catalog.js';
+import { EnergyLifecycleService } from '../energy/energy-lifecycle.service.js';
 import { ItemGrantService } from '../equipment/item-grant.service.js';
 import {
   loadBossCatalog,
@@ -130,6 +131,80 @@ describe('Pity blessing, stars & energy refund (STORY-159)', () => {
 
     const late = await progress.recordOutcome('u1', 's1', 11, { ...loss, energySpent: 15 });
     expect(late.energyRefunded).toBe(0);
+  });
+
+  describe('above the base capacity (bonus energy)', () => {
+    const today = () => getResetDayKey(new Date(), DEFAULT_RESET_SCHEDULE);
+
+    async function setPool(userId: string, currentEnergy: number): Promise<void> {
+      await energy.getOrCreate(userId);
+      await energy.update(userId, {
+        currentEnergy,
+        maxEnergy: 100,
+        bonusEnergy: 5,
+        lastResetDate: today(),
+      });
+    }
+
+    it('keeps an above-cap pool on a refund through the lifecycle', async () => {
+      const lifecycle = new EnergyLifecycleService(energy, DEFAULT_RESET_SCHEDULE);
+      const withLifecycle = new DungeonProgressService(
+        new TcgConfigRepository(client),
+        energy,
+        grants,
+        lifecycle,
+      );
+      await setPool('u_over', 105);
+
+      const result = await withLifecycle.recordOutcome('u_over', 's1', 3, loss);
+
+      expect(result.energyRefunded).toBe(5);
+      expect((await energy.getOrCreate('u_over')).currentEnergy).toBe(105);
+    });
+
+    it('refunds a below-cap pool up to maxEnergy plus bonus through the lifecycle', async () => {
+      const lifecycle = new EnergyLifecycleService(energy, DEFAULT_RESET_SCHEDULE);
+      const withLifecycle = new DungeonProgressService(
+        new TcgConfigRepository(client),
+        energy,
+        grants,
+        lifecycle,
+      );
+      await setPool('u_below', 103);
+
+      await withLifecycle.recordOutcome('u_below', 's1', 3, { ...loss, energySpent: 20 });
+
+      expect((await energy.getOrCreate('u_below')).currentEnergy).toBe(105);
+    });
+
+    it('applies the daily reset before the refund', async () => {
+      const lifecycle = new EnergyLifecycleService(energy, DEFAULT_RESET_SCHEDULE);
+      const withLifecycle = new DungeonProgressService(
+        new TcgConfigRepository(client),
+        energy,
+        grants,
+        lifecycle,
+      );
+      await energy.getOrCreate('u_stale');
+      await energy.update('u_stale', {
+        currentEnergy: 10,
+        bonusEnergy: 5,
+        lastResetDate: '2000-01-01',
+      });
+
+      await withLifecycle.recordOutcome('u_stale', 's1', 3, loss);
+
+      // Reset refills to 100 + 5 bonus; the refund cannot lower it.
+      expect((await energy.getOrCreate('u_stale')).currentEnergy).toBe(105);
+    });
+
+    it('also keeps an above-cap pool on the repository fallback path', async () => {
+      await setPool('u_repo', 105);
+
+      await progress.recordOutcome('u_repo', 's1', 3, loss);
+
+      expect((await energy.getOrCreate('u_repo')).currentEnergy).toBe(105);
+    });
   });
 
   it('awards stars, keeps the best, and pays dust once for the first 3-star clear', async () => {

@@ -64,6 +64,11 @@ export interface AdventureEngineOptions {
   completionRewards?: boolean;
   sessions: AdventureSessionRepository<ActiveAdventureSession>;
   energy: PlayerEnergyRepository;
+  /**
+   * Applies the daily energy reset (refill, bonus growth) for a player. `start` calls it before
+   * the start transaction, so the 15 energy entry charge is taken from the refilled pool.
+   */
+  reconcileEnergy?: ((userId: string) => Promise<unknown>) | undefined;
   payments: AdventurePaymentPort;
   now?: () => number;
   seed?: () => number;
@@ -130,6 +135,8 @@ export class AdventureEngine {
       throw new AdventureError('INVALID_CONTEXT', 'Adventure requires a user, guild and channel.');
     // Resolve explicit IDs before charging anything. Random selection advances persisted RNG state.
     const explicit = input.scenarioId ? getAdventureScenario(input.scenarioId) : null;
+    // Outside the transaction, so a row lock is never held across two connections.
+    await this.options.reconcileEnergy?.(input.userId);
     const result = await this.options.sessions.withUser(
       input.userId,
       async (tx, cooldownUntil, lastStartAt) => {

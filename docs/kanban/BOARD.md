@@ -139,6 +139,7 @@
 | `STORY-194` | Story | Complete User Data Erasure Tool for Data Requests | 5 | EPIC-020 | [STORY-194.md](./handovers/STORY-194.md) |
 | `STORY-195` | Story | Ririko Brand Identity (Sour Gummy, Libre Franklin, Official Pink) and a Redesigned ririko.ai Home Page | 21 | EPIC-020 | [STORY-195.md](./handovers/STORY-195.md) |
 | `STORY-196` | Story | npx ririko: the npm Package Becomes a Zero-Dependency 2.0 Starter | 8 | EPIC-020 | [STORY-196.md](./handovers/STORY-196.md) |
+| `STORY-197` | Story | Energy at a Glance: the /energy and !energy Command | 3 | EPIC-020 | [STORY-197.md](./handovers/STORY-197.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -418,6 +419,7 @@
 | `TASK-1955` | Task | Home Page Hero Copy From the Maintainer, and the Discord Demo Chat Column No Longer Clipped With Large Phone Text | 1 | STORY-195 | [TASK-1955.md](./handovers/TASK-1955.md) |
 | `TASK-1961` | Task | apps/starter: the ririko npm Package, a Zero-Dependency Starter for Docker and Source Installs | 5 | STORY-196 | [TASK-1961.md](./handovers/TASK-1961.md) |
 | `TASK-1962` | Task | Publish ririko to npm From GitHub Actions With Trusted Publishing, and an npm README That Brings In AI Users | 3 | STORY-196 | [TASK-1962.md](./handovers/TASK-1962.md) |
+| `TASK-1971` | Task | /energy and !energy Show Energy, Bonus Energy, Potions Used and the Next Refill | 3 | STORY-197 | [TASK-1971.md](./handovers/TASK-1971.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -440,6 +442,7 @@
 | `CHORE-2006` | Chore | Dependabot Targets develop, Not master | 1 | EPIC-020 | [CHORE-2006.md](./handovers/CHORE-2006.md) |
 | `CHORE-2007` | Chore | Docker Hub Texts After latest Moved to 2.0.0 | 1 | EPIC-020 | [CHORE-2007.md](./handovers/CHORE-2007.md) |
 | `CHORE-2008` | Chore | Version 2.0.1 in Every Workspace package.json | 1 | EPIC-020 | [CHORE-2008.md](./handovers/CHORE-2008.md) |
+| `CHORE-2009` | Chore | Lavalink "Never Ready" Deploy Test Polls Only Once Under Load | 1 | EPIC-020 | [CHORE-2009.md](./handovers/CHORE-2009.md) |
 | `BUG-0001` | Bug | Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors | 5 | STORY-050 | [BUG-0001.md](./handovers/BUG-0001.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | STORY-050 | [BUG-0002.md](./handovers/BUG-0002.md) |
 | `BUG-0003` | Bug | OpenAI & LLM Providers Function Name Schema Validation & Sanitization | 2 | STORY-060 | [BUG-0003.md](./handovers/BUG-0003.md) |
@@ -488,6 +491,7 @@
 | `BUG-0047` | Bug | Setup Wizard Pages Do Not Mirror the 1.x Installer: Font Sizes, Note and Guide Button Placement, Switch-Gated Guides, Minimal Look | 3 | STORY-192 | [BUG-0047.md](./handovers/BUG-0047.md) |
 | `BUG-0048` | Bug | Landing Page Demo Messages Overlap Once the Chat Overflows | 1 | STORY-189 | [BUG-0048.md](./handovers/BUG-0048.md) |
 | `BUG-0049` | Bug | Docker Images 2.0.0 Carry Critical and High CVEs From the Base Image, the Bundled npm and Old Dashboard Dependencies | 5 | EPIC-020 | [BUG-0049.md](./handovers/BUG-0049.md) |
+| `BUG-0050` | Bug | Energy Is Shown, Spent or Refunded Without the Daily Reset: /dungeon status, /adventure and the Floor Refund | 3 | EPIC-020 | [BUG-0050.md](./handovers/BUG-0050.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |
@@ -524,4 +528,4 @@
 | `EPIC-017` | Production Hosting & Continuous Deployment (Managed VMs, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
 | `EPIC-018` | Dashboard Usability Improvements | DONE | 21 | STORY-182, STORY-183, STORY-184 | [EPIC-018.md](./handovers/EPIC-018.md) |
 | `EPIC-019` | Production Harness: Controlled, Automated and Safeguarded Releases | DONE | 21 | STORY-185, STORY-186 | [EPIC-019.md](./handovers/EPIC-019.md) |
-| `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, STORY-193, STORY-194, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045, STORY-195, CHORE-2005, STORY-196, CHORE-2006, CHORE-2007, BUG-0049, CHORE-2008 | [EPIC-020.md](./handovers/EPIC-020.md) |
+| `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, STORY-193, STORY-194, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045, STORY-195, CHORE-2005, STORY-196, CHORE-2006, CHORE-2007, BUG-0049, CHORE-2008, STORY-197, BUG-0050, CHORE-2009 | [EPIC-020.md](./handovers/EPIC-020.md) |

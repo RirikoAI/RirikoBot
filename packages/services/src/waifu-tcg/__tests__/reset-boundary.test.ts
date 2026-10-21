@@ -187,6 +187,37 @@ describe('STORY-161 shared reset boundary', () => {
     });
   });
 
+  describe('next energy reset', () => {
+    it('returns the next boundary on the energy schedule', () => {
+      const service = new EnergyLifecycleService(
+        new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE),
+        DEFAULT_RESET_SCHEDULE,
+      );
+
+      // Midnight GMT+8 is 16:00 UTC.
+      expect(service.nextResetAt(LATE_IN_RESET_DAY).toISOString()).toBe('2026-09-20T16:00:00.000Z');
+      expect(service.nextResetAt(JUST_AFTER_BOUNDARY).toISOString()).toBe(
+        '2026-09-21T16:00:00.000Z',
+      );
+    });
+
+    it('uses the configured schedule and the current time by default', () => {
+      const service = new EnergyLifecycleService(
+        new PlayerEnergyRepository(client, SIX_AM_GMT8),
+        SIX_AM_GMT8,
+      );
+
+      // 06:00 GMT+8 is 22:00 UTC the day before.
+      expect(service.nextResetAt(new Date('2026-09-20T21:00:00.000Z')).toISOString()).toBe(
+        '2026-09-20T22:00:00.000Z',
+      );
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-09-20T22:30:00.000Z'));
+      expect(service.nextResetAt().toISOString()).toBe('2026-09-21T22:00:00.000Z');
+    });
+  });
+
   describe('energy potion daily ceiling', () => {
     it('keeps the ceiling within one GMT+8 day even after UTC midnight passes', async () => {
       const energyRepo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
@@ -446,6 +477,40 @@ describe('BUG-0012 energy lifecycle wiring', () => {
 
     const record = await service.refundEnergy('user_refund', 25);
     expect(record.currentEnergy).toBe(100);
+  });
+
+  it('never lowers an above-capacity pool on a refund', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, DEFAULT_RESET_SCHEDULE);
+
+    // 105 = 100 + 5 bonus; a refund must keep it, not clamp it down to maxEnergy.
+    await repo.getOrCreate('user_refund_over');
+    await repo.update('user_refund_over', {
+      currentEnergy: 105,
+      maxEnergy: 100,
+      bonusEnergy: 5,
+      lastResetDate: getResetDayKey(new Date(), DEFAULT_RESET_SCHEDULE),
+    });
+
+    const record = await service.refundEnergy('user_refund_over', 5);
+    expect(record.currentEnergy).toBe(105);
+    expect((await repo.getOrCreate('user_refund_over')).currentEnergy).toBe(105);
+  });
+
+  it('refunds up to maxEnergy plus bonus energy', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, DEFAULT_RESET_SCHEDULE);
+
+    await repo.getOrCreate('user_refund_bonus');
+    await repo.update('user_refund_bonus', {
+      currentEnergy: 90,
+      maxEnergy: 100,
+      bonusEnergy: 5,
+      lastResetDate: getResetDayKey(new Date(), DEFAULT_RESET_SCHEDULE),
+    });
+
+    const record = await service.refundEnergy('user_refund_bonus', 50);
+    expect(record.currentEnergy).toBe(105);
   });
 
   it('increments bonusEnergy by dailyIncrement and replenishes to effective capacity on rollover', async () => {

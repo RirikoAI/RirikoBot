@@ -16,7 +16,8 @@ import {
   ADVENTURE_FALLBACK_MS,
   resolveAdventureTransition,
 } from '../adventure-engine.js';
-import type { AdventurePaymentPort } from '../adventure-engine.js';
+import type { AdventureEngineOptions, AdventurePaymentPort } from '../adventure-engine.js';
+import { EnergyLifecycleService } from '../../waifu-tcg/energy/energy-lifecycle.service.js';
 import type { ActiveAdventureSession, AdventureCardSnapshot } from '../types.js';
 import { adventureRandom } from '../random.js';
 
@@ -95,7 +96,10 @@ describe('durable adventure engine', () => {
   afterEach(async () => {
     await db.close();
   });
-  function makeEngine(repo = sessions): AdventureEngine {
+  function makeEngine(
+    repo = sessions,
+    extra: Partial<AdventureEngineOptions> = {},
+  ): AdventureEngine {
     return new AdventureEngine({
       completionRewards: false /* Retain coverage of stored version-1 reward behavior. */,
       startCooldownMs: 0,
@@ -105,6 +109,7 @@ describe('durable adventure engine', () => {
       now: () => now,
       seed: () => 1702,
       id: () => `session-${++nextId}`,
+      ...extra,
     });
   }
   async function present(session: ActiveAdventureSession) {
@@ -163,6 +168,36 @@ describe('durable adventure engine', () => {
     card.speed = 9999;
     expect((await energy.findById('alice'))?.currentEnergy).toBe(0);
     expect((await sessions.findById(session.id))?.card?.speed).toBe(50);
+  });
+  it('refills a stale pool through reconcileEnergy before charging the entry cost', async () => {
+    const lifecycle = new EnergyLifecycleService(energy);
+    const order: string[] = [];
+    const reconcile = vi.fn(async (userId: string) => {
+      order.push('reconcile');
+      return lifecycle.getOrReconcileUserEnergy(userId);
+    });
+    const withdraw = vi.spyOn(energy, 'consumeEnergy');
+    withdraw.mockImplementation(async (...args) => {
+      order.push('charge');
+      return PlayerEnergyRepository.prototype.consumeEnergy.apply(energy, args);
+    });
+    // 10 energy left from before the daily reset: not enough for 15 without the refill.
+    await energy.getOrCreate('alice');
+    await energy.update('alice', { currentEnergy: 10, lastResetDate: '2000-01-01' });
+    const reconciling = makeEngine(sessions, { reconcileEnergy: reconcile });
+
+    const session = await reconciling.start(input);
+
+    expect(session.userId).toBe('alice');
+    expect(reconcile).toHaveBeenCalledWith('alice');
+    expect(order).toEqual(['reconcile', 'charge']);
+    // Refilled to 100, then charged 15.
+    expect((await energy.findById('alice'))?.currentEnergy).toBe(85);
+  });
+  it('still refuses a stale pool of 10 when no reconcileEnergy is provided', async () => {
+    await energy.getOrCreate('alice');
+    await energy.update('alice', { currentEnergy: 10, lastResetDate: '2000-01-01' });
+    await expect(engine.start(input)).rejects.toMatchObject({ code: 'ENERGY' });
   });
   it('retains global fallback cooldown across cancellation, restart and guild changes', async () => {
     await sessions.setSettings('guild-a', { energyEnabled: false });

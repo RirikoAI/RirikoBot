@@ -100,7 +100,9 @@ export function createDungeonCommand(services: BotServices): Command {
             ctx.user.id,
             activeSeason.id,
           );
-          const energy = await services.playerEnergyRepo.getOrCreate(ctx.user.id);
+          const energy = await services.energyLifecycleService.getOrReconcileUserEnergy(
+            ctx.user.id,
+          );
           const nextFloor = progress.highestClearedFloor + 1;
           const nextCost = getDungeonFloorEnergyCost(nextFloor);
           const nextFloorType = services.scalingEngine.getFloorType(nextFloor);
@@ -120,7 +122,7 @@ export function createDungeonCommand(services: BotServices): Command {
                 `• **Active Affixes**: \`${affixesStr}\`\n` +
                 `• **Highest Floor Cleared**: \`Floor ${progress.highestClearedFloor}\`\n` +
                 `• **Total Attempts**: \`${progress.attemptsCount}\` (Wins: \`${progress.clearCount}\`)\n` +
-                `• **Energy Available**: \`${energy.currentEnergy}/${energy.maxEnergy} Energy\`\n\n` +
+                `• **Energy Available**: \`${energy.currentEnergy}/${energy.maxEnergy + energy.bonusEnergy} Energy\`\n\n` +
                 `⚔️ **Next Challenge**: **Floor ${nextFloor}** [${nextFloorType}]\n` +
                 `• **Entry Cost**: \`${nextCost} Energy\`\n\n` +
                 `*Commands:* \`/dungeon climb\` to battle | \`/dungeon floor <id>\` to inspect | \`/dungeon leaderboard\``,
