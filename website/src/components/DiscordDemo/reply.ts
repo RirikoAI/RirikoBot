@@ -151,7 +151,7 @@ function friendlyName(author: AuthorId): string {
   return author === 'you' ? 'friend' : DISPLAY_NAMES[author];
 }
 
-export const BOT_VERSION = '2.0.1';
+export const BOT_VERSION = '2.0.2';
 
 const COLORS = {
   primary: 0x5865f2,

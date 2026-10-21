@@ -6,7 +6,7 @@ import { GatewayManager } from '@ririko/discord';
 describe('apps/bot Bootstrapper', () => {
   it('returns package and version info', () => {
     const info = getBotInfo();
-    expect(info.version).toBe('2.0.1');
+    expect(info.version).toBe('2.0.2');
     expect(info.database).toBe('@ririko/database');
     expect(info.discord).toBe('@ririko/discord');
   });
