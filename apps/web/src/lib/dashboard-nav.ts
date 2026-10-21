@@ -26,6 +26,7 @@ export const GUILD_NAV_ITEMS = [
   { slug: 'audit-log', label: 'Audit Log', group: 'moderation' },
   { slug: 'autoroles', label: 'Auto Roles', group: 'members' },
   { slug: 'reaction-roles', label: 'Reaction Roles', group: 'members' },
+  { slug: 'tickets', label: 'Tickets', group: 'members' },
   { slug: 'autovoice', label: 'Auto Voice', group: 'members' },
   { slug: 'welcome', label: 'Welcome Card', group: 'members' },
   { slug: 'farewell', label: 'Farewell Card', group: 'members' },

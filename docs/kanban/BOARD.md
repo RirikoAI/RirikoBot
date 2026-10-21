@@ -17,13 +17,6 @@
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
 | `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188, STORY-192, STORY-193 | yes | large |
-| `STORY-198` | Story | Support Tickets: Open-Ticket Panel, Private Ticket Channels, Claim and Close with Transcripts | 21 | EPIC-021 | — | yes | large |
-| `TASK-1981` | Task | Ticket Schema, Migrations and TicketRepository on Both Dialects | 5 | STORY-198 | — | yes | medium |
-| `TASK-1982` | Task | The `tickets` Guild Config Module for the Dashboard and the CLI | 2 | STORY-198 | TASK-1981 | blocked | medium |
-| `TASK-1983` | Task | TicketService: Open, Claim, Add, Remove and Close with a Plain-Text Transcript | 5 | STORY-198 | TASK-1981, TASK-1982 | blocked | medium |
-| `TASK-1984` | Task | /ticket Command (Slash and Prefix), Panel, Buttons, Modals and Bot Wiring | 5 | STORY-198 | TASK-1983 | blocked | medium |
-| `TASK-1985` | Task | Tickets Dashboard Page with a Category Picker | 3 | STORY-198 | TASK-1982 | blocked | medium |
-| `TASK-1986` | Task | Document Support Tickets for Server Admins and in the Privacy Policy | 1 | STORY-198 | TASK-1984, TASK-1985 | blocked | small |
 | `CHORE-2004` | Chore | Add the New Discord, Gemini, OpenAI, YouTube and Spotify Screenshots to the Setup Wizard Guides | 1 | EPIC-020 | TASK-1924 | yes | small |
 
 ## 🔍 Review
@@ -147,6 +140,7 @@
 | `STORY-195` | Story | Ririko Brand Identity (Sour Gummy, Libre Franklin, Official Pink) and a Redesigned ririko.ai Home Page | 21 | EPIC-020 | [STORY-195.md](./handovers/STORY-195.md) |
 | `STORY-196` | Story | npx ririko: the npm Package Becomes a Zero-Dependency 2.0 Starter | 8 | EPIC-020 | [STORY-196.md](./handovers/STORY-196.md) |
 | `STORY-197` | Story | Energy at a Glance: the /energy and !energy Command | 3 | EPIC-020 | [STORY-197.md](./handovers/STORY-197.md) |
+| `STORY-198` | Story | Support Tickets: Open-Ticket Panel, Private Ticket Channels, Claim and Close with Transcripts | 21 | EPIC-021 | [STORY-198.md](./handovers/STORY-198.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -427,6 +421,12 @@
 | `TASK-1961` | Task | apps/starter: the ririko npm Package, a Zero-Dependency Starter for Docker and Source Installs | 5 | STORY-196 | [TASK-1961.md](./handovers/TASK-1961.md) |
 | `TASK-1962` | Task | Publish ririko to npm From GitHub Actions With Trusted Publishing, and an npm README That Brings In AI Users | 3 | STORY-196 | [TASK-1962.md](./handovers/TASK-1962.md) |
 | `TASK-1971` | Task | /energy and !energy Show Energy, Bonus Energy, Potions Used and the Next Refill | 3 | STORY-197 | [TASK-1971.md](./handovers/TASK-1971.md) |
+| `TASK-1981` | Task | Ticket Schema, Migrations and TicketRepository on Both Dialects | 5 | STORY-198 | [TASK-1981.md](./handovers/TASK-1981.md) |
+| `TASK-1982` | Task | The `tickets` Guild Config Module for the Dashboard and the CLI | 2 | STORY-198 | [TASK-1982.md](./handovers/TASK-1982.md) |
+| `TASK-1983` | Task | TicketService: Open, Claim, Add, Remove and Close with a Plain-Text Transcript | 5 | STORY-198 | [TASK-1983.md](./handovers/TASK-1983.md) |
+| `TASK-1984` | Task | /ticket Command (Slash and Prefix), Panel, Buttons, Modals and Bot Wiring | 5 | STORY-198 | [TASK-1984.md](./handovers/TASK-1984.md) |
+| `TASK-1985` | Task | Tickets Dashboard Page with a Category Picker | 3 | STORY-198 | [TASK-1985.md](./handovers/TASK-1985.md) |
+| `TASK-1986` | Task | Document Support Tickets for Server Admins and in the Privacy Policy | 1 | STORY-198 | [TASK-1986.md](./handovers/TASK-1986.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |

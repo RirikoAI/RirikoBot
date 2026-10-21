@@ -46,6 +46,7 @@ const GUILD_SCOPED = [
   'stream',
   'setup-stream-notification',
   'giveaway',
+  'ticket',
   'tcg-admin',
 ];
 

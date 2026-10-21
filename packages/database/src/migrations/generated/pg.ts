@@ -206,5 +206,17 @@ export const PG_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "674255b99c4b69da1c12181e9c0c27865dbc414d0b7b43eaf6c745f6a8f8d8dc",
     "contract": false
+  },
+  {
+    "id": "0006_cool_stranger",
+    "statements": [
+      "CREATE TABLE \"ticket_settings\" (\n\t\"guild_id\" varchar(32) PRIMARY KEY NOT NULL,\n\t\"is_enabled\" boolean DEFAULT false NOT NULL,\n\t\"category_id\" varchar(32),\n\t\"staff_role_ids\" jsonb DEFAULT '[]'::jsonb NOT NULL,\n\t\"transcript_channel_id\" varchar(32),\n\t\"max_open_per_user\" integer DEFAULT 1 NOT NULL,\n\t\"welcome_message\" text,\n\t\"next_number\" integer DEFAULT 1 NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\n);",
+      "CREATE TABLE \"tickets\" (\n\t\"id\" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,\n\t\"guild_id\" varchar(32) NOT NULL,\n\t\"number\" integer NOT NULL,\n\t\"channel_id\" varchar(32) NOT NULL,\n\t\"opener_id\" varchar(32) NOT NULL,\n\t\"subject\" text,\n\t\"status\" text DEFAULT 'open' NOT NULL,\n\t\"claimed_by\" varchar(32),\n\t\"closed_by\" varchar(32),\n\t\"close_reason\" text,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"closed_at\" timestamp with time zone\n);",
+      "CREATE UNIQUE INDEX \"uq_pg_tickets_guild_number\" ON \"tickets\" USING btree (\"guild_id\",\"number\");",
+      "CREATE UNIQUE INDEX \"uq_pg_tickets_channel\" ON \"tickets\" USING btree (\"channel_id\");",
+      "CREATE INDEX \"idx_pg_tickets_guild_opener_status\" ON \"tickets\" USING btree (\"guild_id\",\"opener_id\",\"status\");"
+    ],
+    "checksum": "0b7893c8ce838c218b9e6f97ca05dc64069dbecfb315bd823220024d938c93a5",
+    "contract": false
   }
 ];

@@ -1,6 +1,6 @@
 # Server Modules
 
-This page covers the community features of Ririko: roles, giveaways, voice channels, welcome cards, stream alerts, free games, reminders, mini-games, and fun commands. Music, AI, economy, moderation and the card game have their own pages.
+This page covers the community features of Ririko: roles, giveaways, support tickets, voice channels, welcome cards, stream alerts, free games, reminders, mini-games, and fun commands. Music, AI, economy, moderation and the card game have their own pages.
 
 ## 1. Overview
 
@@ -12,14 +12,15 @@ Most features work as soon as the bot is in your server. Some need a few setting
 | Reaction roles | Reaction Roles | Yes. Build a panel. | 2.2 |
 | Temporary roles | None (command only) | No | 2.3 |
 | Giveaways | Giveaways | No | 3 |
-| Auto voice channels | Auto Voice | Yes. Pick a voice channel. | 4 |
-| Welcome and farewell cards | Welcome Card, Farewell Card | Yes. Pick a channel. | 5 |
-| Stream alerts | Stream Alerts | Yes. Pick a channel, add streamers. | 6 |
-| Free games | Free Games | Yes. Pick a channel. | 7 |
-| Reminders | None | No | 8 |
-| Server settings | General | No | 9 |
-| Mini-games | Games | No | 10 |
-| Anime, reactions, memes | None | No | 11 |
+| Support tickets | Tickets | Yes. Pick a category and staff roles. | 4 |
+| Auto voice channels | Auto Voice | Yes. Pick a voice channel. | 5 |
+| Welcome and farewell cards | Welcome Card, Farewell Card | Yes. Pick a channel. | 6 |
+| Stream alerts | Stream Alerts | Yes. Pick a channel, add streamers. | 7 |
+| Free games | Free Games | Yes. Pick a channel. | 8 |
+| Reminders | None | No | 9 |
+| Server settings | General | No | 10 |
+| Mini-games | Games | No | 11 |
+| Anime, reactions, memes | None | No | 12 |
 
 To use the dashboard, see [dashboard.md](dashboard.md). To turn a command off, use the **Commands** page. See [commands.md](commands.md).
 
@@ -129,7 +130,87 @@ A giveaway has a prize, an end time and a button. Members click the button to en
 
 Prefix form: `!giveaway create <duration> <winners> <prize>`. The old names `!gcreate`, `!gend`, `!greroll`, `!gdelete`, `!gedit` and `!glist` still work.
 
-## 4. Auto Voice Channels
+## 4. Support Tickets
+
+Support tickets give each member a private channel for help. A member presses **Open Ticket** on a panel and types a subject. Ririko makes a channel for them under a category you pick. Only the member, the staff roles and Ririko can see it. When the ticket closes, Ririko saves a text transcript in a channel of your server and deletes the ticket channel.
+
+**Turn it on.**
+
+1. Open the dashboard **Tickets** page. It is in the Members group.
+2. Turn on **Allow tickets**.
+3. Pick the **Ticket category**. Ririko creates each ticket channel under it.
+4. Pick the **Staff roles**. Members with these roles see every ticket. You can pick up to 10 roles.
+5. Pick a **Transcript channel**. If you leave it empty, transcripts go to the log channel from the **Logging** page.
+6. Pick how many tickets one member can have open at once (1 to 5, default 1). You can also write a welcome message for new tickets.
+7. Save. Then post the panel with `/ticket action:panel` in the channel where members should open tickets.
+
+The panel is a message with one **Open Ticket** button. Only a member with **Manage Server** or **Administrator** can post it. The command refuses when tickets are off or have no category.
+
+**What members do.**
+
+1. Press **Open Ticket**.
+2. Type a subject. It is required, and it can be up to 200 characters.
+3. Ririko makes a channel named `ticket-0042` under the category. It posts a welcome message with **Claim** and **Close** buttons, and it mentions the member and the staff.
+4. Ririko replies with a link to the new channel.
+
+If the member already has as many open tickets as the limit allows, Ririko says so and makes no channel.
+
+**What staff do.**
+
+- **Claim** the ticket with the button or `/ticket action:claim`. Ririko says who is handling it. If someone has already claimed it, Ririko says who.
+- Add a member with `/ticket action:add user:@member`. Remove one with `/ticket action:remove user:@member`. The member who opened the ticket cannot be removed, and neither can Ririko.
+- Staff are members with a staff role. Members with **Administrator** or **Manage Channels** also count as staff.
+
+**Closing a ticket.**
+
+The member who opened the ticket and the staff can close it. Press **Close** and type an optional reason. Or use `/ticket action:close reason:Solved`.
+
+Then Ririko does this, in order:
+
+1. Builds a transcript. It is a plain text file named `ticket-0042.txt`. The top of the file has the server, the ticket number, the subject, who opened, claimed and closed the ticket, the reason, and the open and close times in UTC. Below that are the messages, oldest first. Attachment links and embed titles are included.
+2. Posts the transcript in the transcript channel, or in the log channel when the transcript channel is empty.
+3. Marks the ticket closed, and deletes the ticket channel.
+
+Ririko closes the ticket only after the transcript is posted. If the post fails, the ticket stays open, and the person who closed it sees why. Fix the problem, such as a missing permission, and close the ticket again.
+
+If the server has no transcript channel and no log channel, Ririko closes the ticket with no transcript.
+
+A transcript holds up to 5,000 messages. A longer ticket keeps the newest 5,000, and the file says so.
+
+After a close, the channel is deleted. The person who closed the ticket may not see a confirmation message. The transcript in the transcript channel is the record.
+
+If someone deletes a ticket channel by hand, Ririko marks the ticket closed with the reason "Channel deleted". No transcript is made.
+
+Ririko does not keep transcripts. It keeps only the ticket details.
+
+**Permissions.** Ririko needs these permissions.
+
+- In the ticket category: **Manage Channels**, **View Channel** and **Send Messages**.
+- In the panel channel: **View Channel**, **Send Messages** and **Embed Links**.
+- In the transcript channel, or the log channel: **View Channel**, **Send Messages**, **Embed Links** and **Attach Files**.
+
+**Command.** `/ticket`
+
+| Option | Required | What it does |
+|---|---|---|
+| `action` | Yes | `panel`, `close`, `claim`, `add` or `remove`. |
+| `channel` | No | For `panel`. Where to post the panel. The default is this channel. |
+| `message` | No | For `panel`. The text on the panel. Up to 1,000 characters. |
+| `reason` | No | For `close`. Up to 500 characters. |
+| `user` | For `add` and `remove` | The member. |
+
+- `panel` needs **Manage Server** or **Administrator**.
+- `close` works for the opener and the staff. `claim`, `add` and `remove` work for staff.
+- Every action except `panel` works only inside a ticket channel.
+
+Prefix form: `!ticket` (or `!tickets`).
+
+- `!ticket panel [#channel] [message]`. Example: `!ticket panel #support Need help?`
+- `!ticket close [reason]`. Example: `!ticket close spam`
+- `!ticket claim`
+- `!ticket add <user>` and `!ticket remove <user>`. Mention the member or give their ID.
+
+## 5. Auto Voice Channels
 
 A member joins a "Join to Create" voice channel. Ririko makes a new voice channel for them and moves them in. When everyone leaves, Ririko deletes the channel. After a restart, Ririko removes channels that were left behind.
 
@@ -165,7 +246,7 @@ Or run `/autovoice action:setup channel:<voice channel>`.
 
 `claim` lets you take a channel when its owner has left it. The old names `!avc`, `!vname`, `!vlimit`, `!vlock`, `!vunlock`, `!vpermit`, `!vkick`, `!vclaim` and `!vtransfer` still work as prefix commands.
 
-## 5. Welcome and Farewell Cards
+## 6. Welcome and Farewell Cards
 
 Ririko posts a picture card when a member joins or leaves.
 
@@ -198,7 +279,7 @@ The message can use `{user}`, `{server}` and `{memberCount}`.
 
 The aliases are `/welcome` and `/goodbye`.
 
-## 6. Stream Alerts
+## 7. Stream Alerts
 
 Ririko posts a message when a streamer goes live. It supports Twitch, YouTube and TikTok. A server can follow up to 25 streamers.
 
@@ -232,7 +313,7 @@ The message can use `{streamer}`, `{title}`, `{game}`, `{platform}`, `{url}` and
 - `/stream-status` lists the followed streamers and shows who is live. Everyone can use it.
 - Ririko checks for live streams every minute. The host can change this with `STREAM_CHECK_INTERVAL_MS`.
 
-## 7. Free Games
+## 8. Free Games
 
 Ririko announces free games from the Epic Games Store and Steam.
 
@@ -253,7 +334,7 @@ Ririko announces free games from the Epic Games Store and Steam.
 
 `setchannel` and `remove` need **Manage Server**. `show` is open to everyone.
 
-## 8. Reminders
+## 9. Reminders
 
 `/reminder` sets a reminder for you. Ririko sends it as a direct message.
 
@@ -284,7 +365,7 @@ Limits:
 
 Ririko reads times in your time zone. If you set none, it uses the time zone of the server. If that is not set either, it uses UTC.
 
-## 9. Server Settings and Information
+## 10. Server Settings and Information
 
 | Command | What it does |
 |---|---|
@@ -296,7 +377,7 @@ Ririko reads times in your time zone. If you set none, it uses the time zone of 
 
 The dashboard **General** page sets the prefix and time zone too. Time zone names come from the IANA list, such as `Europe/London` or `UTC`.
 
-## 10. Mini-Games
+## 11. Mini-Games
 
 Mini-games use credits. See [economy.md](economy.md). A wager is optional. When you play with a wager, Ririko takes the credits first. A win pays double the wager. A tie gives the wager back. A loss keeps the credits.
 
@@ -318,9 +399,9 @@ Prefix examples: `!cf heads 100`, `!roll 2`, `!rps @friend 50`.
 
 `/adventure` is a story game with choices. See [adventure-game.md](adventure-game.md).
 
-## 11. Anime, Reactions and Memes
+## 12. Anime, Reactions and Memes
 
-### 11.1. Anime Search
+### 12.1. Anime Search
 
 `/anime`, `/manga` and `/anime-character` search for a title or a character. Each has one required option, `search`.
 
@@ -334,12 +415,12 @@ Only you can use the menu. It stops working after 2 minutes.
 - Adult entries show only in age-restricted channels.
 - Ririko remembers search results for 10 minutes.
 
-### 11.2. Waifu Images and Wallpapers
+### 12.2. Waifu Images and Wallpapers
 
 - `/waifu` sends a random safe image from waifu.im. The **Another one** button sends a new image. Only you can use it.
 - `/wallpaper search:<keyword>` finds anime wallpapers. Pick a source (WallHaven, Zerochan or Konachan). Ririko shows 3 wallpapers. Then you can load more, switch the source, or stop. Wallpapers are safe for work and never repeat.
 
-### 11.3. Reactions
+### 12.3. Reactions
 
 `/react type:<name> [target:@user]` sends an anime GIF. With no target, it is aimed at you. Start typing in `type` to see the list.
 
@@ -347,7 +428,7 @@ There are 68 reactions: airkiss, angrystare, bite, bleh, blush, brofist, celebra
 
 Each name also works as a prefix command, such as `!hug @friend`. The exception is `roll`, which is also `/dice`. Use `!react roll`. The cooldown is 2 seconds.
 
-### 11.4. Memes
+### 12.4. Memes
 
 `/meme template:<name> text1:<text> [text2] [text3] [text4] [text5]` makes a meme picture. Start typing in `template` to see the list.
 

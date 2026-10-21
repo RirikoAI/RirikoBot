@@ -93,7 +93,7 @@ Discord allows 100 slash commands in each scope. Ririko uses two scopes.
 Per-server commands:
 
 - Moderation: `automod`, `ban`, `unban`, `softban`, `kick`, `timeout`, `untimeout`, `warn`, `history`, `note`, `nick`, `purge`, `lock`, `unlock`.
-- Server setup: `prefix`, `welcomer`, `farewell`, `autorole`, `temprole`, `create-reaction-role`, `reaction-roles`, `autovoice`, `setup-music`.
+- Server setup: `prefix`, `welcomer`, `farewell`, `autorole`, `temprole`, `create-reaction-role`, `reaction-roles`, `autovoice`, `ticket`, `setup-music`.
 - AI and images: `aichannel`, `aipersona`, `setup-stablediffusion-api`, `stablediffusion-model`.
 - Streams, events and cards: `stream`, `setup-stream-notification`, `giveaway`, `tcg-admin`.
 
@@ -258,6 +258,7 @@ See [modules.md](modules.md).
 | `/member-info` | `memberinfo`, `user-info`, `userinfo`, `whois` | Shows member information. | Everyone (server only) |
 | `/welcomer` | `welcome` | Sets the welcome card. | Manage Server |
 | `/farewell` | `goodbye` | Sets the farewell card. | Manage Server |
+| `/ticket` | `tickets` | Support tickets: post the panel, claim, close, and add or remove members. | Panel: Manage Server or Administrator. Close: the opener and staff. Claim, add and remove: staff |
 
 ### 7.7. Games
 

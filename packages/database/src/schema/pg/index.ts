@@ -7,6 +7,7 @@ export * from './music.js';
 export * from './ai.js';
 export * from './images.js';
 export * from './giveaways.js';
+export * from './tickets.js';
 export * from './streams.js';
 export * from './free-games.js';
 export * from './tcg.js';

@@ -30,9 +30,9 @@ All of these steps work from the dashboard or from a command.
 
 | I want | Command | Guide |
 |---|---|---|
-| A welcome card | `/welcomer channel:#welcome enable:true` | [modules.md](modules.md) section 5 |
-| A farewell card | `/farewell channel:#goodbye enable:true` | [modules.md](modules.md) section 5 |
-| Stream alerts | `/setup-stream-notification channel:#live`, then `/stream` | [modules.md](modules.md) section 6 |
+| A welcome card | `/welcomer channel:#welcome enable:true` | [modules.md](modules.md) section 6 |
+| A farewell card | `/farewell channel:#goodbye enable:true` | [modules.md](modules.md) section 6 |
+| Stream alerts | `/setup-stream-notification channel:#live`, then `/stream` | [modules.md](modules.md) section 7 |
 | A music channel | `/setup-music` | [music.md](music.md) section 1.2 |
 | An AI channel | `/aichannel channel:#ririko-ai` | [ai.md](ai.md) section 1.2 |
 | A different prefix | `/prefix` | [commands.md](commands.md) |

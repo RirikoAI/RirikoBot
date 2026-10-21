@@ -209,6 +209,12 @@ const AutoModActionSetting = z.enum(AUTOMOD_ACTIONS, {
 });
 const MAX_EXEMPTIONS = 25;
 const MAX_JOIN_ROLES = 10;
+/** Most staff roles a server can give access to its support tickets. */
+export const MAX_TICKET_STAFF_ROLES = 10;
+/** Most tickets one member may have open at once. */
+export const MAX_TICKETS_PER_USER = 5;
+/** Longest welcome message posted in a new ticket channel. */
+export const MAX_TICKET_WELCOME_MESSAGE_LENGTH = 1000;
 const MAX_NO_XP_CHANNELS = 50;
 /** Highest per-guild XP rate. Levels also raise the global bank capacity, so the rate is capped. */
 export const MAX_XP_RATE_PERCENT = 300;
@@ -316,6 +322,26 @@ export const GuildConfigSchemas = {
       ),
       verificationRoleId: OptionalSnowflakeSetting.describe(
         'Role given by the verification button (/autorole send-verify); empty for none',
+      ),
+    })
+    .strict(),
+  tickets: z
+    .object({
+      enabled: FlagSetting.describe('Let members open support tickets with the Open Ticket button'),
+      categoryId: OptionalSnowflakeSetting.describe(
+        'Category channel ID that new ticket channels are created under; empty for no category',
+      ),
+      staffRoleIds: SnowflakeListSetting(MAX_TICKET_STAFF_ROLES).describe(
+        `Role IDs of the staff who can see and handle every ticket, comma separated (at most ${MAX_TICKET_STAFF_ROLES})`,
+      ),
+      transcriptChannelId: OptionalSnowflakeSetting.describe(
+        'Channel that receives the transcript of a closed ticket; empty to use the log channel',
+      ),
+      maxOpenPerUser: IntSetting(1, MAX_TICKETS_PER_USER).describe(
+        `Tickets one member may have open at the same time (1 to ${MAX_TICKETS_PER_USER})`,
+      ),
+      welcomeMessage: OptionalTextSetting(MAX_TICKET_WELCOME_MESSAGE_LENGTH).describe(
+        `Message posted in a new ticket, up to ${MAX_TICKET_WELCOME_MESSAGE_LENGTH} characters; empty for the default welcome`,
       ),
     })
     .strict(),

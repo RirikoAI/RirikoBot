@@ -63,6 +63,7 @@ The sidebar groups the pages. This table tells you what each page does and where
 | Moderation | Audit Log | Lists changes made on the dashboard. | Section 4.5 |
 | Members | Auto Roles | Gives roles to new members and bots. | [modules.md](modules.md) |
 | Members | Reaction Roles | Builds role buttons and menus. | [modules.md](modules.md) |
+| Members | Tickets | Turns support tickets on and sets the category, staff roles and transcript channel. | [modules.md](modules.md) |
 | Members | Auto Voice | Sets up "Join to Create" channels. | [modules.md](modules.md) |
 | Members | Welcome Card | Sets the welcome card. | [modules.md](modules.md) |
 | Members | Farewell Card | Sets the farewell card. | [modules.md](modules.md) |

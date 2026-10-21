@@ -40,7 +40,7 @@ export interface GuildChildEntry {
 /** The column every inventoried table keeps the server id in. */
 export const GUILD_ID_COLUMN = 'guild_id';
 
-/** Every table with a `guild_id` column (41 tables, both dialects). Sorted by table name. */
+/** Every table with a `guild_id` column (43 tables, both dialects). Sorted by table name. */
 export const GUILD_DATA_INVENTORY: readonly GuildDataEntry[] = [
   { table: 'adventure_sessions', action: 'delete' },
   { table: 'adventure_settings', action: 'delete' },
@@ -104,6 +104,12 @@ export const GUILD_DATA_INVENTORY: readonly GuildDataEntry[] = [
   { table: 'stream_announcements', action: 'delete' },
   { table: 'stream_subscriptions', action: 'delete' },
   { table: 'temporary_roles', action: 'delete' },
+  { table: 'ticket_settings', action: 'delete' },
+  {
+    table: 'tickets',
+    action: 'delete',
+    note: 'Ticket metadata only. Transcripts are posted to a channel in the server and are never stored.',
+  },
   {
     table: 'waifu_guild_members',
     action: 'exclude',

@@ -210,5 +210,17 @@ export const SQLITE_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "3133edeed29c29272f0c590cae128169c8e046cc5b18405dd112a50d05eb3c87",
     "contract": false
+  },
+  {
+    "id": "0006_strong_ares",
+    "statements": [
+      "CREATE TABLE `ticket_settings` (\n\t`guild_id` text PRIMARY KEY NOT NULL,\n\t`is_enabled` integer DEFAULT false NOT NULL,\n\t`category_id` text,\n\t`staff_role_ids` text DEFAULT '[]' NOT NULL,\n\t`transcript_channel_id` text,\n\t`max_open_per_user` integer DEFAULT 1 NOT NULL,\n\t`welcome_message` text,\n\t`next_number` integer DEFAULT 1 NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
+      "CREATE TABLE `tickets` (\n\t`id` text PRIMARY KEY NOT NULL,\n\t`guild_id` text NOT NULL,\n\t`number` integer NOT NULL,\n\t`channel_id` text NOT NULL,\n\t`opener_id` text NOT NULL,\n\t`subject` text,\n\t`status` text DEFAULT 'open' NOT NULL,\n\t`claimed_by` text,\n\t`closed_by` text,\n\t`close_reason` text,\n\t`created_at` integer NOT NULL,\n\t`closed_at` integer\n);",
+      "CREATE UNIQUE INDEX `uq_tickets_guild_number` ON `tickets` (`guild_id`,`number`);",
+      "CREATE UNIQUE INDEX `uq_tickets_channel` ON `tickets` (`channel_id`);",
+      "CREATE INDEX `idx_tickets_guild_opener_status` ON `tickets` (`guild_id`,`opener_id`,`status`);"
+    ],
+    "checksum": "80e8f607b72d782e7ce8fb83fd1823e75fbcab971c9e1b83340a218dd4e36260",
+    "contract": false
   }
 ];

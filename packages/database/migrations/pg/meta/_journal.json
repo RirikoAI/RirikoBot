@@ -43,6 +43,13 @@
       "when": 1792587001997,
       "tag": "0005_brown_leper_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792598787536,
+      "tag": "0006_cool_stranger",
+      "breakpoints": true
     }
   ]
 }

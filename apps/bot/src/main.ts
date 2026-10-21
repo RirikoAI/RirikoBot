@@ -201,6 +201,11 @@ export async function main(): Promise<void> {
     } catch (err) {
       console.error('[AutoVoice] Error forgetting deleted channel:', err);
     }
+    try {
+      await services.ticketService.handleChannelDeleted(channel.id);
+    } catch (err) {
+      console.error('[Tickets] Error closing the ticket of a deleted channel:', err);
+    }
   });
 
   // 7. Track Gateway State Transitions

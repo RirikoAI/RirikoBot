@@ -6,6 +6,10 @@ const resources = vi.hoisted(() => ({
     { id: 'c1', name: 'general', category: 'Text' },
     { id: 'c2', name: 'rules', category: null },
   ]),
+  categories: vi.fn(async () => [
+    { id: 'k1', name: 'Support', category: null },
+    { id: 'k2', name: 'Staff', category: null },
+  ]),
   voiceChannels: vi.fn(async () => [{ id: 'v1', name: 'Lobby', category: 'Voice' }]),
   assignableRoles: vi.fn(async () => [{ id: 'r1', name: 'Gamer' }]),
   memberRoles: vi.fn(async () => [
@@ -21,6 +25,7 @@ vi.mock('@/lib/server/services', () => ({
 const {
   AssignableRoleListField,
   ChannelListField,
+  CategorySelectField,
   ChannelSelectField,
   MemberRoleSelectField,
   RoleListField,
@@ -40,6 +45,24 @@ describe('guild pickers', () => {
     );
     expect(html).toContain('<option value="c2" selected="">#rules</option>');
     expect(resources.messageChannels).toHaveBeenCalledWith('100000000000000001');
+  });
+
+  it('lists the server categories with the saved one selected and a no-category choice', async () => {
+    const html = render(
+      await CategorySelectField({ ...base, defaultValue: 'k2', emptyLabel: 'No category' }),
+    );
+    expect(html).toContain('<option value="">No category</option>');
+    expect(html).toContain('<option value="k1">Support</option>');
+    expect(html).toContain('<option value="k2" selected="">Staff</option>');
+    expect(resources.categories).toHaveBeenCalledWith('100000000000000001');
+  });
+
+  it('keeps a saved category that was deleted, labelled as such', async () => {
+    const html = render(await CategorySelectField({ ...base, defaultValue: 'gone' }));
+    expect(html).toContain('Deleted category (gone)');
+    const none = render(await CategorySelectField({ ...base, defaultValue: null }));
+    expect(none).not.toContain('Deleted category');
+    expect(none).not.toContain('selected');
   });
 
   it('starts with no choice when nothing is saved', async () => {
