@@ -142,6 +142,7 @@ export const playerEnergy = pgTable('player_energy', {
     .defaultNow(),
   lastResetDate: varchar('last_reset_date', { length: 16 }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  lastPotionResetDate: varchar('last_potion_reset_date', { length: 16 }),
 });
 
 export const gameAchievements = pgTable('game_achievements', {

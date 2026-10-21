@@ -4,6 +4,36 @@ export interface EpicProviderOptions {
   fetchFn?: typeof fetch | undefined;
 }
 
+const HEX_ID = /^[0-9a-f]{32}$/i;
+
+function productHomeSlug(mappings: unknown): string | null {
+  if (!Array.isArray(mappings)) return null;
+  const hit = mappings.find(
+    (m: any) => m?.pageType === 'productHome' && typeof m.pageSlug === 'string' && m.pageSlug,
+  );
+  return hit ? hit.pageSlug : null;
+}
+
+/**
+ * Resolves the Epic store page slug: productHome offerMappings, then productHome
+ * catalogNs.mappings, then productSlug (without "/home"), then a non-hex urlSlug.
+ * Returns null when no valid page slug exists (the caller links the free-games page).
+ */
+export function resolveEpicPageSlug(game: any): string | null {
+  const mapped = productHomeSlug(game?.offerMappings) ?? productHomeSlug(game?.catalogNs?.mappings);
+  if (mapped) return mapped;
+
+  if (typeof game?.productSlug === 'string') {
+    const product = game.productSlug.replace(/\/home$/, '');
+    if (product) return product;
+  }
+
+  if (typeof game?.urlSlug === 'string' && game.urlSlug && !HEX_ID.test(game.urlSlug)) {
+    return game.urlSlug;
+  }
+  return null;
+}
+
 export class EpicGamesProvider implements FreeGameProvider {
   readonly id: FreeGameProviderType = 'EPIC';
   readonly name = 'Epic Games Store';
@@ -60,19 +90,10 @@ export class EpicGamesProvider implements FreeGameProvider {
           ? new Date(promo.endDate)
           : new Date(now.getTime() + 7 * 86_400_000);
 
-        // Resolve product slug
-        let slug = game.productSlug || game.urlSlug;
-        if (!slug && game.offerMappings && game.offerMappings.length > 0) {
-          slug = game.offerMappings[0]?.pageSlug;
-        }
-        if (!slug && game.catalogNs?.mappings && game.catalogNs.mappings.length > 0) {
-          slug = game.catalogNs.mappings[0]?.pageSlug;
-        }
-        if (!slug) {
-          slug = game.id;
-        }
-
-        const storeUrl = `https://store.epicgames.com/p/${slug}`;
+        const slug = resolveEpicPageSlug(game);
+        const storeUrl = slug
+          ? `https://store.epicgames.com/p/${slug}`
+          : 'https://store.epicgames.com/free-games';
 
         // Select best high-res key image
         const keyImages: any[] = game.keyImages ?? [];
@@ -85,7 +106,7 @@ export class EpicGamesProvider implements FreeGameProvider {
         const originalPrice = game.price?.totalPrice?.fmtPrice?.originalPrice;
 
         freeGames.push({
-          id: `epic-${game.id || slug}`,
+          id: `epic-${game.id || slug || game.title}`,
           provider: 'EPIC',
           title: game.title + (isUpcoming ? ' (Coming Soon)' : ''),
           storeUrl,

@@ -1,5 +1,10 @@
 import type { PlayerEnergyRepository, PlayerEnergy, XpRepository } from '@ririko/database';
-import { DEFAULT_RESET_SCHEDULE, getResetDayKey, type ResetSchedule } from '@ririko/core';
+import {
+  DEFAULT_RESET_SCHEDULE,
+  getNextResetAt,
+  getResetDayKey,
+  type ResetSchedule,
+} from '@ririko/core';
 
 export const DEFAULT_GLOBAL_ENERGY_CAP = 300;
 
@@ -52,6 +57,8 @@ export type EnergyRulesResolver = () => Promise<EnergyRules>;
 
 export interface EnergyLifecycleOptions {
   resetSchedule?: ResetSchedule | undefined;
+  /** Boundary for the daily potion limit; defaults to `resetSchedule`. */
+  potionResetSchedule?: ResetSchedule | undefined;
   /** Cap used without a rules resolver. */
   globalCap?: number | undefined;
   /** Resolves account-wide player level; omit to keep each player's stored capacity. */
@@ -96,6 +103,7 @@ export interface SpendEnergyResult {
  */
 export class EnergyLifecycleService {
   private readonly resetSchedule: ResetSchedule;
+  private readonly potionResetSchedule: ResetSchedule;
   private readonly globalCap: number;
   private readonly levelResolver: PlayerLevelResolver | undefined;
   private readonly rulesResolver: EnergyRulesResolver | undefined;
@@ -111,6 +119,7 @@ export class EnergyLifecycleService {
         : resetScheduleOrOptions;
 
     this.resetSchedule = options.resetSchedule ?? DEFAULT_RESET_SCHEDULE;
+    this.potionResetSchedule = options.potionResetSchedule ?? this.resetSchedule;
     this.globalCap = options.globalCap ?? DEFAULT_GLOBAL_ENERGY_CAP;
     this.levelResolver = options.levelResolver;
     this.rulesResolver = options.rulesResolver;
@@ -120,6 +129,11 @@ export class EnergyLifecycleService {
   async rules(): Promise<EnergyRules> {
     if (this.rulesResolver) return this.rulesResolver();
     return { ...DEFAULT_ENERGY_RULES, globalCap: this.globalCap, dailyBonusIncrement: 0 };
+  }
+
+  /** The instant of the next daily energy reset, on the energy reset schedule. */
+  nextResetAt(now: Date = new Date()): Date {
+    return getNextResetAt(now, this.resetSchedule);
   }
 
   /** Energy potions a player may use per reset day. */
@@ -153,8 +167,8 @@ export class EnergyLifecycleService {
   /**
    * Lazily reconciles a user's energy pool against the reset boundary and their current level.
    * When a new reset day has arrived:
-   * 1. Resets the daily potion counter to 0.
-   * 2. Replenishes active energy up to capacity, preserving any overflow above it.
+   * 1. Replenishes active energy up to capacity, preserving any overflow above it.
+   * The daily potion counter resets separately, on the potion reset boundary.
    */
   async getOrReconcileUserEnergy(
     userId: string,
@@ -162,7 +176,9 @@ export class EnergyLifecycleService {
     globalCap?: number,
   ): Promise<PlayerEnergy> {
     const record = await this.energyRepo.getOrCreate(userId);
-    const today = getResetDayKey(new Date(), this.resetSchedule);
+    const now = new Date();
+    const today = getResetDayKey(now, this.resetSchedule);
+    const potionToday = getResetDayKey(now, this.potionResetSchedule);
     const rules = await this.rules();
 
     const maxCapacity = await this.resolveMaxEnergy(
@@ -185,7 +201,6 @@ export class EnergyLifecycleService {
     // 2. Apply the daily rollover if the reset boundary has passed
     if (record.lastResetDate !== today) {
       updateData.lastResetDate = today;
-      updateData.dailyEnergyPotsUsed = 0;
       updateData.lastReplenishedAt = new Date();
 
       let currentBonus = record.bonusEnergy ?? 0;
@@ -202,6 +217,13 @@ export class EnergyLifecycleService {
       if (record.currentEnergy < effectiveCap) {
         updateData.currentEnergy = effectiveCap;
       }
+      needsUpdate = true;
+    }
+
+    // 3. The potion limit rolls over on its own boundary, independent of the energy rollover
+    if ((record.lastPotionResetDate ?? record.lastResetDate) !== potionToday) {
+      updateData.lastPotionResetDate = potionToday;
+      updateData.dailyEnergyPotsUsed = 0;
       needsUpdate = true;
     }
 
@@ -244,15 +266,16 @@ export class EnergyLifecycleService {
   }
 
   /**
-   * Refunds energy back into the pool, clamped to the player's capacity. Backs the documented
-   * half-energy refund on defeats in the early dungeon floors.
+   * Refunds energy back into the pool, clamped to the player's capacity (`maxEnergy` plus bonus
+   * energy). A refund never lowers energy: a pool above capacity keeps what it has. Backs the
+   * documented half-energy refund on defeats in the early dungeon floors.
    */
   async refundEnergy(userId: string, amount: number): Promise<PlayerEnergy> {
     const record = await this.getOrReconcileUserEnergy(userId);
     if (amount <= 0) return record;
 
     const cap = record.maxEnergy + record.bonusEnergy;
-    const restored = Math.min(cap, record.currentEnergy + amount);
+    const restored = Math.max(record.currentEnergy, Math.min(cap, record.currentEnergy + amount));
     if (restored === record.currentEnergy) return record;
 
     return this.energyRepo.update(userId, { currentEnergy: restored });
@@ -267,7 +290,9 @@ export class EnergyLifecycleService {
     globalCap?: number,
   ): Promise<PlayerEnergy> {
     const record = await this.energyRepo.getOrCreate(userId);
-    const today = getResetDayKey(new Date(), this.resetSchedule);
+    const now = new Date();
+    const today = getResetDayKey(now, this.resetSchedule);
+    const potionToday = getResetDayKey(now, this.potionResetSchedule);
 
     const maxCapacity = await this.resolveMaxEnergy(
       userId,
@@ -284,6 +309,7 @@ export class EnergyLifecycleService {
       maxEnergy: maxCapacity,
       dailyEnergyPotsUsed: 0,
       lastResetDate: today,
+      lastPotionResetDate: potionToday,
       lastReplenishedAt: new Date(),
     });
   }

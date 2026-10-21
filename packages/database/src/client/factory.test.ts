@@ -18,7 +18,9 @@ describe('Database Client Factory', () => {
     }
   });
 
-  describe('SQLite Client', () => {
+  // Some tests create a file database, which is slow on some machines (a Windows drive takes ten
+  // times longer than a Linux disk), so this suite gets more than the 5 s default.
+  describe('SQLite Client', { timeout: 30_000 }, () => {
     it('creates an in-memory SQLite client with ping verification', async () => {
       client = await createDatabaseClient({
         dialect: 'sqlite',

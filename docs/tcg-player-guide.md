@@ -108,7 +108,11 @@ Your energy cap depends on your level (the level of your XP added together acros
 
 Level 1 has 100 energy. Level 50 has 228. The most is 300. The bot owner can change these values.
 
-You can see your energy with `/dungeon action:status`.
+You can see your energy with `/energy`. It also shows your bonus energy, the energy potions you used today and when the next refill comes. It works in servers and in direct messages.
+
+### Bonus energy
+
+Bonus energy adds to your cap. You get +5 at each daily reset, and you keep it up to 50. The bonus is part of your pool, so it refills with the rest of your energy at each reset. The bot owner can change both values.
 
 What things cost:
 
@@ -449,6 +453,7 @@ Bot owners can change the text and rewards of achievements. The XP counts toward
 | `/craft [recipe]` | Crafts gear and potions. |
 | `/dungeon action:tutorial` | Starts the tutorial. |
 | `/dungeon action:status` | Shows your energy and next floor. |
+| `/energy` | Shows your energy, bonus energy and next refill. |
 | `/dungeon action:climb` | Fights the next floor. |
 | `/game action:pvp user:@friend` | Duels a player. |
 | `/game action:explore subaction:start duration:1h` | Starts an expedition. |

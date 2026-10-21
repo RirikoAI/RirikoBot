@@ -115,6 +115,7 @@ You can also use the command line: `ririko guild:config <server> music.<key> <va
 
 - With no `song`, Ririko uses the song that plays now.
 - With `song`, Ririko searches for that text and uses the first result.
+- For the song that plays now, Ririko asks LRCLIB for an exact match first. If there is none, it takes the search result that is within 3 seconds of the song's length. Music videos often have an intro or outro, so if no result is that close, Ririko takes the one with the closest length, up to 60 seconds apart. If none is that close either, it takes the first result by the same artist (capital letters and extra spaces are ignored). Otherwise it reports that it found no lyrics.
 - Long lyrics are split into up to 10 embeds. Anything longer is cut.
 - Ririko tells you when it finds no lyrics, when the song is instrumental, or when LRCLIB does not answer.
 

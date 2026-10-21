@@ -285,6 +285,7 @@ See [waifu-tcg.md](waifu-tcg.md) for admins and [tcg-player-guide.md](tcg-player
 | `/craft` | `forge` | Crafts gear and potions. | Everyone |
 | `/loadout` | `gear`, `equipment` | Opens the gear menu of a card. | Everyone |
 | `/dungeon` | `tower`, `climb`, `spire` | Climbs the dungeon tower. | Everyone |
+| `/energy` | `stamina` | Shows your energy, bonus energy and next refill. | Everyone |
 | `/trade` | `cardtrade`, `tcgtrade` | Trades cards and credits. | Everyone |
 | `/market` | `marketplace`, `tcgmarket` | Buys and sells cards. | Everyone |
 | `/waifuguild` | `wguild`, `guild` | Manages WaifuGuilds. | Everyone |

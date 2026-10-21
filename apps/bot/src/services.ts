@@ -383,18 +383,6 @@ export async function createBotServices(
     db,
     validateAdventureRewardState,
   );
-  const adventureEngine = new AdventureEngine({
-    sessions: adventureSessions,
-    energy: playerEnergyRepo,
-    payments: new AdventurePayoutService({
-      economy: economyRepo,
-      xp: xpRepo,
-      energy: playerEnergyRepo,
-      cards: waifuCardRepo,
-      assets: waifuAssetRepo,
-      items: itemGrantService,
-    }),
-  });
   const dismantleService = new CardDismantleService(
     waifuCardRepo,
     userInventoryItemRepo,
@@ -476,6 +464,7 @@ export async function createBotServices(
   // account-wide level. Capacity, potion and bonus energy rules are the global TCG rules.
   const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo, {
     resetSchedule: resetSchedules.energy,
+    potionResetSchedule: resetSchedules.energyPotions,
     levelResolver: accountLevel,
     rulesResolver: async () => {
       const rules = await tcgRulesService.getRules();
@@ -488,6 +477,21 @@ export async function createBotServices(
         dailyBonusIncrement: rules.dailyBonusEnergyIncrement,
       };
     },
+  });
+
+  // Starting an adventure charges energy, so the engine refills a stale pool (daily reset) first.
+  const adventureEngine = new AdventureEngine({
+    sessions: adventureSessions,
+    energy: playerEnergyRepo,
+    reconcileEnergy: (userId) => energyLifecycleService.getOrReconcileUserEnergy(userId),
+    payments: new AdventurePayoutService({
+      economy: economyRepo,
+      xp: xpRepo,
+      energy: playerEnergyRepo,
+      cards: waifuCardRepo,
+      assets: waifuAssetRepo,
+      items: itemGrantService,
+    }),
   });
 
   const leaderboardService = new LeaderboardService({
@@ -976,7 +980,12 @@ export async function createBotServices(
     cardRepo: waifuCardRepo,
     tutorialService,
     cardProgression: new CardProgressionService(waifuCardRepo),
-    progressService: new DungeonProgressService(tcgConfigRepo, playerEnergyRepo, itemGrantService),
+    progressService: new DungeonProgressService(
+      tcgConfigRepo,
+      playerEnergyRepo,
+      itemGrantService,
+      energyLifecycleService,
+    ),
   });
 
   // Seed and synchronize canonical items

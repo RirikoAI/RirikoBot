@@ -99,6 +99,36 @@ describe('dashboard probes', () => {
     log.mockRestore();
   });
 
+  it('reports SCHEMA_INCOMPATIBLE, not MIGRATION_PENDING, when the downgrade guard refuses', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const refused = new SchemaNotReadyError(
+      'The database has contract migration(s) this dashboard release does not know (9999_future_drop).',
+      [],
+      'incompatible',
+    );
+    const deps = {
+      database: async (): Promise<DatabaseClient> => {
+        throw refused;
+      },
+      version: '2.0.0',
+    };
+
+    const health = await webProbe('health', deps);
+    expect(health.status).toBe(200);
+    expect(health.headers.get('cache-control')).toBe('no-store');
+    const body = (await health.json()) as { status: string; database: unknown };
+    expect(body).toMatchObject({ status: 'healthy', version: '2.0.0' });
+    expect(body.database).toEqual({ status: 'SCHEMA_INCOMPATIBLE' });
+    expect(log).not.toHaveBeenCalled();
+
+    const ready = await webProbe('ready', deps);
+    expect(ready.status).toBe(503);
+    expect(await ready.text()).toBe('{"ready":false}');
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('ready probe'), refused);
+    log.mockRestore();
+  });
+
   it('answers 503 on both probes when the database is unreachable, not just behind', async () => {
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     const deps = {

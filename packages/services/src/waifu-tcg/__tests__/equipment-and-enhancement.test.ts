@@ -127,6 +127,7 @@ describe('Waifu TCG: Equipment, Loadouts, Enhancement & Consumables (STORY-103 /
         daily_energy_pots_used INTEGER NOT NULL DEFAULT 0,
         last_replenished_at INTEGER NOT NULL,
         last_reset_date TEXT NOT NULL,
+        last_potion_reset_date TEXT,
         updated_at INTEGER NOT NULL
       );
     `);

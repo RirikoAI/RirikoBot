@@ -486,7 +486,11 @@
         "CHORE-2006",
         "CHORE-2007",
         "BUG-0049",
-        "CHORE-2008"
+        "CHORE-2008",
+        "STORY-197",
+        "BUG-0050",
+        "CHORE-2009",
+        "BUG-0051"
       ],
       "requires": [
         "EPIC-019"
@@ -2760,7 +2764,7 @@
       "id": "STORY-190",
       "title": "README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader",
       "points": 13,
-      "status": "TODO",
+      "status": "DONE",
       "description": "The README is the first page for everyone from a first-time self-hoster to a long-term contributor. Rework it (later, once the docs site exists) into a unique front page with a promotional feature image, a deterministic quick start, badges (CircleCI, Codecov, CodeFactor, Docker pulls, all-contributors) and the all-contributors list carried over from master. Add a short CONTRIBUTING.md in simple English.",
       "context": {
         "files": [
@@ -3095,6 +3099,43 @@
         "The coverage gate passes (`pnpm test:coverage`)."
       ],
       "verify_cmd": "pnpm build && pnpm typecheck && pnpm test:coverage && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [
+        "TASK-1971"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "STORY-197",
+      "parent": "EPIC-020",
+      "title": "Energy at a Glance: the /energy and !energy Command",
+      "points": 3,
+      "status": "DONE",
+      "model": "large",
+      "requires": [],
+      "handovers": [
+        "STORY-197",
+        "EPIC-020"
+      ],
+      "description": "Players can see their energy only inside /dungeon action:status. Add a dedicated command that shows the pool, the bonus energy, the potion count and the next refill.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/tcg/energy.command.ts"
+        ],
+        "symbols": [
+          "createEnergyCommand"
+        ],
+        "codegraph_queries": [
+          "EnergyLifecycleService getOrReconcileUserEnergy rules"
+        ]
+      },
+      "acceptance": [
+        "TASK-1971 is DONE."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
     }
   ],
   "tasks": [
@@ -9322,23 +9363,28 @@
       "parent": "STORY-190",
       "title": "CodeFactor Integration and Config",
       "points": 1,
-      "status": "BACKLOG",
-      "description": "CodeFactor already reports on master (1.x). After 2.0 is on master, configure it for the monorepo so generated code does not count, and add the badge (TASK-1901).",
+      "status": "DONE",
+      "description": "CodeFactor already reports on master, and master now holds 2.0. CodeFactor has no repository config file for excluding paths: file exclusions are a repository setting (Settings, Ignore Files). The one repository file it reads for this is .cfduplication.yml, which configures its duplication check. Add that file, document the Ignore Files patterns and the maintainer steps, and keep the existing master badge.",
       "context": {
         "files": [
-          ".codefactor.yml",
+          ".cfduplication.yml",
+          "docs/development.md",
           "README.md"
         ],
         "symbols": [],
+        "entry_points": [
+          "docs/development.md section 2 (Check Your Work)"
+        ],
         "codegraph_queries": [
-          "build-status-site renderBoard"
+          "packages/database migrations generated ddl embedded db:generate-migrations"
         ]
       },
       "acceptance": [
-        "A CodeFactor config excludes generated files (packages/database/migrations/, packages/database/src/migrations/generated/, packages/database/src/schema/*/ddl.ts, apps/web/.next) and test fixtures.",
-        "The PROGRESS entry lists the maintainer steps (CodeFactor app access to the repository, default branch) and the badge URL."
+        ".cfduplication.yml at the repository root keeps CodeFactor's default keys and values (MinLineCount 20 and every default IgnorePatterns entry, copied in the GROOMING entry) and adds the generated and fixture paths listed there.",
+        "docs/development.md has a short CodeFactor subsection in section 2: what CodeFactor grades (master), that .cfduplication.yml configures the duplication check, the exact Ignore Files patterns (one per line) for the repository settings, and the maintainer steps in order.",
+        "README.md keeps its CodeFactor badge for master unchanged; the PROGRESS entry lists the badge URL and the maintainer steps."
       ],
-      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet && node -e \"const s=require('fs').readFileSync('.cfduplication.yml','utf8');for(const k of ['MinLineCount: 20','IgnorePatterns:','packages/database/migrations/**','**/__fixtures__/**'])if(!s.includes(k))throw new Error('missing '+k)\""
     },
     {
       "children": [],
@@ -10761,6 +10807,66 @@
         "The workflow is valid YAML and passes `pnpm format:check`."
       ],
       "verify_cmd": "pnpm build && pnpm format:check && pnpm lint --quiet && pnpm docs:build"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-1971",
+      "parent": "STORY-197",
+      "title": "/energy and !energy Show Energy, Bonus Energy, Potions Used and the Next Refill",
+      "points": 3,
+      "status": "DONE",
+      "model": "medium",
+      "requires": [
+        "BUG-0050"
+      ],
+      "handovers": [
+        "TASK-1971",
+        "STORY-197",
+        "EPIC-020",
+        "BUG-0050"
+      ],
+      "description": "A TCG command, slash and prefix, that reads the reconciled energy pool and shows it with the daily refill details.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/tcg/energy.command.ts",
+          "apps/bot/src/commands/tcg/__tests__/energy.command.test.ts",
+          "apps/bot/src/commands/tcg/index.ts",
+          "apps/bot/src/command-set.ts",
+          "packages/services/src/waifu-tcg/energy/energy-lifecycle.service.ts",
+          "packages/services/src/waifu-tcg/__tests__/reset-boundary.test.ts",
+          "docs/commands.md",
+          "docs/tcg-player-guide.md"
+        ],
+        "symbols": [
+          "createEnergyCommand",
+          "EnergyLifecycleService.getOrReconcileUserEnergy",
+          "EnergyLifecycleService.rules",
+          "EnergyLifecycleService.nextResetAt",
+          "getNextResetAt",
+          "registerBotCommands"
+        ],
+        "entry_points": [
+          "/energy",
+          "!energy"
+        ],
+        "codegraph_queries": [
+          "createAchievementCommand CommandCategory.TCG metadata execute",
+          "EnergyLifecycleService rules getOrReconcileUserEnergy getNextResetAt",
+          "registerBotCommands createTcgInfoCommand"
+        ]
+      },
+      "acceptance": [
+        "/energy and !energy (alias stamina) reply with an embed: current energy / (maxEnergy + bonusEnergy); the level cap (maxEnergy); bonus energy as bonusEnergy / maxBonusCap with \"+<dailyBonusIncrement> at the next reset\" unless it is at the cap or the increment is 0; energy potions used today as dailyEnergyPotsUsed / dailyPotionLimit; and the next refill as a Discord relative timestamp <t:unix:R>.",
+        "The values come from EnergyLifecycleService.getOrReconcileUserEnergy and rules(); the next refill comes from a new EnergyLifecycleService.nextResetAt(now) that uses the energy reset schedule. Energy is global, so the command works in servers and in DMs.",
+        "Tests (with a fake lifecycle) cover a slash call, a prefix call, a player at the bonus cap and the DM case; command-set.test.ts still fits every Discord limit.",
+        "docs/commands.md section 7.8 lists /energy; docs/tcg-player-guide.md section 4 names /energy and explains bonus energy (+5 at each reset, kept up to 50, refilled with the pool, owner-configurable)."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/commands/tcg packages/services/src/waifu-tcg apps/bot/src/command-set.test.ts && pnpm --filter @ririko/services typecheck && pnpm --filter @ririko/bot typecheck && pnpm format:check && pnpm lint --quiet"
     }
   ],
   "chores": [
@@ -11166,7 +11272,7 @@
       "parent": "EPIC-020",
       "title": "bootstrap.sh Says \"CI deploy key: NOT installed\" When It Kept the Existing Key",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "description": "Rerunning bootstrap.sh without --deploy-key keeps the deploy user's authorized_keys, but the summary says \"CI deploy key: NOT installed (run again with --deploy-key)\". Seen on staging on 2026-10-11.",
       "context": {
         "files": [
@@ -11201,14 +11307,17 @@
       "parent": "EPIC-020",
       "title": "Make the Test Suite Pass on a Windows Development Machine",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "description": "On the maintainer's Windows machine (Git Bash, repository on a slower drive) the full suite fails where CI passes: scripts/deploy-host.test.ts \"deploys the first release of staging\" because Git Bash sha256sum prints \"<hash> *<file>\", several deploy-host tests time out at 5 s, and file-SQLite tests (client/factory WAL test, db-migrate adoption test, copy-database suites) sometimes pass 5 s under load.",
       "context": {
         "files": [
           "scripts/deploy-host.test.ts",
           "vitest.config.ts",
           "packages/database/src/client/factory.test.ts",
-          "apps/cli/src/commands/db-migrate.test.ts"
+          "apps/cli/src/commands/db-migrate.test.ts",
+          "apps/cli/src/commands/db-copy.test.ts",
+          "packages/database/src/copy/copy-database.flow.test.ts",
+          "apps/cli/src/installer/server.test.ts"
         ],
         "symbols": [],
         "codegraph_queries": [
@@ -11240,14 +11349,16 @@
       "parent": "EPIC-020",
       "title": "Dashboard /health Reports SCHEMA_INCOMPATIBLE for a Downgrade-Guard Refusal",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "description": "When the database holds contract migrations the dashboard does not know, assertSchemaCurrent throws SchemaNotReadyError with an empty pending list and /health reports MIGRATION_PENDING with pending []. The status codes are right; the label is misleading.",
       "context": {
         "files": [
           "apps/web/src/lib/server/schema-guard.ts",
           "apps/web/src/lib/server/health.ts",
           "apps/web/src/lib/server/health.test.ts",
-          "apps/web/src/lib/server/schema-guard.test.ts"
+          "apps/web/src/lib/server/schema-guard.test.ts",
+          "docs/deployment.md",
+          "docs/database.md"
         ],
         "symbols": [
           "SchemaNotReadyError",
@@ -11260,7 +11371,8 @@
       },
       "acceptance": [
         "SchemaNotReadyError carries a reason (pending or incompatible). /health reports database.status MIGRATION_PENDING with the ids for pending, and SCHEMA_INCOMPATIBLE for the downgrade-guard case; both stay 200 for liveness and 503 for /ready.",
-        "Tests cover both reasons."
+        "Tests cover both reasons.",
+        "docs/deployment.md (section 6, the paragraph on pending migrations) and docs/database.md (the dashboard bullets) also describe SCHEMA_INCOMPATIBLE: /health stays 200 with database.status SCHEMA_INCOMPATIBLE when a newer release recorded contract migrations this dashboard does not know, /ready answers 503, and the fix is the matching release or the pre-deploy dump."
       ],
       "verify_cmd": "pnpm vitest run apps/web/src/lib/server && pnpm format:check && pnpm lint --quiet"
     },
@@ -11481,6 +11593,44 @@
         "CORE_VERSION in packages/core/src/index.ts is 2.0.1, so /api/health and ririko --version report 2.0.1; the three tests that assert it (apps/bot/src/index.test.ts, apps/cli/src/program.test.ts, apps/web/src/app/api/health/route.test.ts) expect 2.0.1. pnpm build, pnpm typecheck, pnpm format:check and those three test files pass."
       ],
       "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/bot/src/index.test.ts apps/cli/src/program.test.ts apps/web/src/app/api/health/route.test.ts packages/core/src/index.test.ts && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "CHORE-2009",
+      "parent": "EPIC-020",
+      "title": "Lavalink \"Never Ready\" Deploy Test Polls Only Once Under Load",
+      "points": 1,
+      "status": "DONE",
+      "model": "small",
+      "requires": [],
+      "handovers": [
+        "CHORE-2009",
+        "CHORE-2002",
+        "EPIC-020"
+      ],
+      "description": "scripts/deploy-host.test.ts:3158-3165, the never case of \"keeps polling /version until it answers 200 and fails when it never does\", runs with the default LAVALINK_READY_TIMEOUT=1 of the Lavalink scenario (line 2931). wait_lavalink measures the limit with bash $SECONDS in whole seconds, so under load the deadline can pass after the first check and never.version has length 1. Seen on 2026-10-21 in a full coverage run; it passed in CI and in earlier runs.",
+      "context": {
+        "files": [
+          "scripts/deploy-host.test.ts"
+        ],
+        "symbols": [
+          "lavalinkScenario",
+          "wait_lavalink"
+        ],
+        "codegraph_queries": [
+          "deploy-host lavalinkScenario LAVALINK_READY_TIMEOUT never version"
+        ]
+      },
+      "acceptance": [
+        "The never case sets conf 'LAVALINK_READY_TIMEOUT=5' before its deploy, so it polls for about 5 s at READY_POLL_SECONDS=0.1; every assertion of the test stays as it is.",
+        "pnpm vitest run scripts/deploy-host.test.ts passes."
+      ],
+      "verify_cmd": "pnpm vitest run scripts/deploy-host.test.ts --testTimeout=120000 && pnpm format:check && pnpm lint --quiet"
     }
   ],
   "bugs": [
@@ -12700,34 +12850,36 @@
       ],
       "id": "BUG-0044",
       "parent": "EPIC-020",
-      "title": "Free Games Notification Links Are Broken (Needs Deeper Grooming)",
+      "title": "Free Games Notification Links Are Broken: Epic Links Use the Internal urlSlug Instead of the Store Page Slug",
       "points": 3,
-      "status": "BACKLOG",
-      "description": "Reported by the maintainer on 2026-10-11: the links in free games notifications are broken. Needs a deeper grooming with live samples before it can enter TODO; the estimate is provisional.",
+      "status": "DONE",
+      "description": "Reported by the maintainer on 2026-10-11. A live freeGamesPromotions sample (2026-10-21) shows most Epic games have productSlug null and urlSlug set to a 32-character hex id, so EpicGamesProvider builds https://store.epicgames.com/p/<hex id>, which is not a store page. Both games free now (Bad Cheese: ae5d8fc5..., Agent A: urlSlug without the page suffix) and both upcoming free games (Sker Ritual, Home) get a wrong slug. The page slug is in offerMappings / catalogNs.mappings with pageType productHome. Steam links (/app/<id>/) are the standard format and need no change.",
       "context": {
         "files": [
           "packages/services/src/free-games/providers/epic.provider.ts",
-          "packages/services/src/free-games/providers/steam.provider.ts",
-          "packages/services/src/free-games/engine.ts",
           "packages/services/src/free-games/__tests__/free-games.test.ts",
-          "apps/bot/src/commands/streams/free-games.command.ts",
-          "packages/database/src/migration/transformer.ts"
+          "packages/services/src/free-games/__tests__/fixtures/epic-promotions.json",
+          "packages/services/src/free-games/__tests__/fixtures/steam-featured.json"
         ],
         "symbols": [
           "EpicGamesProvider.fetchFreeGames",
-          "SteamFreeGamesProvider.fetchFreeGames",
-          "FreeGamesEngine.formatGameEmbed",
-          "FreeGamesEngine.formatAnnouncement",
-          "freeGameId"
+          "SteamFreeGamesProvider.fetchFreeGames"
+        ],
+        "entry_points": [
+          "FreeGamesEngine poll -> EpicGamesProvider.fetchFreeGames",
+          "/freegames"
         ],
         "codegraph_queries": [
           "EpicGamesProvider fetchFreeGames SteamFreeGamesProvider formatGameEmbed formatAnnouncement"
         ]
       },
       "acceptance": [
-        "To be written at the deeper grooming, from live API samples of both providers and real broken links."
+        "EpicGamesProvider resolves the store page slug in this order: the pageSlug of the first offerMappings entry with pageType \"productHome\"; the same in catalogNs.mappings; productSlug with a trailing \"/home\" removed; urlSlug only when it is not a 32-character hex id. With none of these, storeUrl is https://store.epicgames.com/free-games. Pages stay https://store.epicgames.com/p/<slug>. game.id is never used as a slug.",
+        "A test feeds the real fixture epic-promotions.json (captured 2026-10-21) through the provider and asserts the exact items: currently free Bad Cheese -> /p/bad-cheese-4256d9 and Agent A -> /p/agent-a-a-puzzle-in-disguise-42fe5f; upcoming Sker Ritual -> /p/sker-ritual-aac702 and Home - A Unique Horror Adventure -> /p/home-19212a; no non-free element is returned. No storeUrl contains a 32-character hex id.",
+        "Unit tests cover each fallback step: productSlug with /home, a hex urlSlug with no mappings (free-games page), a non-hex urlSlug, and a mapping that is not productHome being skipped in favour of a later productHome mapping.",
+        "A test feeds steam-featured.json through SteamFreeGamesProvider: it has no 100% discount today, so it returns no items. Existing tests and the item id format (epic-<game.id>) are unchanged."
       ],
-      "verify_cmd": "pnpm vitest run packages/services/src/free-games && pnpm format:check && pnpm lint --quiet"
+      "verify_cmd": "pnpm vitest run packages/services/src/free-games && pnpm --filter @ririko/services typecheck && pnpm format:check && pnpm lint --quiet"
     },
     {
       "children": [],
@@ -12747,7 +12899,7 @@
       "parent": "EPIC-020",
       "title": "/lyrics Finds Nothing for Music Videos Whose Length Differs From the Song by More Than 3 Seconds",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "description": "LrclibClient.findForTrack only takes a search hit within 3 s of the track duration (BUG-0040, as groomed). Music videos with an intro or outro miss even when LRCLIB has the song, and the user sees \"no lyrics found\".",
       "context": {
         "files": [
@@ -12950,6 +13102,138 @@
         "The PROGRESS entry lists the CVE findings that remain without a fix, with the package and the reason (for example no Debian fix yet)."
       ],
       "verify_cmd": "pnpm build && pnpm typecheck && pnpm test:coverage && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "BUG-0050",
+      "parent": "EPIC-020",
+      "title": "Energy Is Shown, Spent or Refunded Without the Daily Reset: /dungeon status, /adventure and the Floor Refund",
+      "points": 3,
+      "status": "DONE",
+      "model": "medium",
+      "requires": [],
+      "handovers": [
+        "BUG-0050",
+        "EPIC-020"
+      ],
+      "description": "The daily refill is lazy: EnergyLifecycleService.getOrReconcileUserEnergy applies it on the next read or spend. Three paths skip it. /dungeon action:status reads the raw row, so after a reset it shows yesterday's energy. AdventureEngine.start charges 15 energy through PlayerEnergyRepository.consumeEnergy, so a player with less than 15 left from yesterday cannot start an adventure after the reset. DungeonProgressService caps the floor 1-10 defeat refund at maxEnergy, so a player above it (bonus energy) loses energy on a refund. Reproduced on SQLite on 2026-10-21: 10/100 shown, adventure refused with 10 energy, refund took 105 down to 100.",
+      "context": {
+        "files": [
+          "packages/services/src/waifu-tcg/energy/energy-lifecycle.service.ts",
+          "apps/bot/src/commands/tcg/dungeon.command.ts",
+          "packages/services/src/adventure/adventure-engine.ts",
+          "packages/services/src/waifu-tcg/dungeon/dungeon-progress.service.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/commands/tcg/__tests__/dungeon.command.test.ts",
+          "packages/services/src/adventure/__tests__/engine.test.ts",
+          "packages/services/src/waifu-tcg/__tests__/s1-balance-and-progress.test.ts",
+          "packages/services/src/waifu-tcg/__tests__/reset-boundary.test.ts"
+        ],
+        "symbols": [
+          "EnergyLifecycleService.getOrReconcileUserEnergy",
+          "EnergyLifecycleService.refundEnergy",
+          "AdventureEngine.start",
+          "AdventureEngineOptions",
+          "DungeonProgressService",
+          "createDungeonCommand",
+          "createBotServices"
+        ],
+        "entry_points": [
+          "/dungeon action:status",
+          "/adventure action:start",
+          "DungeonRunner floor defeat"
+        ],
+        "codegraph_queries": [
+          "EnergyLifecycleService getOrReconcileUserEnergy refundEnergy",
+          "AdventureEngine start consumeEnergy AdventureEngineOptions",
+          "DungeonProgressService energyRepo refund ENERGY_REFUND_SHARE",
+          "createDungeonCommand status playerEnergyRepo"
+        ]
+      },
+      "acceptance": [
+        "/dungeon action:status reads energy through EnergyLifecycleService.getOrReconcileUserEnergy and shows currentEnergy / (maxEnergy + bonusEnergy). A player whose lastResetDate is the previous reset day sees the refilled value.",
+        "AdventureEngine takes an optional reconcileEnergy(userId) option and calls it before the start transaction; services.ts passes the lifecycle. A player with 10 energy left from the previous reset day can start an adventure (energy on) after the reset and is charged 15 from the refilled pool.",
+        "The floor 1-10 defeat refund goes through EnergyLifecycleService.refundEnergy, which caps at maxEnergy + bonusEnergy and never lowers energy: a player at 105 (100 + bonus 5) keeps 105, a player at 90 of 105 gets the refund up to 105.",
+        "Each case has a test that starts from a stale lastResetDate (or an above-cap pool for the refund). No existing assertion is removed."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/waifu-tcg packages/services/src/adventure apps/bot/src/commands/tcg apps/bot/src/command-set.test.ts && pnpm --filter @ririko/services typecheck && pnpm --filter @ririko/bot typecheck && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "BUG-0051",
+      "parent": "EPIC-020",
+      "title": "Energy and the Potion Limit Share One Stored Reset Date: a Potion Can Refill Energy Again When Their Reset Times Differ",
+      "points": 5,
+      "status": "DONE",
+      "model": "medium",
+      "requires": [],
+      "handovers": [
+        "BUG-0051",
+        "BUG-0050",
+        "EPIC-020"
+      ],
+      "description": "player_energy has one last_reset_date for two schedules. EnergyLifecycleService writes it with the energy schedule (RIRIKO_RESET_TIME_ENERGY) and PlayerEnergyRepository.consumeEnergyPotion writes it with the potion schedule (RIRIKO_RESET_TIME_ENERGY_POTIONS). With the defaults they match. When a host sets different times, between the two boundaries each potion writes the potion day key, and the next energy read sees a different key and refills the pool and adds bonus energy again. The potion counter also resets on the energy boundary instead of its own. Fix: a separate nullable last_potion_reset_date column, owned by the potion schedule.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/tcg.ts",
+          "packages/database/src/schema/pg/tcg.ts",
+          "packages/database/migrations/",
+          "packages/database/src/migrations/generated/sqlite.ts",
+          "packages/database/src/migrations/generated/pg.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/src/repositories/player-energy.repository.ts",
+          "packages/database/src/repositories/player-energy.repository.behaviour.test.ts",
+          "packages/services/src/waifu-tcg/energy/energy-lifecycle.service.ts",
+          "packages/services/src/waifu-tcg/__tests__/reset-boundary.test.ts",
+          "apps/bot/src/services.ts",
+          "packages/database/src/repositories/repositories.test.ts",
+          "packages/database/src/schema/schema.test.ts",
+          "apps/bot/src/commands/economy/commands.test.ts",
+          "packages/services/src/economy/inventory.service.test.ts",
+          "packages/services/src/economy/profile-background.manager.test.ts",
+          "packages/services/src/waifu-tcg/__tests__/energy-and-shop.test.ts",
+          "packages/services/src/waifu-tcg/__tests__/equipment-and-enhancement.test.ts"
+        ],
+        "symbols": [
+          "playerEnergy (sqlite and pg schema)",
+          "PlayerEnergyRepository.consumeEnergyPotion",
+          "PlayerEnergyRepository.create",
+          "PlayerEnergyRepository.getOrCreate",
+          "EnergyLifecycleService.getOrReconcileUserEnergy",
+          "EnergyLifecycleService.replenishUserEnergy",
+          "EnergyLifecycleOptions",
+          "createBotServices"
+        ],
+        "entry_points": [
+          "/item action:use stamina_potion (InventoryService.useItem, ConsumableService)",
+          "/energy",
+          "any energy spend (EnergyLifecycleService.spendEnergy)"
+        ],
+        "codegraph_queries": [
+          "PlayerEnergyRepository consumeEnergyPotion getOrCreate create currentDayKey",
+          "EnergyLifecycleService getOrReconcileUserEnergy replenishUserEnergy EnergyLifecycleOptions",
+          "playerEnergy lastResetDate dailyEnergyPotsUsed schema",
+          "createBotServices resolveResetSchedulesFromEnv energyPotions PlayerEnergyRepository EnergyLifecycleService"
+        ]
+      },
+      "acceptance": [
+        "player_energy has a new nullable column last_potion_reset_date (lastPotionResetDate) in both the SQLite and PostgreSQL schemas. The migration is generated with pnpm db:generate for both dialects (additive, no destructive statement), with the embedded modules and DDL regenerated, and pnpm db:check passes.",
+        "PlayerEnergyRepository.consumeEnergyPotion resets the counter when lastPotionResetDate ?? lastResetDate differs from the potion day key, and writes lastPotionResetDate, never lastResetDate. create and getOrCreate set lastPotionResetDate to the potion day key.",
+        "EnergyLifecycleOptions takes potionResetSchedule (default: the energy resetSchedule). getOrReconcileUserEnergy no longer resets dailyEnergyPotsUsed on the energy rollover; a separate potion rollover (lastPotionResetDate ?? lastResetDate against the potion day key) resets it and writes lastPotionResetDate. replenishUserEnergy also writes lastPotionResetDate. services.ts passes resetSchedules.energyPotions.",
+        "A test with energy at 00:00 and potions at 06:00 (same offset), at a time between the two boundaries, shows that drinking a potion and then reading or spending energy gives no second refill and no second bonus. Another shows the potion counter resets at the potion boundary and not at the energy boundary. A repository test covers a row whose lastPotionResetDate is null. With equal schedules, every existing test passes and no existing assertion is removed."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src packages/services/src/waifu-tcg packages/services/src/economy apps/bot/src/commands/tcg apps/bot/src/commands/economy && pnpm --filter @ririko/database typecheck && pnpm --filter @ririko/services typecheck && pnpm --filter @ririko/bot typecheck && pnpm format:check && pnpm lint --quiet"
     }
   ],
   "active_in_progress_ticket": null

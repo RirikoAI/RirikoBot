@@ -53,6 +53,7 @@ describe('STORY-161 shared reset boundary', () => {
         daily_energy_pots_used INTEGER NOT NULL DEFAULT 0,
         last_replenished_at INTEGER NOT NULL,
         last_reset_date TEXT NOT NULL,
+        last_potion_reset_date TEXT,
         updated_at INTEGER NOT NULL
       );
       CREATE TABLE IF NOT EXISTS game_items (
@@ -187,6 +188,37 @@ describe('STORY-161 shared reset boundary', () => {
     });
   });
 
+  describe('next energy reset', () => {
+    it('returns the next boundary on the energy schedule', () => {
+      const service = new EnergyLifecycleService(
+        new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE),
+        DEFAULT_RESET_SCHEDULE,
+      );
+
+      // Midnight GMT+8 is 16:00 UTC.
+      expect(service.nextResetAt(LATE_IN_RESET_DAY).toISOString()).toBe('2026-09-20T16:00:00.000Z');
+      expect(service.nextResetAt(JUST_AFTER_BOUNDARY).toISOString()).toBe(
+        '2026-09-21T16:00:00.000Z',
+      );
+    });
+
+    it('uses the configured schedule and the current time by default', () => {
+      const service = new EnergyLifecycleService(
+        new PlayerEnergyRepository(client, SIX_AM_GMT8),
+        SIX_AM_GMT8,
+      );
+
+      // 06:00 GMT+8 is 22:00 UTC the day before.
+      expect(service.nextResetAt(new Date('2026-09-20T21:00:00.000Z')).toISOString()).toBe(
+        '2026-09-20T22:00:00.000Z',
+      );
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-09-20T22:30:00.000Z'));
+      expect(service.nextResetAt().toISOString()).toBe('2026-09-21T22:00:00.000Z');
+    });
+  });
+
   describe('energy potion daily ceiling', () => {
     it('keeps the ceiling within one GMT+8 day even after UTC midnight passes', async () => {
       const energyRepo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
@@ -197,6 +229,7 @@ describe('STORY-161 shared reset boundary', () => {
         dailyEnergyPotsUsed: 3,
         // The GMT+8 day that spans both 16:01Z on the 20th and 02:00Z on the 21st.
         lastResetDate: '2026-09-21',
+        lastPotionResetDate: '2026-09-21',
       });
 
       vi.useFakeTimers();
@@ -217,6 +250,7 @@ describe('STORY-161 shared reset boundary', () => {
         currentEnergy: 0,
         dailyEnergyPotsUsed: 3,
         lastResetDate: '2000-01-01',
+        lastPotionResetDate: '2000-01-01',
       });
 
       const result = await energyRepo.consumeEnergyPotion('user_potions_reset', 15, 3);
@@ -331,6 +365,7 @@ describe('BUG-0012 energy lifecycle wiring', () => {
         daily_energy_pots_used INTEGER NOT NULL DEFAULT 0,
         last_replenished_at INTEGER NOT NULL,
         last_reset_date TEXT NOT NULL,
+        last_potion_reset_date TEXT,
         updated_at INTEGER NOT NULL
       );
     `);
@@ -425,6 +460,7 @@ describe('BUG-0012 energy lifecycle wiring', () => {
       currentEnergy: 10,
       dailyEnergyPotsUsed: 3,
       lastResetDate: '2000-01-01',
+      lastPotionResetDate: '2000-01-01',
     });
 
     const result = await service.consumePotion('user_pot', 15, 3);
@@ -446,6 +482,40 @@ describe('BUG-0012 energy lifecycle wiring', () => {
 
     const record = await service.refundEnergy('user_refund', 25);
     expect(record.currentEnergy).toBe(100);
+  });
+
+  it('never lowers an above-capacity pool on a refund', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, DEFAULT_RESET_SCHEDULE);
+
+    // 105 = 100 + 5 bonus; a refund must keep it, not clamp it down to maxEnergy.
+    await repo.getOrCreate('user_refund_over');
+    await repo.update('user_refund_over', {
+      currentEnergy: 105,
+      maxEnergy: 100,
+      bonusEnergy: 5,
+      lastResetDate: getResetDayKey(new Date(), DEFAULT_RESET_SCHEDULE),
+    });
+
+    const record = await service.refundEnergy('user_refund_over', 5);
+    expect(record.currentEnergy).toBe(105);
+    expect((await repo.getOrCreate('user_refund_over')).currentEnergy).toBe(105);
+  });
+
+  it('refunds up to maxEnergy plus bonus energy', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, DEFAULT_RESET_SCHEDULE);
+
+    await repo.getOrCreate('user_refund_bonus');
+    await repo.update('user_refund_bonus', {
+      currentEnergy: 90,
+      maxEnergy: 100,
+      bonusEnergy: 5,
+      lastResetDate: getResetDayKey(new Date(), DEFAULT_RESET_SCHEDULE),
+    });
+
+    const record = await service.refundEnergy('user_refund_bonus', 50);
+    expect(record.currentEnergy).toBe(105);
   });
 
   it('increments bonusEnergy by dailyIncrement and replenishes to effective capacity on rollover', async () => {
@@ -522,5 +592,128 @@ describe('BUG-0012 energy lifecycle wiring', () => {
 
     const second = await service.getOrReconcileUserEnergy('user_bonus_once');
     expect(second.bonusEnergy).toBe(5);
+  });
+});
+
+describe('BUG-0051 energy and potion limit own separate reset dates', () => {
+  let client: SqliteDatabaseClient;
+
+  /** 00:00 and 06:00 in the same GMT+8 offset, so a window sits between the two boundaries. */
+  const ENERGY_MIDNIGHT = createResetSchedule(480, '00:00');
+  const POTION_SIX_AM = createResetSchedule(480, '06:00');
+  /** 02:00 GMT+8 on 2026-09-21: past the energy boundary, before the potion boundary. */
+  const BETWEEN_BOUNDARIES = new Date('2026-09-20T18:00:00.000Z');
+  /** 07:00 GMT+8 on 2026-09-21: past both boundaries. */
+  const AFTER_POTION_BOUNDARY = new Date('2026-09-20T23:00:00.000Z');
+
+  beforeEach(async () => {
+    const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
+    if (rawClient.dialect !== 'sqlite') throw new Error('Expected sqlite client');
+    client = rawClient;
+    client.raw.exec(`
+      CREATE TABLE IF NOT EXISTS player_energy (
+        user_id TEXT PRIMARY KEY,
+        current_energy INTEGER NOT NULL DEFAULT 100,
+        max_energy INTEGER NOT NULL DEFAULT 100,
+        bonus_energy INTEGER NOT NULL DEFAULT 0,
+        daily_energy_pots_used INTEGER NOT NULL DEFAULT 0,
+        last_replenished_at INTEGER NOT NULL,
+        last_reset_date TEXT NOT NULL,
+        last_potion_reset_date TEXT,
+        updated_at INTEGER NOT NULL
+      );
+    `);
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    await client.close();
+  });
+
+  const build = () => {
+    const repo = new PlayerEnergyRepository(client, POTION_SIX_AM);
+    const service = new EnergyLifecycleService(repo, {
+      resetSchedule: ENERGY_MIDNIGHT,
+      potionResetSchedule: POTION_SIX_AM,
+      rulesResolver: async () => ({
+        ...DEFAULT_ENERGY_RULES,
+        maxBonusCap: 50,
+        dailyBonusIncrement: 5,
+      }),
+    });
+    return { repo, service };
+  };
+
+  it('gives no second refill or bonus after a potion between the two boundaries', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(BETWEEN_BOUNDARIES);
+    const { repo, service } = build();
+
+    await repo.getOrCreate('user_between');
+    await repo.update('user_between', {
+      currentEnergy: 10,
+      maxEnergy: 100,
+      bonusEnergy: 0,
+      lastResetDate: '2000-01-01',
+      lastPotionResetDate: '2000-01-01',
+    });
+
+    const first = await service.getOrReconcileUserEnergy('user_between');
+    expect(first.bonusEnergy).toBe(5);
+    expect(first.currentEnergy).toBe(105);
+
+    await repo.update('user_between', { currentEnergy: 20 });
+    const potion = await service.consumePotion('user_between', 15, 3);
+    expect(potion.success).toBe(true);
+    expect(potion.energy.currentEnergy).toBe(35);
+    expect(potion.energy.lastResetDate).toBe(first.lastResetDate);
+
+    const after = await service.getOrReconcileUserEnergy('user_between');
+    expect(after.currentEnergy).toBe(35); // no second refill
+    expect(after.bonusEnergy).toBe(5); // no second bonus
+    expect(after.dailyEnergyPotsUsed).toBe(1);
+
+    const spent = await service.spendEnergy('user_between', 5);
+    expect(spent.currentEnergy).toBe(30);
+    expect((await repo.findById('user_between'))?.bonusEnergy).toBe(5);
+  });
+
+  it('keeps the potion counter across the energy boundary and resets it at the potion boundary', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(BETWEEN_BOUNDARIES);
+    const { repo, service } = build();
+
+    await repo.getOrCreate('user_counter');
+    const potionDay = getResetDayKey(BETWEEN_BOUNDARIES, POTION_SIX_AM);
+    await repo.update('user_counter', {
+      dailyEnergyPotsUsed: 3,
+      lastResetDate: '2000-01-01',
+      lastPotionResetDate: potionDay,
+    });
+
+    // The energy day rolled over, but the potion day did not.
+    const betweenRecord = await service.getOrReconcileUserEnergy('user_counter');
+    expect(betweenRecord.lastResetDate).toBe(getResetDayKey(BETWEEN_BOUNDARIES, ENERGY_MIDNIGHT));
+    expect(betweenRecord.dailyEnergyPotsUsed).toBe(3);
+
+    vi.setSystemTime(AFTER_POTION_BOUNDARY);
+    const afterRecord = await service.getOrReconcileUserEnergy('user_counter');
+    expect(afterRecord.dailyEnergyPotsUsed).toBe(0);
+    expect(afterRecord.lastPotionResetDate).toBe(
+      getResetDayKey(AFTER_POTION_BOUNDARY, POTION_SIX_AM),
+    );
+  });
+
+  it('writes lastPotionResetDate when replenishing', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(BETWEEN_BOUNDARIES);
+    const { repo, service } = build();
+
+    await repo.getOrCreate('user_replenish_dates');
+    const record = await service.replenishUserEnergy('user_replenish_dates');
+
+    expect(record.lastResetDate).toBe(getResetDayKey(BETWEEN_BOUNDARIES, ENERGY_MIDNIGHT));
+    expect(record.lastPotionResetDate).toBe(getResetDayKey(BETWEEN_BOUNDARIES, POTION_SIX_AM));
+    expect(record.lastPotionResetDate).not.toBe(record.lastResetDate);
   });
 });

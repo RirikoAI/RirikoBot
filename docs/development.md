@@ -69,6 +69,29 @@ The Git hooks that `pnpm install` sets up run checks for you:
 - `pre-commit` blocks `.env` files, scans the staged changes with gitleaks, and runs ESLint and Prettier on the staged files.
 - `pre-push` runs `pnpm lint --quiet` and `pnpm format:check`.
 
+### CodeFactor
+
+CodeFactor grades the `master` branch. The grade badge at the top of the README links to its overview for `master`.
+
+`.cfduplication.yml` at the repository root configures CodeFactor's duplication check. It sets the minimum line count and the files that the check skips: tests, migrations, generated code and fixtures.
+
+File exclusions are a repository setting on codefactor.io, not a file in the repository. Add these patterns under **Ignore Files**, one per line. Patterns are case sensitive:
+
+```text
+packages/database/migrations/*
+packages/database/src/migrations/generated/*
+packages/database/src/schema/pg/ddl.ts
+packages/database/src/schema/sqlite/ddl.ts
+packages/database/src/migration/__fixtures__/*
+```
+
+Maintainer steps, in order:
+
+1. Sign in to codefactor.io with GitHub. Check that the CodeFactor GitHub app can read `RirikoAI/RirikoBot`.
+2. Open the repository's settings on CodeFactor. Check that the default branch is `master`.
+3. Open **Ignore Files**, paste the patterns above, and save.
+4. Start a new analysis. Check that the files above no longer appear in the file list.
+
 Optional: make `git blame` skip the commit that formatted the whole repository:
 
 ```bash

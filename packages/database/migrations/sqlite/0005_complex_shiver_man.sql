@@ -1,0 +1,1 @@
+ALTER TABLE `player_energy` ADD `last_potion_reset_date` text;

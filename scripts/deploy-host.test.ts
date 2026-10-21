@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 const hostDir = fileURLToPath(new URL('../deploy/host/', import.meta.url));
 const files = readdirSync(hostDir, { recursive: true, withFileTypes: true })
@@ -11,6 +11,10 @@ const files = readdirSync(hostDir, { recursive: true, withFileTypes: true })
   .sort();
 const scripts = files.filter((entry) => entry.endsWith('.sh'));
 const read = (entry: string) => readFileSync(join(hostDir, entry), 'utf8');
+
+// Every test here starts bash, often several times, and Git Bash on Windows needs seconds for
+// that, so this file runs with a limit above the 5 s default. Other files keep the default.
+vi.setConfig({ testTimeout: 30_000 });
 
 // The script is fed through stdin, so the test does not depend on how this platform maps paths
 // (Git Bash, WSL and Linux bash all read it the same way).
@@ -2614,6 +2618,59 @@ render_deploy_authorized_keys "$work/authorized_keys"`,
       );
     });
   });
+
+  describe('deploy_key_state', () => {
+    const fn = /^deploy_key_state\(\) \{\n[\s\S]*?^\}$/m.exec(bootstrap)?.[0];
+    const state = (deployKey: string, authorizedKeys?: string) =>
+      runBash(
+        [],
+        `set -euo pipefail
+DEPLOY_KEY=${shQuote(deployKey)}
+${fn}
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+${authorizedKeys === undefined ? '' : `printf '%s\\n' ${shQuote(authorizedKeys)} >"$work/authorized_keys"`}
+deploy_key_state "$work/authorized_keys"`,
+      );
+    const appLine = `restrict,command="/usr/local/bin/ririko-deploy-ssh" ${sshKey('App')}`;
+    const stagingLine = `restrict,command="/usr/local/bin/ririko-deploy-ssh staging" ${sshKey('Staging')}`;
+    const notInstalled = 'NOT installed (run again with --deploy-key)';
+
+    it('finds the function in bootstrap.sh', () => {
+      expect(fn).toContain('deploy_key_state');
+    });
+
+    it('reports installed when --deploy-key gave a key this run', () => {
+      const result = state(sshKey('App'));
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe('installed\n');
+    });
+
+    it('reports kept when authorized_keys already holds the app forced-command line', () => {
+      const result = state('', appLine);
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe('kept (already installed)\n');
+    });
+
+    it('reports NOT installed when there is no file and no option', () => {
+      const result = state('');
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe(`${notInstalled}\n`);
+    });
+
+    it('reports NOT installed for a plain key with no forced command', () => {
+      expect(state('', sshKey('Plain')).stdout).toBe(`${notInstalled}\n`);
+    });
+
+    it('does not count a lavalink context line as the app key', () => {
+      expect(state('', stagingLine).stdout).toBe(`${notInstalled}\n`);
+    });
+
+    it('print_next_steps reports the app key through deploy_key_state', () => {
+      const body = /^print_next_steps\(\) \{\n[\s\S]*?^\}$/m.exec(bootstrap)?.[0] ?? '';
+      expect(body).toContain('key_state=$(deploy_key_state "$home/.ssh/authorized_keys")');
+    });
+  });
 });
 
 describe('bootstrap.sh roles, WireGuard and firewall wiring', () => {
@@ -2955,8 +3012,10 @@ const lavalinkCall = (
     `^WG_ADDRESS=10\\.77\\.0\\.1 ${env} ${heaps} docker compose -p ririko-lavalink ` +
       `-f \\S+/releases/${escapeDots(version)}/deploy/lavalink/docker-compose\\.yml ${subcommand}`,
   );
+// sha256sum prints "<hash>  <file>" (text mode) on Linux and "<hash> *<file>" (binary mode) in Git
+// Bash on Windows; both are valid.
 const shaLine =
-  /^[0-9a-f]{64} {2}(deploy\/lavalink\/docker-compose\.yml|docker\/lavalink\/application\.yml)$/;
+  /^[0-9a-f]{64} [ *](deploy\/lavalink\/docker-compose\.yml|docker\/lavalink\/application\.yml)$/;
 
 describe.skipIf(!hasBash)('ririko-deploy-ssh on a Lavalink host', () => {
   const run = (cases: Array<[string, string]>) => {
@@ -3047,6 +3106,25 @@ describe.skipIf(!hasBash)('ririko-deploy on a Lavalink host', () => {
     expect(result.stdout).toContain('lavalink-staging is ready');
   });
 
+  it('compares the sha256 lines of a sha256sum that prints "<hash> *<file>" (Git Bash)', () => {
+    // A sha256sum on PATH that prints the binary-mode form, as Git Bash does.
+    const result = lavalinkScenario(`
+real=$(command -v sha256sum)
+printf '%s\\n' '#!/usr/bin/env bash' "\\"$real\\" \\"\\$@\\" | sed -E 's/^([0-9a-f]{64})  /\\1 */'" >"$work/bin/sha256sum"
+chmod +x "$work/bin/sha256sum"
+touch "$FAKE_DIR/same.docker-compose.yml" "$FAKE_DIR/same.application.yml"
+run deploy 2.1.3 staging
+run deploy 2.1.4 staging`);
+    expect(result.rcs).toEqual([0, 0]);
+    const sha = result.state['lavalink-staging.sha']!.split('|').filter(Boolean);
+    expect(sha).toHaveLength(2);
+    for (const line of sha) expect(line).toMatch(/^[0-9a-f]{64} \*/);
+    for (const line of sha) expect(line).toMatch(shaLine);
+    // The second release has the same content, so the star form compares equal: nothing restarts.
+    expect(result.stdout).toContain('unchanged');
+    expect(result.docker).toHaveLength(2);
+  });
+
   it('checks http://<WG_ADDRESS>:<port>/version with the password, never on a command line', () => {
     const result = lavalinkScenario('run deploy 2.1.3 staging');
     expect(result.version).toEqual([
@@ -3069,16 +3147,20 @@ describe.skipIf(!hasBash)('ririko-deploy on a Lavalink host', () => {
   });
 
   it('keeps polling /version until it answers 200 and fails when it never does', () => {
+    // The case ends as soon as the fourth check answers 200; the generous limit only keeps a loaded
+    // machine from giving up before that.
     const slow = lavalinkScenario(`
 echo 3 >"$FAKE_DIR/not_ready_checks"
-conf 'LAVALINK_READY_TIMEOUT=10'
+conf 'LAVALINK_READY_TIMEOUT=60'
 run deploy 2.1.3 staging`);
     expect(slow.rcs).toEqual([0]);
     expect(slow.version).toHaveLength(4);
     expect(slow.state['lavalink-staging.current']).toBe('2.1.3|');
 
+    // The script's deadline is in whole seconds, so a 1 s limit can pass before the first check on a loaded machine.
     const never = lavalinkScenario(`
 echo 2.1.3 >"$FAKE_DIR/bad_version"
+conf 'LAVALINK_READY_TIMEOUT=5'
 run deploy 2.1.3 staging`);
     expect(never.rcs).toEqual([5]);
     expect(never.version.length).toBeGreaterThan(1);

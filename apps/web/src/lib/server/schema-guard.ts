@@ -5,14 +5,23 @@ import { migrationStatus, type DatabaseClient } from '@ririko/database';
 const MIGRATE_COMMAND = 'ririko db:migrate';
 
 /**
+ * `pending`: migrations this release can apply, which the bot or `ririko db:migrate` still has to run.
+ * `incompatible`: the downgrade guard refused, because a newer release recorded contract migrations
+ * this one does not know. Nothing here fixes that except the matching release or a restore.
+ */
+export type SchemaNotReadyReason = 'pending' | 'incompatible';
+
+/**
  * Raised while the dashboard's database cannot be used with this release: migrations are pending,
  * or a newer release changed the schema in a way this one cannot work with. `/ready` answers 503
- * and logs this message until it is fixed.
+ * and logs this message until it is fixed. `pending` lists the migration ids for the `pending`
+ * reason and is empty for `incompatible`.
  */
 export class SchemaNotReadyError extends Error {
   constructor(
     message: string,
     readonly pending: readonly string[] = [],
+    readonly reason: SchemaNotReadyReason = 'pending',
   ) {
     super(message);
     this.name = 'SchemaNotReadyError';
@@ -35,6 +44,8 @@ export async function assertSchemaCurrent(
     throw new SchemaNotReadyError(
       `The database has contract migration(s) this dashboard release does not know (${status.unknownContract.join(', ')}). ` +
         'Deploy the matching dashboard release, or restore the pre-deploy dump.',
+      [],
+      'incompatible',
     );
   }
   if (status.pending.length > 0) {
@@ -42,6 +53,7 @@ export async function assertSchemaCurrent(
       `The database schema is behind this dashboard: ${status.pending.length} pending migration(s) (${status.pending.join(', ')}). ` +
         `The bot applies them when it starts; or run \`${MIGRATE_COMMAND}\` against this database.`,
       status.pending,
+      'pending',
     );
   }
   if (status.unknown.length > 0) {

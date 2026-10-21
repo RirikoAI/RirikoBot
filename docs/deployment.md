@@ -379,6 +379,8 @@ The dashboard is public, so its answers never include error text. `/health` answ
 
 While migrations are pending, the dashboard `/health` stays `200` and reports `database: { status: "MIGRATION_PENDING", pending: [...] }`. The `/ready` check answers `503` and the log names the pending migrations. This keeps Docker from restarting the dashboard while the bot is still migrating.
 
+When a newer release has recorded contract migrations that this dashboard does not know, `/health` stays `200` and reports `database: { status: "SCHEMA_INCOMPATIBLE" }`. The `/ready` check answers `503`. The fix is to deploy the matching release or restore the pre-deploy dump.
+
 ---
 
 ## 7. Settings Reference

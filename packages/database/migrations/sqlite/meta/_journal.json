@@ -36,6 +36,13 @@
       "when": 1792181260588,
       "tag": "0004_guild_left_at",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1792587000635,
+      "tag": "0005_complex_shiver_man",
+      "breakpoints": true
     }
   ]
 }
