@@ -16,7 +16,7 @@ describe('probe routes (TASK-1221)', () => {
   it('answer from the dashboard database', async () => {
     const live = await health.GET(request('203.0.113.1'));
     expect(live.status).toBe(200);
-    expect(await live.json()).toMatchObject({ status: 'healthy', version: '2.0.1' });
+    expect(await live.json()).toMatchObject({ status: 'healthy', version: '2.0.2' });
     expect(await (await ready.GET(request('203.0.113.1'))).json()).toEqual({ ready: true });
     expect(ping).toHaveBeenCalledTimes(2);
   });
