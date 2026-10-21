@@ -575,6 +575,7 @@ describeDialects('Core Domain Repositories & ACID Financial Ledger', (db) => {
       expect((await playerEnergyRepo.findById('bulk_race'))?.dailyEnergyPotsUsed).toBe(2);
       await playerEnergyRepo.update('bulk_race', {
         lastResetDate: '2000-01-01',
+        lastPotionResetDate: '2000-01-01',
         dailyEnergyPotsUsed: 3,
         currentEnergy: 0,
       });
@@ -627,6 +628,7 @@ describeDialects('Core Domain Repositories & ACID Financial Ledger', (db) => {
       // Simulate next day rollover: lastResetDate in the past
       await playerEnergyRepo.update('energy_tester', {
         lastResetDate: '2020-01-01',
+        lastPotionResetDate: '2020-01-01',
         currentEnergy: 30,
       });
 

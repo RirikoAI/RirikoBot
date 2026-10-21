@@ -183,6 +183,7 @@ describe('ProfileBackgroundManager', () => {
         max_stamina INTEGER NOT NULL DEFAULT 100,
         daily_energy_pots_used INTEGER NOT NULL DEFAULT 0,
         last_reset_date TEXT NOT NULL,
+        last_potion_reset_date TEXT,
         last_stamina_regen_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       );

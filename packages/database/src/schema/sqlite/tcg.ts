@@ -151,6 +151,7 @@ export const playerEnergy = sqliteTable('player_energy', {
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),
+  lastPotionResetDate: text('last_potion_reset_date'),
 });
 
 export const gameAchievements = sqliteTable('game_achievements', {

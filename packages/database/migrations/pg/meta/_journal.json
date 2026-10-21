@@ -36,6 +36,13 @@
       "when": 1792181261420,
       "tag": "0004_guild_left_at",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792587001997,
+      "tag": "0005_brown_leper_queen",
+      "breakpoints": true
     }
   ]
 }

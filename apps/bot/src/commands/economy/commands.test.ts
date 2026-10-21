@@ -242,6 +242,7 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
         daily_energy_pots_used INTEGER NOT NULL DEFAULT 0,
         last_replenished_at INTEGER NOT NULL,
         last_reset_date TEXT NOT NULL,
+        last_potion_reset_date TEXT,
         updated_at INTEGER NOT NULL
       );
 

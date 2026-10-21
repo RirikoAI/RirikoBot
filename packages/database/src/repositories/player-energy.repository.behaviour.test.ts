@@ -149,13 +149,39 @@ describeDialects('PlayerEnergyRepository behaviour', (db) => {
       currentEnergy: 0,
       dailyEnergyPotsUsed: 3,
       lastResetDate: '2000-01-01',
+      lastPotionResetDate: '2000-01-01',
     });
 
     const result = await repo.consumeEnergyPotion('u1', 50);
 
     expect(result.success).toBe(true);
     expect(result.potsUsedToday).toBe(1);
-    expect(result.energy.lastResetDate).not.toBe('2000-01-01');
+    expect(result.energy.lastPotionResetDate).not.toBe('2000-01-01');
+    // The potion limit has its own date; the energy reset date is left to the lifecycle.
+    expect(result.energy.lastResetDate).toBe('2000-01-01');
+  });
+
+  it('falls back to lastResetDate when lastPotionResetDate is null', async () => {
+    const repo = new PlayerEnergyRepository(db.client);
+    const today = (await repo.getOrCreate('u1')).lastResetDate;
+    await repo.update('u1', {
+      currentEnergy: 0,
+      dailyEnergyPotsUsed: 3,
+      lastPotionResetDate: null,
+    });
+
+    // Same day: the old row shape still counts today's potions.
+    const blocked = await repo.consumeEnergyPotion('u1', 50);
+    expect(blocked.success).toBe(false);
+    expect(blocked.potsUsedToday).toBe(3);
+
+    // Stale lastResetDate with no potion date: the counter resets and the potion date is set.
+    await repo.update('u1', { lastResetDate: '2000-01-01', lastPotionResetDate: null });
+    const result = await repo.consumeEnergyPotion('u1', 50);
+    expect(result.success).toBe(true);
+    expect(result.potsUsedToday).toBe(1);
+    expect(result.energy.lastPotionResetDate).toBe(today);
+    expect(result.energy.lastResetDate).toBe('2000-01-01');
   });
 
   it('rejects a potion quantity that is not a positive integer', async () => {

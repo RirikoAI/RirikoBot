@@ -489,7 +489,8 @@
         "CHORE-2008",
         "STORY-197",
         "BUG-0050",
-        "CHORE-2009"
+        "CHORE-2009",
+        "BUG-0051"
       ],
       "requires": [
         "EPIC-019"
@@ -13159,6 +13160,78 @@
         "Each case has a test that starts from a stale lastResetDate (or an above-cap pool for the refund). No existing assertion is removed."
       ],
       "verify_cmd": "pnpm vitest run packages/services/src/waifu-tcg packages/services/src/adventure apps/bot/src/commands/tcg apps/bot/src/command-set.test.ts && pnpm --filter @ririko/services typecheck && pnpm --filter @ririko/bot typecheck && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "BUG-0051",
+      "parent": "EPIC-020",
+      "title": "Energy and the Potion Limit Share One Stored Reset Date: a Potion Can Refill Energy Again When Their Reset Times Differ",
+      "points": 5,
+      "status": "DONE",
+      "model": "medium",
+      "requires": [],
+      "handovers": [
+        "BUG-0051",
+        "BUG-0050",
+        "EPIC-020"
+      ],
+      "description": "player_energy has one last_reset_date for two schedules. EnergyLifecycleService writes it with the energy schedule (RIRIKO_RESET_TIME_ENERGY) and PlayerEnergyRepository.consumeEnergyPotion writes it with the potion schedule (RIRIKO_RESET_TIME_ENERGY_POTIONS). With the defaults they match. When a host sets different times, between the two boundaries each potion writes the potion day key, and the next energy read sees a different key and refills the pool and adds bonus energy again. The potion counter also resets on the energy boundary instead of its own. Fix: a separate nullable last_potion_reset_date column, owned by the potion schedule.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/tcg.ts",
+          "packages/database/src/schema/pg/tcg.ts",
+          "packages/database/migrations/",
+          "packages/database/src/migrations/generated/sqlite.ts",
+          "packages/database/src/migrations/generated/pg.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/src/repositories/player-energy.repository.ts",
+          "packages/database/src/repositories/player-energy.repository.behaviour.test.ts",
+          "packages/services/src/waifu-tcg/energy/energy-lifecycle.service.ts",
+          "packages/services/src/waifu-tcg/__tests__/reset-boundary.test.ts",
+          "apps/bot/src/services.ts",
+          "packages/database/src/repositories/repositories.test.ts",
+          "packages/database/src/schema/schema.test.ts",
+          "apps/bot/src/commands/economy/commands.test.ts",
+          "packages/services/src/economy/inventory.service.test.ts",
+          "packages/services/src/economy/profile-background.manager.test.ts",
+          "packages/services/src/waifu-tcg/__tests__/energy-and-shop.test.ts",
+          "packages/services/src/waifu-tcg/__tests__/equipment-and-enhancement.test.ts"
+        ],
+        "symbols": [
+          "playerEnergy (sqlite and pg schema)",
+          "PlayerEnergyRepository.consumeEnergyPotion",
+          "PlayerEnergyRepository.create",
+          "PlayerEnergyRepository.getOrCreate",
+          "EnergyLifecycleService.getOrReconcileUserEnergy",
+          "EnergyLifecycleService.replenishUserEnergy",
+          "EnergyLifecycleOptions",
+          "createBotServices"
+        ],
+        "entry_points": [
+          "/item action:use stamina_potion (InventoryService.useItem, ConsumableService)",
+          "/energy",
+          "any energy spend (EnergyLifecycleService.spendEnergy)"
+        ],
+        "codegraph_queries": [
+          "PlayerEnergyRepository consumeEnergyPotion getOrCreate create currentDayKey",
+          "EnergyLifecycleService getOrReconcileUserEnergy replenishUserEnergy EnergyLifecycleOptions",
+          "playerEnergy lastResetDate dailyEnergyPotsUsed schema",
+          "createBotServices resolveResetSchedulesFromEnv energyPotions PlayerEnergyRepository EnergyLifecycleService"
+        ]
+      },
+      "acceptance": [
+        "player_energy has a new nullable column last_potion_reset_date (lastPotionResetDate) in both the SQLite and PostgreSQL schemas. The migration is generated with pnpm db:generate for both dialects (additive, no destructive statement), with the embedded modules and DDL regenerated, and pnpm db:check passes.",
+        "PlayerEnergyRepository.consumeEnergyPotion resets the counter when lastPotionResetDate ?? lastResetDate differs from the potion day key, and writes lastPotionResetDate, never lastResetDate. create and getOrCreate set lastPotionResetDate to the potion day key.",
+        "EnergyLifecycleOptions takes potionResetSchedule (default: the energy resetSchedule). getOrReconcileUserEnergy no longer resets dailyEnergyPotsUsed on the energy rollover; a separate potion rollover (lastPotionResetDate ?? lastResetDate against the potion day key) resets it and writes lastPotionResetDate. replenishUserEnergy also writes lastPotionResetDate. services.ts passes resetSchedules.energyPotions.",
+        "A test with energy at 00:00 and potions at 06:00 (same offset), at a time between the two boundaries, shows that drinking a potion and then reading or spending energy gives no second refill and no second bonus. Another shows the potion counter resets at the potion boundary and not at the energy boundary. A repository test covers a row whose lastPotionResetDate is null. With equal schedules, every existing test passes and no existing assertion is removed."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src packages/services/src/waifu-tcg packages/services/src/economy apps/bot/src/commands/tcg apps/bot/src/commands/economy && pnpm --filter @ririko/database typecheck && pnpm --filter @ririko/services typecheck && pnpm --filter @ririko/bot typecheck && pnpm format:check && pnpm lint --quiet"
     }
   ],
   "active_in_progress_ticket": null
