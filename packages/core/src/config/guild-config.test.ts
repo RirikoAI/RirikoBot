@@ -154,6 +154,79 @@ describe('EscalationPolicySchema', () => {
 });
 
 describe('GuildConfigSchemas', () => {
+  describe('tickets (TASK-1982)', () => {
+    const roles = (count: number) =>
+      Array.from({ length: count }, (_, i) => `30000000000000${String(i).padStart(4, '0')}`);
+    const valid = {
+      enabled: true,
+      categoryId: '100000000000000001',
+      staffRoleIds: roles(2),
+      transcriptChannelId: '100000000000000002',
+      maxOpenPerUser: 3,
+      welcomeMessage: 'Staff will be with you soon.',
+    };
+
+    it('accepts typed values and plain CLI strings', () => {
+      expect(GuildConfigSchemas.tickets.safeParse(valid).data).toEqual(valid);
+      const fromCli = GuildConfigSchemas.tickets.safeParse({
+        enabled: 'on',
+        categoryId: 'none',
+        staffRoleIds: roles(2).join(','),
+        transcriptChannelId: '',
+        maxOpenPerUser: '5',
+        welcomeMessage: '  Hello  ',
+      });
+      expect(fromCli.data).toEqual({
+        enabled: true,
+        categoryId: null,
+        staffRoleIds: roles(2),
+        transcriptChannelId: null,
+        maxOpenPerUser: 5,
+        welcomeMessage: 'Hello',
+      });
+    });
+
+    it('accepts the limits: 1 and 5 open tickets, 10 staff roles, 1000 characters', () => {
+      const edge = {
+        ...valid,
+        maxOpenPerUser: 1,
+        staffRoleIds: roles(10),
+        welcomeMessage: 'a'.repeat(1000),
+      };
+      expect(GuildConfigSchemas.tickets.safeParse(edge).success).toBe(true);
+      expect(GuildConfigSchemas.tickets.safeParse({ ...edge, maxOpenPerUser: 5 }).success).toBe(
+        true,
+      );
+    });
+
+    it('rejects 0 and 6 open tickets per member', () => {
+      for (const maxOpenPerUser of [0, 6]) {
+        const result = GuildConfigSchemas.tickets.safeParse({ ...valid, maxOpenPerUser });
+        expect(result.error?.issues[0]?.message).toBe('Enter a whole number from 1 to 5.');
+      }
+    });
+
+    it('rejects 11 staff roles', () => {
+      const result = GuildConfigSchemas.tickets.safeParse({ ...valid, staffRoleIds: roles(11) });
+      expect(result.error?.issues[0]?.message).toBe('Choose at most 10.');
+    });
+
+    it('rejects a 1001-character welcome message and unknown keys', () => {
+      const result = GuildConfigSchemas.tickets.safeParse({
+        ...valid,
+        welcomeMessage: 'a'.repeat(1001),
+      });
+      expect(result.error?.issues[0]?.message).toBe('Use at most 1000 characters.');
+      expect(GuildConfigSchemas.tickets.safeParse({ ...valid, nextNumber: 9 }).success).toBe(false);
+    });
+
+    it('describes every field for a server admin', () => {
+      for (const field of Object.values(GuildConfigSchemas.tickets.shape)) {
+        expect(field.description?.length).toBeGreaterThan(20);
+      }
+    });
+  });
+
   it('lists the modules with only keys the bot reads', () => {
     expect(GUILD_CONFIG_MODULES).toEqual([
       'general',
@@ -162,6 +235,7 @@ describe('GuildConfigSchemas', () => {
       'logging',
       'commands',
       'autoroles',
+      'tickets',
       'autovoice',
       'xp',
       'games',
@@ -194,6 +268,14 @@ describe('GuildConfigSchemas', () => {
       'humanRoleIds',
       'botRoleIds',
       'verificationRoleId',
+    ]);
+    expect(Object.keys(GuildConfigSchemas.tickets.shape)).toEqual([
+      'enabled',
+      'categoryId',
+      'staffRoleIds',
+      'transcriptChannelId',
+      'maxOpenPerUser',
+      'welcomeMessage',
     ]);
     expect(Object.keys(GuildConfigSchemas.autovoice.shape)).toEqual(['hubs']);
     expect(Object.keys(GuildConfigSchemas.xp.shape)).toEqual([

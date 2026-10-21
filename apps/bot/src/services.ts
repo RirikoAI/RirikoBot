@@ -45,6 +45,7 @@ import {
   AuditLogRepository,
   GuildDataRepository,
   ItemCategoryRepository,
+  TicketRepository,
   type DatabaseClient,
   databaseConfigFromEnv,
 } from '@ririko/database';
@@ -148,6 +149,7 @@ import {
   AchievementService,
   TcgRulesService,
   AutoRoleService,
+  TicketService,
   ReactionRoleService,
   AniListClient,
   JikanClient,
@@ -325,6 +327,8 @@ export interface BotServices {
   autoRoleRepo: AutoRoleRepository;
   reactionRoleService: ReactionRoleService;
   autoRoleService: AutoRoleService;
+  ticketRepo: TicketRepository;
+  ticketService: TicketService;
   imageRepo: ImageRepository;
   imageGenerationService: ImageGenerationService;
   welcomerRepo: WelcomerRepository;
@@ -368,6 +372,8 @@ export async function createBotServices(
   const autoRoleRepo = new AutoRoleRepository(db);
   const reactionRoleService = new ReactionRoleService(reactionRoleRepo);
   const autoRoleService = new AutoRoleService(autoRoleRepo);
+  const ticketRepo = new TicketRepository(db);
+  const ticketService = new TicketService(ticketRepo, guildSettingsRepo);
   const welcomerRepo = new WelcomerRepository(db);
   const welcomerService = new WelcomerService();
   const dropManager = new DropManager(waifuCardRepo, waifuAssetRepo, undefined, {
@@ -1171,6 +1177,8 @@ export async function createBotServices(
     autoRoleRepo,
     reactionRoleService,
     autoRoleService,
+    ticketRepo,
+    ticketService,
     welcomerRepo,
     welcomerService,
     imageRepo,

@@ -1,6 +1,6 @@
 # Dasar Privasi
 
-Kemas kini terakhir: 2026-10-15
+Kemas kini terakhir: 2026-10-21
 
 Ini ialah terjemahan bahasa Malaysia bagi [Privacy Policy](../privacy.md) (versi bahasa Inggeris). Jika terdapat perbezaan antara kedua-dua versi, versi bahasa Inggeris diutamakan. Mesej dan butang dalam bot masih dalam bahasa Inggeris, jadi nama butang seperti "I agree" dan "No thanks" ditulis seperti yang dipaparkan oleh bot.
 
@@ -58,8 +58,9 @@ Ririko menyimpan datanya dalam pangkalan data pengendali. Setiap item di bawah m
 | 3.13. Mesej yang dibaca untuk XP dan AutoMod | Ririko membaca mesej dalam sesebuah pelayan untuk mengira XP dan menggunakan peraturan AutoMod. Alasan dalam kes AutoMod menyimpan bahagian mesej yang mencetuskan peraturan (kod jemputan, domain pautan atau frasa yang ditandakan). Semakan spam XP menyimpan 10 mesej terakhir seseorang pengguna dalam memori sahaja, untuk seketika, dan tidak pernah menyimpannya. Ririko tidak menyimpan salinan lain mesej untuk tujuan ini. Ini berlaku sebelum anda melihat sebarang notis. | Kepentingan sah pelayan dalam tahap dan komuniti yang selamat. |
 | 3.14. Kiraan penggunaan arahan | Bagi setiap pelayan, setiap hari dan setiap arahan, satu nombor yang menyatakan berapa kali arahan itu dijalankan. Kiraan itu tidak menyatakan siapa yang menjalankannya. Arahan di luar pelayan tidak dikira. | Untuk menunjukkan kepada pengurus pelayan bagaimana bot digunakan. Kepentingan sah pelayan. |
 | 3.15. Status bot | Kelewatan sambungan bot, bilangan pelayan, versi, dan saluran suara yang mempunyai ahli (ID saluran dan bilangan ahli). Ia tidak menyimpan nama ahli. | Untuk menunjukkan kesihatan bot. Perkhidmatan. |
+| 3.16. Tiket sokongan | Nombor dan saluran bagi setiap tiket, ID ahli yang membukanya, subjek yang ditaip oleh ahli itu, kakitangan yang menuntut atau menutupnya, sebab penutupan, serta masa dibuka dan ditutup. Ririko tidak menyimpan mesej. Transkrip dihantar ke saluran dalam pelayan dan tidak disimpan oleh Ririko. Apabila anda meminta pemadaman, ID dan subjek anda dialih keluar daripada tiket yang anda buka. Jika anda menuntut atau menutup tiket, ID anda digantikan dengan kod yang tidak menamakan anda. | Untuk menjalankan tiket sokongan dan menunjukkan siapa yang mengendalikan setiap tiket. Perkhidmatan. |
 
-3.16. Ririko tidak mengumpul alamat e-mel. Ia tidak menjual data peribadi dan tidak menghantar pemasaran.
+3.17. Ririko tidak mengumpul alamat e-mel. Ia tidak menjual data peribadi dan tidak menghantar pemasaran.
 
 ## 4. Notis dan Persetujuan
 
@@ -128,7 +129,7 @@ Ririko menghantar data kepada perkhidmatan luar hanya apabila pengendali telah m
 | Pelayar yang dikenali | Dipadam apabila tidak dilihat selama setahun |
 | Amaran | Tamat selepas 30 hari. Rekod kes kekal. |
 | Status bot | Hanya keadaan terkini disimpan |
-| Data pelayan (selepas bot keluar) | 90 hari selepas bot keluar atau dialih keluar daripada pelayan, bot memadam semua yang disimpannya untuk pelayan itu: tetapannya, XP dan tahap, rekod moderasi, giveaway, muzik, tetapan AI dan imej, serta entri log audit tentangnya. Jika bot ditambah semula sebelum itu, data kekal. |
+| Data pelayan (selepas bot keluar) | 90 hari selepas bot keluar atau dialih keluar daripada pelayan, bot memadam semua yang disimpannya untuk pelayan itu: tetapannya, XP dan tahap, rekod moderasi, giveaway, tiket sokongan, muzik, tetapan AI dan imej, serta entri log audit tentangnya. Jika bot ditambah semula sebelum itu, data kekal. |
 
 7.2. Semua data lain dalam bahagian 3 kekal selagi ciri itu menggunakannya. Ia dipadam apabila anda memintanya (bahagian 8 dan 9). Data yang terikat kepada pengguna dan bukan kepada pelayan (contohnya baki, kad, tetapan AI dan rekod persetujuan) bukan sebahagian daripada peraturan pelayan dalam 7.1. Tiga jenis data anda sendiri merekodkan pelayan tempat anda membuatnya: peringatan anda, senarai main yang anda simpan, dan sejarah baki anda. Apabila data sesebuah pelayan dipadam, ia kekal bersama anda dan hanya kehilangan pautan kepada pelayan itu.
 

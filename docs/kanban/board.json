@@ -3173,7 +3173,7 @@
       "parent": "EPIC-021",
       "title": "Support Tickets: Open-Ticket Panel, Private Ticket Channels, Claim and Close with Transcripts",
       "points": 21,
-      "status": "TODO",
+      "status": "DONE",
       "description": "Members press an Open Ticket button on a panel, give a short subject, and get a private channel under a ticket category that only they, the staff roles and Ririko can see. Staff can claim the ticket; the opener or staff close it with an optional reason, and Ririko posts a plain-text transcript to the transcript channel (or the log channel) before it deletes the ticket channel. Settings live on a new Tickets dashboard page and in a new `tickets` guild config module; the panel is posted with /ticket action:panel.",
       "context": {
         "files": [
@@ -10961,7 +10961,7 @@
       "id": "TASK-1981",
       "parent": "STORY-198",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "title": "Ticket Schema, Migrations and TicketRepository on Both Dialects",
       "description": "Two new tables, their migrations for SQLite and PostgreSQL, a repository, and entries in the guild and user data inventories. No Discord code.",
       "context": {
@@ -11033,7 +11033,7 @@
       "id": "TASK-1982",
       "parent": "STORY-198",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "title": "The `tickets` Guild Config Module for the Dashboard and the CLI",
       "description": "Adds a `tickets` entry to GuildConfigSchemas and a matching store in GuildConfigService that reads and writes ticket_settings through TicketRepository.",
       "context": {
@@ -11094,7 +11094,7 @@
       "id": "TASK-1983",
       "parent": "STORY-198",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "title": "TicketService: Open, Claim, Add, Remove and Close with a Plain-Text Transcript",
       "description": "The Discord-facing logic in packages/services/src/tickets, independent of commands and buttons, so TASK-1984 only routes interactions to it.",
       "context": {
@@ -11108,7 +11108,9 @@
           "packages/services/src/index.ts",
           "packages/services/src/roles/reaction-role.service.ts",
           "packages/services/src/autovoice/service.ts",
-          "packages/services/src/moderation/moderation-log.service.ts"
+          "packages/services/src/moderation/moderation-log.service.ts",
+          "packages/database/src/repositories/ticket.repository.ts",
+          "packages/database/src/repositories/ticket.repository.behaviour.test.ts"
         ],
         "symbols": [
           "ReactionRoleService.hasPermission",
@@ -11159,7 +11161,7 @@
       "id": "TASK-1984",
       "parent": "STORY-198",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "title": "/ticket Command (Slash and Prefix), Panel, Buttons, Modals and Bot Wiring",
       "description": "Connects TicketService to Discord: the /ticket command, the panel button, the subject and close-reason modals, and the channelDelete hook.",
       "context": {
@@ -11173,6 +11175,7 @@
           "apps/bot/src/services.ts",
           "apps/bot/src/command-set.ts",
           "apps/bot/src/command-set.test.ts",
+          "apps/bot/src/component-interactions.test.ts",
           "apps/bot/src/main.ts",
           "apps/bot/src/commands/roles/autorole.command.ts",
           "apps/bot/src/commands/giveaway/giveaway.command.ts",
@@ -11231,7 +11234,7 @@
       "id": "TASK-1985",
       "parent": "STORY-198",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "title": "Tickets Dashboard Page with a Category Picker",
       "description": "A settings page for the `tickets` module, built like the Logging and Auto Roles pages, plus a picker for channel categories, which the dashboard does not have yet.",
       "context": {
@@ -11246,7 +11249,9 @@
           "apps/web/src/lib/server/guilds/guild-resources.ts",
           "apps/web/src/lib/server/guilds/guild-resources.test.ts",
           "apps/web/src/lib/dashboard-nav.ts",
-          "apps/web/src/lib/server/authorization-coverage.test.ts"
+          "apps/web/src/lib/server/authorization-coverage.test.ts",
+          "apps/web/src/lib/server/guilds/audit-log.ts",
+          "apps/web/src/lib/server/guilds/audit-log.test.ts"
         ],
         "symbols": [
           "LoggingSettingsPage",
@@ -11297,7 +11302,7 @@
       "id": "TASK-1986",
       "parent": "STORY-198",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "title": "Document Support Tickets for Server Admins and in the Privacy Policy",
       "description": "User docs for the finished feature. Text only.",
       "context": {
@@ -11305,9 +11310,17 @@
           "docs/modules.md",
           "docs/commands.md",
           "docs/dashboard.md",
-          "docs/legal/privacy.md"
+          "docs/legal/privacy.md",
+          "docs/after-installing.md",
+          "docs/legal/ms/privacy.md",
+          "packages/services/src/privacy/consent.service.ts",
+          "packages/services/src/privacy/consent.service.test.ts"
         ],
-        "symbols": [],
+        "symbols": [
+          "LEGAL_DOCUMENTS_DATE",
+          "TERMS_VERSION",
+          "AI_CONSENT_VERSION"
+        ],
         "codegraph_queries": [
           "TicketService open close transcript createTicketCommand"
         ]
@@ -11317,9 +11330,11 @@
         "docs/commands.md lists /ticket in the Server Tools table with who can use each action, and in the list of guild-registered commands.",
         "docs/dashboard.md lists the Tickets page in the Pages for Each Server table.",
         "docs/legal/privacy.md says what tickets store (opener, staff who claimed or closed, subject, close reason, times), that transcripts are posted to a channel in the server and not kept by Ririko, and what server data deletion and user erasure do to tickets.",
-        "Every statement matches the code as merged in TASK-1981 to TASK-1985, and `pnpm docs:build` passes."
+        "Every statement matches the code as merged in TASK-1981 to TASK-1985, and `pnpm docs:build` passes.",
+        "docs/legal/privacy.md and docs/legal/ms/privacy.md both carry the ticket changes and the date 2026-10-21.",
+        "LEGAL_DOCUMENTS_DATE (and so TERMS_VERSION) is 2026-10-21; AI_CONSENT_VERSION stays 2026-10-15 as its own constant; consent.service.test.ts asserts both."
       ],
-      "verify_cmd": "pnpm docs:build && pnpm format:check"
+      "verify_cmd": "pnpm docs:build && pnpm vitest run packages/services/src/privacy apps/bot/src/privacy apps/bot/src/terms-notice.test.ts && pnpm --filter @ririko/services typecheck && pnpm lint --quiet && pnpm format:check"
     }
   ],
   "chores": [

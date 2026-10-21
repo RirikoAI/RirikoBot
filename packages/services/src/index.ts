@@ -22,3 +22,4 @@ export * from './activity/index.js';
 export * from './privacy/index.js';
 export * from './owner/index.js';
 export * from './maintenance/index.js';
+export * from './tickets/index.js';

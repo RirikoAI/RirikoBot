@@ -46,6 +46,7 @@ const MODULE_LABELS: Record<string, string> = {
   logging: 'Logging',
   commands: 'Command',
   autoroles: 'Auto Roles',
+  tickets: 'Tickets',
   autovoice: 'Auto Voice',
   xp: 'XP & Ranking',
   games: 'Games',

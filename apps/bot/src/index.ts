@@ -42,6 +42,7 @@ export * from './commands/autovoice/index.js';
 export * from './commands/games/index.js';
 export * from './commands/tcg/index.js';
 export * from './commands/roles/index.js';
+export * from './commands/tickets/index.js';
 export * from './commands/anime/index.js';
 export * from './commands/reactions/index.js';
 export * from './commands/memes/index.js';

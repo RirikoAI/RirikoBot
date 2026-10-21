@@ -48,6 +48,7 @@ import {
   ImageRepository,
   ModerationRepository,
   MusicRepository,
+  TicketRepository,
   WelcomerRepository,
   withTransaction,
   type AutoVoiceConfig,
@@ -317,6 +318,7 @@ export interface GuildConfigServiceDeps {
   images: ImageRepository;
   freeGames: FreeGameRepository;
   welcomer: WelcomerRepository;
+  tickets: TicketRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -438,6 +440,34 @@ export class GuildConfigService {
               humanRoleIds: values.humanRoleIds,
               botRoleIds: values.botRoleIds,
               verificationRoleId: values.verificationRoleId,
+            },
+            tx,
+          );
+        },
+      },
+      tickets: {
+        read: async (guildId, tx) => {
+          const row = await deps.tickets.getSettings(guildId, tx);
+          return {
+            enabled: row?.isEnabled ?? false,
+            categoryId: row?.categoryId ?? null,
+            staffRoleIds: row?.staffRoleIds ?? [],
+            transcriptChannelId: row?.transcriptChannelId ?? null,
+            maxOpenPerUser: row?.maxOpenPerUser ?? 1,
+            welcomeMessage: row?.welcomeMessage ?? null,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          // next_number belongs to the ticket service; the patch type cannot carry it.
+          await deps.tickets.upsertSettings(
+            guildId,
+            {
+              isEnabled: values.enabled,
+              categoryId: values.categoryId,
+              staffRoleIds: values.staffRoleIds,
+              transcriptChannelId: values.transcriptChannelId,
+              maxOpenPerUser: values.maxOpenPerUser,
+              welcomeMessage: values.welcomeMessage,
             },
             tx,
           );
@@ -726,6 +756,7 @@ export function createGuildConfigService(
     images: new ImageRepository(db),
     freeGames: new FreeGameRepository(db),
     welcomer: new WelcomerRepository(db),
+    tickets: new TicketRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit: new AuditLogRepository(db),
     ...options,

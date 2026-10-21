@@ -14,6 +14,7 @@ import {
   AiRepository,
   ImageRepository,
   FreeGameRepository,
+  TicketRepository,
   WelcomerRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
@@ -41,6 +42,7 @@ describe('GuildConfigService (TASK-1111)', () => {
   let commandCatalog: CommandCatalogRepository;
   let autoRoles: AutoRoleRepository;
   let autoVoice: AutoVoiceRepository;
+  let tickets: TicketRepository;
   let service: GuildConfigService;
 
   beforeEach(async () => {
@@ -57,6 +59,7 @@ describe('GuildConfigService (TASK-1111)', () => {
     commandCatalog = new CommandCatalogRepository(db);
     autoRoles = new AutoRoleRepository(db);
     autoVoice = new AutoVoiceRepository(db);
+    tickets = new TicketRepository(db);
     service = new GuildConfigService({
       db,
       guildSettings: new GuildSettingsRepository(db),
@@ -70,6 +73,7 @@ describe('GuildConfigService (TASK-1111)', () => {
       images: new ImageRepository(db),
       freeGames: new FreeGameRepository(db),
       welcomer: new WelcomerRepository(db),
+      tickets: new TicketRepository(db),
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -730,6 +734,129 @@ describe('GuildConfigService (TASK-1111)', () => {
     });
   });
 
+  describe('tickets (TASK-1982)', () => {
+    const CATEGORY = '600000000000000001';
+    const STAFF = '600000000000000002';
+    const STAFF_2 = '600000000000000003';
+    const TRANSCRIPTS = '600000000000000004';
+    const DEFAULTS = {
+      enabled: false,
+      categoryId: null,
+      staffRoleIds: [],
+      transcriptChannelId: null,
+      maxOpenPerUser: 1,
+      welcomeMessage: null,
+    };
+
+    it('reads defaults for a guild without a settings row', async () => {
+      expect(await tickets.getSettings('g1')).toBeNull();
+      expect(await service.get('g1', 'tickets')).toEqual(DEFAULTS);
+    });
+
+    it('writes settings, reads them back and audits the field diff', async () => {
+      const { changes } = await service.update(
+        'g1',
+        'tickets',
+        {
+          enabled: true,
+          categoryId: CATEGORY,
+          staffRoleIds: [STAFF, STAFF_2, STAFF],
+          transcriptChannelId: TRANSCRIPTS,
+          maxOpenPerUser: '3',
+          welcomeMessage: ' Tell us what you need. ',
+        },
+        dashboardActor,
+      );
+      expect(changes.map((change) => change.field)).toEqual([
+        'enabled',
+        'categoryId',
+        'staffRoleIds',
+        'transcriptChannelId',
+        'maxOpenPerUser',
+        'welcomeMessage',
+      ]);
+      const saved = {
+        enabled: true,
+        categoryId: CATEGORY,
+        staffRoleIds: [STAFF, STAFF_2],
+        transcriptChannelId: TRANSCRIPTS,
+        maxOpenPerUser: 3,
+        welcomeMessage: 'Tell us what you need.',
+      };
+      expect(await service.get('g1', 'tickets')).toEqual(saved);
+      expect(await tickets.getSettings('g1')).toMatchObject({
+        isEnabled: true,
+        categoryId: CATEGORY,
+        staffRoleIds: [STAFF, STAFF_2],
+        maxOpenPerUser: 3,
+      });
+      expect(await service.get('g2', 'tickets')).toEqual(DEFAULTS);
+      expect(auditRows().map((audit) => audit.action)).toEqual(['guild_config.tickets.update']);
+
+      await service.update(
+        'g1',
+        'tickets',
+        { categoryId: 'none', transcriptChannelId: '', welcomeMessage: 'none' },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'tickets')).toEqual({
+        ...saved,
+        categoryId: null,
+        transcriptChannelId: null,
+        welcomeMessage: null,
+      });
+    });
+
+    it('never changes next_number, with or without tickets already opened', async () => {
+      await service.update('g1', 'tickets', { enabled: true }, dashboardActor);
+      expect(await tickets.getSettings('g1')).toMatchObject({ nextNumber: 1 });
+
+      await tickets.openTicket({ guildId: 'g1', channelId: 'c1', openerId: 'u1' });
+      await tickets.openTicket({ guildId: 'g1', channelId: 'c2', openerId: 'u2' });
+      await service.update(
+        'g1',
+        'tickets',
+        { maxOpenPerUser: 2, staffRoleIds: STAFF, enabled: false },
+        dashboardActor,
+      );
+      expect(await tickets.getSettings('g1')).toMatchObject({
+        nextNumber: 3,
+        maxOpenPerUser: 2,
+        isEnabled: false,
+      });
+      const next = await tickets.openTicket({ guildId: 'g1', channelId: 'c3', openerId: 'u1' });
+      expect(next.number).toBe(3);
+    });
+
+    it('keeps the counter when a first save comes after tickets were opened', async () => {
+      await tickets.openTicket({ guildId: 'g1', channelId: 'c1', openerId: 'u1' });
+      await service.update('g1', 'tickets', { maxOpenPerUser: 4 }, dashboardActor);
+      expect(await tickets.getSettings('g1')).toMatchObject({ nextNumber: 2, maxOpenPerUser: 4 });
+    });
+
+    it('rejects out-of-range values and saves nothing', async () => {
+      await expect(
+        service.update('g1', 'tickets', { maxOpenPerUser: 6 }, dashboardActor),
+      ).rejects.toMatchObject({
+        fieldErrors: { maxOpenPerUser: ['Enter a whole number from 1 to 5.'] },
+      });
+      await expect(
+        service.update('g1', 'tickets', { maxOpenPerUser: 0 }, dashboardActor),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      const ids = Array.from({ length: 11 }, (_, i) => `6000000000000001${10 + i}`);
+      await expect(
+        service.update('g1', 'tickets', { staffRoleIds: ids }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { staffRoleIds: ['Choose at most 10.'] } });
+      await expect(
+        service.update('g1', 'tickets', { welcomeMessage: 'a'.repeat(1001) }, dashboardActor),
+      ).rejects.toMatchObject({
+        fieldErrors: { welcomeMessage: ['Use at most 1000 characters.'] },
+      });
+      expect(await tickets.getSettings('g1')).toBeNull();
+      expect(auditRows()).toEqual([]);
+    });
+  });
+
   describe('autovoice (TASK-1641)', () => {
     const HUB_A = '500000000000000001';
     const HUB_B = '500000000000000002';
@@ -1093,6 +1220,7 @@ describe('GuildConfigService ai (TASK-1162)', () => {
       images: new ImageRepository(db),
       freeGames: new FreeGameRepository(db),
       welcomer: new WelcomerRepository(db),
+      tickets: new TicketRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -1201,6 +1329,7 @@ describe('GuildConfigService images (TASK-1163)', () => {
       images,
       freeGames: new FreeGameRepository(db),
       welcomer: new WelcomerRepository(db),
+      tickets: new TicketRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',

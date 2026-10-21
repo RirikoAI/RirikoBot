@@ -35,6 +35,7 @@ describe('Server Action and route handler authorization coverage (TASK-1173)', (
         'app/dashboard/[guildId]/logging/actions.ts#saveLoggingSettings',
         'app/dashboard/[guildId]/commands/actions.ts#saveCommandOverrides',
         'app/dashboard/[guildId]/autoroles/actions.ts#saveAutoRoleSettings',
+        'app/dashboard/[guildId]/tickets/actions.ts#saveTicketSettings',
         'app/dashboard/[guildId]/autovoice/actions.ts#saveAutoVoiceSettings',
         'app/dashboard/[guildId]/reaction-roles/actions.ts#publishReactionRolePanel',
         'app/dashboard/[guildId]/reaction-roles/actions.ts#removeReactionRoleBinding',

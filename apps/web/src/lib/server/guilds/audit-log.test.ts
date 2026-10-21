@@ -42,6 +42,7 @@ describe('audit log formatting (TASK-1132)', () => {
     expect(describeAuditAction('guild_config.autovoice.update')).toBe(
       'Auto Voice settings changed',
     );
+    expect(describeAuditAction('guild_config.tickets.update')).toBe('Tickets settings changed');
     expect(describeAuditAction('guild_config.xp.update')).toBe('XP & Ranking settings changed');
     expect(describeAuditAction('reaction_roles.publish')).toBe('Reaction role panel published');
     expect(describeAuditAction('giveaways.reroll')).toBe('Giveaway rerolled');

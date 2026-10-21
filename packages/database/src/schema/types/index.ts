@@ -96,6 +96,12 @@ export type NewGiveawayEntry = typeof sqlite.giveawayEntries.$inferInsert;
 export type GiveawayWinner = typeof sqlite.giveawayWinners.$inferSelect;
 export type NewGiveawayWinner = typeof sqlite.giveawayWinners.$inferInsert;
 
+// Support tickets
+export type TicketSettings = typeof sqlite.ticketSettings.$inferSelect;
+export type NewTicketSettings = typeof sqlite.ticketSettings.$inferInsert;
+export type Ticket = typeof sqlite.tickets.$inferSelect;
+export type NewTicket = typeof sqlite.tickets.$inferInsert;
+
 // Stream Platforms
 export type Streamer = typeof sqlite.streamers.$inferSelect;
 export type NewStreamer = typeof sqlite.streamers.$inferInsert;

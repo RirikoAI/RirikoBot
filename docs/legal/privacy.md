@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Last updated: 2026-10-15
+Last updated: 2026-10-21
 
 Read this text in Bahasa Malaysia: [Dasar Privasi](ms/privacy.md). If the two versions differ, this English version prevails.
 
@@ -58,8 +58,9 @@ Ririko keeps its data in the operator's database. Each item below has a purpose 
 | 3.13. Messages read for XP and AutoMod | Ririko reads the messages in a server to count XP and to apply AutoMod rules. AutoMod case reasons store the part of a message that triggered the rule (an invite code, a link domain or a flagged phrase). The XP spam check keeps a user's last 10 messages in memory only, for a short time, and never saves them. Ririko keeps no other copy of messages for this. This happens before you see any notice. | The legitimate interest of the server in levels and in a safe community. |
 | 3.14. Command usage counts | For each server, each day and each command, a number that says how many times the command ran. The count does not say who ran it. Commands outside a server are not counted. | To show server managers how the bot is used. Server's legitimate interest. |
 | 3.15. Bot status | The bot's connection delay, the number of servers, the version, and the voice channels that have members (channel IDs and the number of members). It holds no names of members. | To show the health of the bot. Service. |
+| 3.16. Support tickets | The number and channel of each ticket, the ID of the member who opened it, the subject that member typed, the staff who claimed or closed it, the close reason, and the open and close times. Ririko does not keep the messages. A transcript is posted to a channel in the server and is not stored by Ririko. When you ask for erasure, your ID and your subject are removed from the tickets you opened. If you claimed or closed a ticket, your ID is replaced by a code that does not name you. | To run support tickets and to show who handled each one. Service. |
 
-3.16. Ririko does not collect email addresses. It does not sell personal data and does not send marketing.
+3.17. Ririko does not collect email addresses. It does not sell personal data and does not send marketing.
 
 ## 4. Notice and Consent
 
@@ -128,7 +129,7 @@ Ririko sends data to an outside service only when the operator has set it up and
 | Known browsers | Deleted when not seen for a year |
 | Warnings | Expire after 30 days. The case record stays. |
 | Bot status | Only the latest state is kept |
-| Server data (after the bot leaves) | 90 days after the bot leaves or is removed from the server, the bot deletes everything it stores for that server: its settings, XP and levels, moderation records, giveaways, music, AI and image settings, and the audit log entries about it. If the bot is added back first, the data stays. |
+| Server data (after the bot leaves) | 90 days after the bot leaves or is removed from the server, the bot deletes everything it stores for that server: its settings, XP and levels, moderation records, giveaways, support tickets, music, AI and image settings, and the audit log entries about it. If the bot is added back first, the data stays. |
 
 7.2. All other data in section 3 stays while the feature uses it. It is deleted when you ask (sections 8 and 9). Data that is tied to a user and not to a server (for example balances, cards, AI settings and consent records) is not part of the server rule in 7.1. Three kinds of your own data record the server where you made them: your reminders, your saved playlists and the history of your balance. When a server's data is deleted they stay with you and lose only the link to the server.
 

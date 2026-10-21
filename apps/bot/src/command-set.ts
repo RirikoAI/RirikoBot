@@ -41,6 +41,7 @@ import {
   createStreamCommands,
   createTcgAdminCommand,
   createTcgInfoCommand,
+  createTicketCommand,
   createTradeCommand,
   createUtilityCommands,
 } from './index.js';
@@ -136,6 +137,7 @@ export function registerBotCommands(
     createTcgAdminCommand(services),
     createTcgInfoCommand(services),
     ...createRoleCommands(services),
+    createTicketCommand(services),
     ...createAnimeCommands(services),
     ...createReactionCommands(services),
     ...createMemeCommands(services),

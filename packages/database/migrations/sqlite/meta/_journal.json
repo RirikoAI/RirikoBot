@@ -43,6 +43,13 @@
       "when": 1792587000635,
       "tag": "0005_complex_shiver_man",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1792598786262,
+      "tag": "0006_strong_ares",
+      "breakpoints": true
     }
   ]
 }
