@@ -17,6 +17,13 @@
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
 | `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188, STORY-192, STORY-193 | yes | large |
+| `STORY-198` | Story | Support Tickets: Open-Ticket Panel, Private Ticket Channels, Claim and Close with Transcripts | 21 | EPIC-021 | — | yes | large |
+| `TASK-1981` | Task | Ticket Schema, Migrations and TicketRepository on Both Dialects | 5 | STORY-198 | — | yes | medium |
+| `TASK-1982` | Task | The `tickets` Guild Config Module for the Dashboard and the CLI | 2 | STORY-198 | TASK-1981 | blocked | medium |
+| `TASK-1983` | Task | TicketService: Open, Claim, Add, Remove and Close with a Plain-Text Transcript | 5 | STORY-198 | TASK-1981, TASK-1982 | blocked | medium |
+| `TASK-1984` | Task | /ticket Command (Slash and Prefix), Panel, Buttons, Modals and Bot Wiring | 5 | STORY-198 | TASK-1983 | blocked | medium |
+| `TASK-1985` | Task | Tickets Dashboard Page with a Category Picker | 3 | STORY-198 | TASK-1982 | blocked | medium |
+| `TASK-1986` | Task | Document Support Tickets for Server Admins and in the Privacy Policy | 1 | STORY-198 | TASK-1984, TASK-1985 | blocked | small |
 | `CHORE-2004` | Chore | Add the New Discord, Gemini, OpenAI, YouTube and Spotify Screenshots to the Setup Wizard Guides | 1 | EPIC-020 | TASK-1924 | yes | small |
 
 ## 🔍 Review
@@ -530,3 +537,4 @@
 | `EPIC-018` | Dashboard Usability Improvements | DONE | 21 | STORY-182, STORY-183, STORY-184 | [EPIC-018.md](./handovers/EPIC-018.md) |
 | `EPIC-019` | Production Harness: Controlled, Automated and Safeguarded Releases | DONE | 21 | STORY-185, STORY-186 | [EPIC-019.md](./handovers/EPIC-019.md) |
 | `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, STORY-193, STORY-194, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045, STORY-195, CHORE-2005, STORY-196, CHORE-2006, CHORE-2007, BUG-0049, CHORE-2008, STORY-197, BUG-0050, CHORE-2009, BUG-0051 | [EPIC-020.md](./handovers/EPIC-020.md) |
+| `EPIC-021` | Essential Server Tools | TODO | 21 | STORY-198 | [EPIC-021.md](./handovers/EPIC-021.md) |

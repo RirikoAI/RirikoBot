@@ -497,6 +497,18 @@
       ],
       "blocks": [],
       "description": "Ship Ririko 2.0.0 as the public release on master and make the project easy to find, install, use and contribute to. Covers a privacy audit before going public, a docs cleanup (archive development-only docs, rewrite user docs as deterministic, current steps), a Docusaurus site on ririko.ai that replaces the GitHub wiki and reuses the old website, a guided setup wizard (the 1.x installer rebuilt as `ririko setup`), a new README and CONTRIBUTING with all-contributors and CodeFactor, the master release and production launch, and the launch cleanups found during EPIC-019."
+    },
+    {
+      "id": "EPIC-021",
+      "title": "Essential Server Tools",
+      "points": 21,
+      "status": "TODO",
+      "children": [
+        "STORY-198"
+      ],
+      "requires": [],
+      "blocks": [],
+      "description": "Maintainer (2026-10-21): features most Discord servers expect that Ririko does not have yet. A gap review of develop found no support tickets, no message, member or role event logs, no level role rewards and no starboard. The maintainer chose support tickets first (STORY-198). More stories are added here when the maintainer picks the next gap."
     }
   ],
   "stories": [
@@ -3136,6 +3148,70 @@
         "TASK-1971 is DONE."
       ],
       "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [
+        "TASK-1981",
+        "TASK-1982",
+        "TASK-1983",
+        "TASK-1984",
+        "TASK-1985",
+        "TASK-1986"
+      ],
+      "requires": [],
+      "model": "large",
+      "handovers": [
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "STORY-198",
+      "parent": "EPIC-021",
+      "title": "Support Tickets: Open-Ticket Panel, Private Ticket Channels, Claim and Close with Transcripts",
+      "points": 21,
+      "status": "TODO",
+      "description": "Members press an Open Ticket button on a panel, give a short subject, and get a private channel under a ticket category that only they, the staff roles and Ririko can see. Staff can claim the ticket; the opener or staff close it with an optional reason, and Ririko posts a plain-text transcript to the transcript channel (or the log channel) before it deletes the ticket channel. Settings live on a new Tickets dashboard page and in a new `tickets` guild config module; the panel is posted with /ticket action:panel.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/",
+          "packages/database/src/repositories/",
+          "packages/core/src/config/guild-config.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/tickets/",
+          "apps/bot/src/commands/tickets/",
+          "apps/bot/src/component-interactions.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/main.ts",
+          "apps/web/src/app/dashboard/[guildId]/tickets/",
+          "apps/web/src/lib/dashboard-nav.ts",
+          "docs/modules.md",
+          "docs/commands.md",
+          "docs/dashboard.md",
+          "docs/legal/privacy.md"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "registerComponentInteractions",
+          "createAutoRoleCommand",
+          "GiveawayRepository",
+          "ReactionRoleService"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas GuildConfigService stores autoroles logging",
+          "registerComponentInteractions handleGiveawayButtonInteraction verify:btn",
+          "createAutoRoleCommand send-verify verify:btn:verify"
+        ]
+      },
+      "acceptance": [
+        "TASK-1981 to TASK-1986 are DONE."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm test:coverage"
     }
   ],
   "tasks": [
@@ -10867,6 +10943,383 @@
         "docs/commands.md section 7.8 lists /energy; docs/tcg-player-guide.md section 4 names /energy and explains bonus energy (+5 at each reset, kept up to 50, refilled with the pool, owner-configurable)."
       ],
       "verify_cmd": "pnpm vitest run apps/bot/src/commands/tcg packages/services/src/waifu-tcg apps/bot/src/command-set.test.ts && pnpm --filter @ririko/services typecheck && pnpm --filter @ririko/bot typecheck && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-1981",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1981",
+      "parent": "STORY-198",
+      "points": 5,
+      "status": "TODO",
+      "title": "Ticket Schema, Migrations and TicketRepository on Both Dialects",
+      "description": "Two new tables, their migrations for SQLite and PostgreSQL, a repository, and entries in the guild and user data inventories. No Discord code.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/tickets.ts",
+          "packages/database/src/schema/pg/tickets.ts",
+          "packages/database/src/schema/sqlite/index.ts",
+          "packages/database/src/schema/pg/index.ts",
+          "packages/database/src/schema/types/index.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/migrations/",
+          "packages/database/src/migrations/",
+          "packages/database/src/repositories/ticket.repository.ts",
+          "packages/database/src/repositories/ticket.repository.behaviour.test.ts",
+          "packages/database/src/repositories/index.ts",
+          "packages/database/src/repositories/guild-data-inventory.ts",
+          "packages/database/src/repositories/user-data-inventory.ts",
+          "packages/database/src/schema/sqlite/giveaways.ts",
+          "packages/database/src/schema/pg/giveaways.ts",
+          "packages/database/src/repositories/giveaway.repository.ts",
+          "packages/database/src/repositories/autorole.repository.ts"
+        ],
+        "symbols": [
+          "GiveawayRepository",
+          "AutoRoleRepository.upsertGuildAutoRoles",
+          "BaseRepository.getClient",
+          "withTransaction",
+          "GUILD_DATA_INVENTORY",
+          "USER_DATA_INVENTORY"
+        ],
+        "entry_points": [
+          "packages/database/src/repositories/index.ts"
+        ],
+        "codegraph_queries": [
+          "GiveawayRepository findById isSqlite sqliteSchema.giveaways",
+          "AutoRoleRepository upsertGuildAutoRoles guildAutoRoles onConflictDoUpdate",
+          "guild-data-inventory GuildDataEntry giveaways",
+          "user-data-inventory UserDataEntry tombstone clear moderation_cases"
+        ]
+      },
+      "acceptance": [
+        "New table `ticket_settings` on both dialects: guild_id (primary key), is_enabled (boolean, default false), category_id (nullable), staff_role_ids (JSON string array, default []), transcript_channel_id (nullable), max_open_per_user (integer, default 1), welcome_message (nullable text), next_number (integer, default 1), updated_at.",
+        "New table `tickets` on both dialects: id (text primary key, UUID), guild_id, number (integer), channel_id, opener_id, subject (nullable text), status (`open` or `closed`), claimed_by (nullable), closed_by (nullable), close_reason (nullable), created_at, closed_at (nullable). Unique index on (guild_id, number), unique index on channel_id, and an index on (guild_id, opener_id, status).",
+        "`pnpm db:generate` output is committed for both dialects (SQL migration, embedded modules and DDL files). The migration is additive only, with no `-- ririko:contract` line, and `pnpm db:check` passes.",
+        "TicketRepository (exported from @ririko/database) has getSettings, upsertSettings, openTicket, findByChannelId, countOpenForUser, listOpen, setClaimedBy and close. openTicket takes the next number from ticket_settings.next_number and increments it inside the same transaction as the insert, so two tickets in one server never share a number.",
+        "close only changes a ticket whose status is `open` and returns whether it did, so a second close (button pressed twice, or the channel deleted after closing) is a no-op.",
+        "A behaviour test runs every TicketRepository method on SQLite (and on PostgreSQL in the test-postgres job, the same way giveaway.repository.behaviour.test.ts does), including numbering across two tickets, the per-user open count and the double close.",
+        "guild-data-inventory.ts lists ticket_settings and tickets with action `delete`. user-data-inventory.ts lists tickets.opener_id as `tombstone` with clear [`subject`], and tickets.claimed_by and tickets.closed_by as `tombstone`, each with a note. Both inventory tests pass."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src/repositories/ticket.repository.behaviour.test.ts packages/database/src/repositories/guild-data-inventory.test.ts packages/database/src/repositories/user-data-inventory.test.ts packages/database/src/schema && pnpm --filter @ririko/database typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1981"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1982",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1982",
+      "parent": "STORY-198",
+      "points": 2,
+      "status": "TODO",
+      "title": "The `tickets` Guild Config Module for the Dashboard and the CLI",
+      "description": "Adds a `tickets` entry to GuildConfigSchemas and a matching store in GuildConfigService that reads and writes ticket_settings through TicketRepository.",
+      "context": {
+        "files": [
+          "packages/core/src/config/guild-config.ts",
+          "packages/core/src/config/guild-config.test.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/guild/__tests__/guild-config.service.test.ts",
+          "apps/bot/src/services.ts",
+          "apps/web/src/lib/server/services.ts",
+          "apps/cli/src/commands/guild-config.ts"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "GuildConfigServiceDeps",
+          "createGuildConfigService",
+          "OptionalSnowflakeSetting",
+          "SnowflakeListSetting",
+          "IntSetting",
+          "OptionalTextSetting",
+          "FlagSetting"
+        ],
+        "entry_points": [
+          "packages/core/src/config/guild-config.ts"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas autoroles logging OptionalSnowflakeSetting SnowflakeListSetting",
+          "GuildConfigService stores autoroles read write upsertGuildAutoRoles",
+          "createGuildConfigService GuildConfigServiceDeps autoRoles"
+        ]
+      },
+      "acceptance": [
+        "GuildConfigSchemas has a strict `tickets` module with: enabled (FlagSetting), categoryId (OptionalSnowflakeSetting), staffRoleIds (SnowflakeListSetting, at most 10), transcriptChannelId (OptionalSnowflakeSetting; empty means the log channel), maxOpenPerUser (IntSetting 1 to 5), welcomeMessage (OptionalTextSetting, at most 1000 characters). Each field has a describe() text a server admin understands, as the other modules do.",
+        "GuildConfigService reads `tickets` from TicketRepository.getSettings (defaults when there is no row: disabled, no category, no staff roles, no transcript channel, 1 open ticket per user, no welcome message) and writes it with upsertSettings in the same transaction as the audit entry, like the `autoroles` store. Writing never changes next_number.",
+        "Every construction of GuildConfigService (bot, web, CLI) passes the TicketRepository, and typecheck passes for all of them.",
+        "Tests cover the schema (valid values, 0 and 6 for maxOpenPerUser, 11 staff roles, a 1001-character message) and the store (read defaults, write then read back, next_number unchanged)."
+      ],
+      "verify_cmd": "pnpm vitest run packages/core/src/config/guild-config.test.ts packages/services/src/guild && pnpm typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1981",
+        "TASK-1982"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1983",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1983",
+      "parent": "STORY-198",
+      "points": 5,
+      "status": "TODO",
+      "title": "TicketService: Open, Claim, Add, Remove and Close with a Plain-Text Transcript",
+      "description": "The Discord-facing logic in packages/services/src/tickets, independent of commands and buttons, so TASK-1984 only routes interactions to it.",
+      "context": {
+        "files": [
+          "packages/services/src/tickets/ticket.service.ts",
+          "packages/services/src/tickets/transcript.ts",
+          "packages/services/src/tickets/messages.ts",
+          "packages/services/src/tickets/types.ts",
+          "packages/services/src/tickets/index.ts",
+          "packages/services/src/tickets/__tests__/",
+          "packages/services/src/index.ts",
+          "packages/services/src/roles/reaction-role.service.ts",
+          "packages/services/src/autovoice/service.ts",
+          "packages/services/src/moderation/moderation-log.service.ts"
+        ],
+        "symbols": [
+          "ReactionRoleService.hasPermission",
+          "AutoVoiceService.handleVoiceStateUpdate",
+          "ModerationLogService",
+          "TicketRepository",
+          "GuildSettingsRepository.findById"
+        ],
+        "entry_points": [
+          "packages/services/src/tickets/index.ts"
+        ],
+        "codegraph_queries": [
+          "ReactionRoleService hasPermission isValidRole PermissionFlagsBits",
+          "AutoVoiceService handleVoiceStateUpdate guild.channels.create permissionOverwrites",
+          "TicketRepository openTicket countOpenForUser close",
+          "ModerationLogService logChannelId guild.channels.fetch"
+        ]
+      },
+      "acceptance": [
+        "open(member, subject) refuses with a clear message, and creates nothing, when tickets are disabled, no category is set or the category is gone, Ririko lacks Manage Channels, View Channel or Send Messages in the category, or the member already has maxOpenPerUser open tickets.",
+        "Otherwise it creates a text channel named `ticket-<number padded to 4>` under the category with overwrites: @everyone cannot view; the opener, each staff role and Ririko can view, send, attach files and read history. It then records the ticket and posts the welcome message (the setting, or a default) in an embed that names the opener and the subject, mentions the staff roles, and carries Claim and Close buttons (custom ids `ticket:claim` and `ticket:close`). If recording fails after the channel exists, the channel is deleted again.",
+        "claim(member, channel) is allowed for staff only (a staff role, Manage Channels or Administrator), records claimed_by and posts who is handling the ticket. Claiming an already claimed ticket says who has it.",
+        "add(member, channel, user) and remove(...) are staff only and change only that user's channel overwrite; the opener cannot be removed.",
+        "close(member, channel, reason) is allowed for the opener and staff. It builds a UTF-8 transcript file `ticket-<number>.txt`: a header (server, number, subject, opener, claimed by, closed by, reason, opened and closed times in UTC), then every message oldest first with time, author tag and ID, content, attachment URLs and embed titles. Messages are fetched 100 at a time, up to 5,000; a longer ticket notes the cut-off.",
+        "The transcript goes to transcriptChannelId, or the log channel when that is empty, as an embed with the ticket details and the file. Only after it is posted (or when neither channel is set) does the service mark the ticket closed and delete the channel. If the post fails, the ticket stays open, the channel stays, and the closer is told why.",
+        "handleChannelDeleted(channelId) marks an open ticket closed (closed_by null, reason \"Channel deleted\") without a transcript.",
+        "Transcript text and message content are never written to the database or the console log.",
+        "Unit tests with mocked Guild, channel and repository objects cover every refusal, the overwrites, the rollback when recording fails, staff and opener checks, transcript formatting and paging (including the 5,000 cap), the failed transcript post, and handleChannelDeleted."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/tickets && pnpm --filter @ririko/services typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1983"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1984",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1984",
+      "parent": "STORY-198",
+      "points": 5,
+      "status": "TODO",
+      "title": "/ticket Command (Slash and Prefix), Panel, Buttons, Modals and Bot Wiring",
+      "description": "Connects TicketService to Discord: the /ticket command, the panel button, the subject and close-reason modals, and the channelDelete hook.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/tickets/ticket.command.ts",
+          "apps/bot/src/commands/tickets/components.ts",
+          "apps/bot/src/commands/tickets/index.ts",
+          "apps/bot/src/commands/tickets/__tests__/",
+          "apps/bot/src/index.ts",
+          "apps/bot/src/component-interactions.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/command-set.test.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/commands/roles/autorole.command.ts",
+          "apps/bot/src/commands/giveaway/giveaway.command.ts",
+          "apps/bot/src/commands/giveaway/components.ts"
+        ],
+        "symbols": [
+          "createAutoRoleCommand",
+          "createGiveawayCommand",
+          "handleGiveawayButtonInteraction",
+          "registerComponentInteractions",
+          "registerBotCommands",
+          "createBotServices",
+          "BotServices",
+          "CommandMetadata"
+        ],
+        "entry_points": [
+          "apps/bot/src/component-interactions.ts",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "createAutoRoleCommand send-verify verify:btn:verify ActionRowBuilder",
+          "registerComponentInteractions handleGiveawayButtonInteraction rr:btn",
+          "createBotServices BotServices giveawayRepo reactionRoleService",
+          "main.ts channelDelete autoVoiceService.handleChannelDelete"
+        ]
+      },
+      "acceptance": [
+        "/ticket (registrationScope `guild`, category UTILITY, guild only) with `action` choices panel, close, claim, add, remove, and options channel, message, reason, user. Every action also works as a prefix command (`!ticket panel #support Need help?`, `!ticket close spam`, `!ticket add @user`), as the other commands do.",
+        "action:panel needs Manage Server or Administrator. It posts an embed with the given message (or a default) and one Open Ticket button (custom id `ticket:open`) in the chosen channel (default: the current one), and refuses when tickets are disabled or have no category, pointing to the Tickets dashboard page.",
+        "Pressing `ticket:open` shows a modal with one Subject field (required, at most 200 characters). Submitting it calls TicketService.open and answers ephemerally with a link to the new channel or the refusal.",
+        "The Close button shows a modal with an optional Reason field (at most 500 characters); submitting it calls TicketService.close. The Claim button calls claim. /ticket close, claim, add and remove call the same service methods and refuse outside a ticket channel.",
+        "component-interactions.ts routes `ticket:` buttons and modal submits; the router handles modal submits without breaking the existing button and select routes.",
+        "BotServices builds TicketRepository and TicketService; main.ts calls handleChannelDeleted from the existing channelDelete listener, with its own try/catch.",
+        "GUILD_SCOPED in command-set.test.ts includes `ticket`, and the guild and global slash command counts stay under 100.",
+        "Tests cover each action (slash and prefix), the permission refusals, the panel message, the modal flows and the interaction routing."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/commands/tickets apps/bot/src/command-set.test.ts && pnpm --filter @ririko/bot typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1982"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1985",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1985",
+      "parent": "STORY-198",
+      "points": 3,
+      "status": "TODO",
+      "title": "Tickets Dashboard Page with a Category Picker",
+      "description": "A settings page for the `tickets` module, built like the Logging and Auto Roles pages, plus a picker for channel categories, which the dashboard does not have yet.",
+      "context": {
+        "files": [
+          "apps/web/src/app/dashboard/[guildId]/tickets/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/tickets/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/tickets/actions.test.ts",
+          "apps/web/src/app/dashboard/[guildId]/logging/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/autoroles/page.tsx",
+          "apps/web/src/components/guild-pickers.tsx",
+          "apps/web/src/components/guild-pickers.test.tsx",
+          "apps/web/src/lib/server/guilds/guild-resources.ts",
+          "apps/web/src/lib/server/guilds/guild-resources.test.ts",
+          "apps/web/src/lib/dashboard-nav.ts",
+          "apps/web/src/lib/server/authorization-coverage.test.ts"
+        ],
+        "symbols": [
+          "LoggingSettingsPage",
+          "saveLoggingSettings",
+          "saveGuildSettings",
+          "pickFormFields",
+          "ChannelSelectField",
+          "RoleListField",
+          "GuildResourceDirectory",
+          "GUILD_NAV_ITEMS"
+        ],
+        "entry_points": [
+          "apps/web/src/app/dashboard/[guildId]/tickets/page.tsx"
+        ],
+        "codegraph_queries": [
+          "LoggingSettingsPage saveLoggingSettings saveGuildSettings pickFormFields",
+          "ChannelSelectField RoleListField guild-pickers PickerProps",
+          "GuildResourceDirectory textChannels GuildCategory category",
+          "GUILD_NAV_ITEMS dashboard-nav authorization-coverage"
+        ]
+      },
+      "acceptance": [
+        "A Tickets page at /dashboard/<guildId>/tickets, listed in GUILD_NAV_ITEMS in the `members` group after Reaction Roles, edits every `tickets` field: an on/off switch, a category picker, a staff role list, a transcript channel picker (empty label \"Use the log channel\"), the open-ticket limit and the welcome message.",
+        "A new CategorySelectField in guild-pickers.tsx lists the server's channel categories (from a new GuildResourceDirectory method) with the saved one selected and an empty \"No category\" choice.",
+        "Each field's description says what Ririko needs: Manage Channels in the category, View Channel, Send Messages, Embed Links and Attach Files in the transcript channel. The page tells the admin to post the panel with `/ticket action:panel`.",
+        "The save action uses saveGuildSettings with pickFormFields, so it gets the request check, guild access, the audit entry and the change notice like the other settings pages; authorization-coverage.test.ts covers it.",
+        "Tests cover the action (valid save, invalid field errors), the category picker and the new directory method."
+      ],
+      "verify_cmd": "pnpm vitest run 'apps/web/src/app/dashboard/[guildId]/tickets' apps/web/src/components/guild-pickers.test.tsx apps/web/src/lib/server && pnpm --filter @ririko/web typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1984",
+        "TASK-1985"
+      ],
+      "model": "small",
+      "handovers": [
+        "TASK-1986",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1986",
+      "parent": "STORY-198",
+      "points": 1,
+      "status": "TODO",
+      "title": "Document Support Tickets for Server Admins and in the Privacy Policy",
+      "description": "User docs for the finished feature. Text only.",
+      "context": {
+        "files": [
+          "docs/modules.md",
+          "docs/commands.md",
+          "docs/dashboard.md",
+          "docs/legal/privacy.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "TicketService open close transcript createTicketCommand"
+        ]
+      },
+      "acceptance": [
+        "docs/modules.md has a Support Tickets section (numbered steps: turn tickets on and pick a category and staff roles on the Tickets page, post the panel with /ticket action:panel; then what members, staff and the opener can do, where transcripts go, and the permissions Ririko needs) and a row in the Overview table. Later sections are renumbered and links to them still work.",
+        "docs/commands.md lists /ticket in the Server Tools table with who can use each action, and in the list of guild-registered commands.",
+        "docs/dashboard.md lists the Tickets page in the Pages for Each Server table.",
+        "docs/legal/privacy.md says what tickets store (opener, staff who claimed or closed, subject, close reason, times), that transcripts are posted to a channel in the server and not kept by Ririko, and what server data deletion and user erasure do to tickets.",
+        "Every statement matches the code as merged in TASK-1981 to TASK-1985, and `pnpm docs:build` passes."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm format:check"
     }
   ],
   "chores": [
