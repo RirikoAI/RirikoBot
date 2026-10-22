@@ -1,6 +1,6 @@
 # Dasar Privasi
 
-Kemas kini terakhir: 2026-10-21
+Kemas kini terakhir: 2026-10-22
 
 Ini ialah terjemahan bahasa Malaysia bagi [Privacy Policy](../privacy.md) (versi bahasa Inggeris). Jika terdapat perbezaan antara kedua-dua versi, versi bahasa Inggeris diutamakan. Mesej dan butang dalam bot masih dalam bahasa Inggeris, jadi nama butang seperti "I agree" dan "No thanks" ditulis seperti yang dipaparkan oleh bot.
 
@@ -59,8 +59,9 @@ Ririko menyimpan datanya dalam pangkalan data pengendali. Setiap item di bawah m
 | 3.14. Kiraan penggunaan arahan | Bagi setiap pelayan, setiap hari dan setiap arahan, satu nombor yang menyatakan berapa kali arahan itu dijalankan. Kiraan itu tidak menyatakan siapa yang menjalankannya. Arahan di luar pelayan tidak dikira. | Untuk menunjukkan kepada pengurus pelayan bagaimana bot digunakan. Kepentingan sah pelayan. |
 | 3.15. Status bot | Kelewatan sambungan bot, bilangan pelayan, versi, dan saluran suara yang mempunyai ahli (ID saluran dan bilangan ahli). Ia tidak menyimpan nama ahli. | Untuk menunjukkan kesihatan bot. Perkhidmatan. |
 | 3.16. Tiket sokongan | Nombor dan saluran bagi setiap tiket, ID ahli yang membukanya, subjek yang ditaip oleh ahli itu, kakitangan yang menuntut atau menutupnya, sebab penutupan, serta masa dibuka dan ditutup. Ririko tidak menyimpan mesej. Transkrip dihantar ke saluran dalam pelayan dan tidak disimpan oleh Ririko. Apabila anda meminta pemadaman, ID dan subjek anda dialih keluar daripada tiket yang anda buka. Jika anda menuntut atau menutup tiket, ID anda digantikan dengan kod yang tidak menamakan anda. | Untuk menjalankan tiket sokongan dan menunjukkan siapa yang mengendalikan setiap tiket. Perkhidmatan. |
+| 3.17. Log peristiwa | Dimatikan sehingga pengurus pelayan memilih saluran log. Apabila mereka berbuat demikian, Ririko menghantar ke saluran itu, sebagai embed, kandungan mesej yang disunting atau dipadam (dan senarai nama lampiran), ahli yang menyertai, keluar, menukar nama panggilan atau peranan, dikenakan timeout atau diharamkan, perubahan pada saluran dan peranan, serta ahli yang menyertai, keluar atau berpindah antara saluran suara. Setiap hantaran menamakan ahli itu (sebutan dan ID) dan masanya. Ririko tidak menyimpan hantaran ini. Ia membaca kandungan mesej yang dipadam hanya daripada memori jangka pendek bagi mesej yang dilihatnya dalam masa sejam yang lalu, dan tidak menyimpan apa-apa. Hanya tetapan pelayan (saluran yang dipilih, saluran yang diabaikan dan suis bot) disimpan, dan tetapan itu tidak mengandungi data ahli. Hantaran kekal dalam saluran Discord di bawah peraturan pelayan itu dan dasar Discord. | Untuk memberi pengurus pelayan rekod tentang apa yang berlaku dalam pelayan mereka. Kepentingan sah pelayan. |
 
-3.17. Ririko tidak mengumpul alamat e-mel. Ia tidak menjual data peribadi dan tidak menghantar pemasaran.
+3.18. Ririko tidak mengumpul alamat e-mel. Ia tidak menjual data peribadi dan tidak menghantar pemasaran.
 
 ## 4. Notis dan Persetujuan
 

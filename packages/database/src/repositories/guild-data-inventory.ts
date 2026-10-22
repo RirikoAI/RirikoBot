@@ -65,6 +65,7 @@ export const GUILD_DATA_INVENTORY: readonly GuildDataEntry[] = [
     action: 'detach',
     note: 'The ledger of a user balance. Deleting rows would stop it adding up to economy_balances, so only the server link is removed.',
   },
+  { table: 'event_log_settings', action: 'delete' },
   { table: 'free_game_announcements', action: 'delete' },
   { table: 'free_game_channels', action: 'delete' },
   { table: 'game_sessions', action: 'delete' },

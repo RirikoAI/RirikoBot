@@ -8,6 +8,8 @@ Moderation commands work as soon as the bot is in your server. Follow these step
 
 1. **Give Ririko the permissions it needs.** Each command needs a Discord permission (see section 2). Ririko needs the same permission. Move the Ririko role above the roles of the members you want to moderate.
 2. **Pick a log channel.** Open the dashboard **Logging** page and pick a channel. Ririko needs View Channel, Send Messages and Embed Links there. The log channel receives cases, raid alerts and notices of dashboard changes.
+
+   The log channel is not the same as the event logs. The log channel is the record of moderation: cases, raid alerts and notices. Event logs record what members do: edited and deleted messages, joins and leaves, nickname and role changes, bans, channel and role changes, and voice activity. They go to their own channels and are off until you pick them. See [the Logging page](dashboard.md#44-logging).
 3. **Check AutoMod.** Open the dashboard **AutoMod** page. See section 5.
 4. **Check the warning policy.** Open the dashboard **Moderation** page. See section 4.
 

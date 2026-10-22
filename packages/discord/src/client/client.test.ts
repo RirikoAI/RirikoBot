@@ -25,6 +25,10 @@ describe('Discord Client Factory (TASK-0301)', () => {
       expect(intentsBitField.has(intent)).toBe(true);
     }
 
+    // Ban and unban events need GuildModeration (a non-privileged intent).
+    expect(DEFAULT_GATEWAY_INTENTS).toContain(GatewayIntentBits.GuildModeration);
+    expect(intentsBitField.has(GatewayIntentBits.GuildModeration)).toBe(true);
+
     // Check partials
     expect(options.partials).toEqual(DEFAULT_PARTIALS);
     expect(options.partials).toContain(Partials.Message);

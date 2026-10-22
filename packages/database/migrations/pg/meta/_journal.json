@@ -50,6 +50,13 @@
       "when": 1792598787536,
       "tag": "0006_cool_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792634063429,
+      "tag": "0007_tan_excalibur",
+      "breakpoints": true
     }
   ]
 }

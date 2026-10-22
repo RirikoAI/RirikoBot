@@ -227,12 +227,78 @@ describe('GuildConfigSchemas', () => {
     });
   });
 
+  describe('eventlogs (TASK-1992)', () => {
+    const channels = (count: number) =>
+      Array.from({ length: count }, (_, i) => `40000000000000${String(i).padStart(4, '0')}`);
+    const valid = {
+      messageChannelId: '100000000000000001',
+      memberChannelId: '100000000000000002',
+      serverChannelId: '100000000000000003',
+      voiceChannelId: '100000000000000004',
+      ignoredChannelIds: channels(2),
+      ignoreBots: false,
+    };
+
+    it('accepts typed values and plain CLI strings', () => {
+      expect(GuildConfigSchemas.eventlogs.safeParse(valid).data).toEqual(valid);
+      const fromCli = GuildConfigSchemas.eventlogs.safeParse({
+        messageChannelId: 'none',
+        memberChannelId: '',
+        serverChannelId: '100000000000000003',
+        voiceChannelId: 'none',
+        ignoredChannelIds: channels(2).join(','),
+        ignoreBots: 'off',
+      });
+      expect(fromCli.data).toEqual({
+        messageChannelId: null,
+        memberChannelId: null,
+        serverChannelId: '100000000000000003',
+        voiceChannelId: null,
+        ignoredChannelIds: channels(2),
+        ignoreBots: false,
+      });
+    });
+
+    it('says ignoreBots covers messages and voice only, and member events for bots are logged', () => {
+      const text = GuildConfigSchemas.eventlogs.shape.ignoreBots.description;
+      expect(text).toContain('messages and voice');
+      expect(text).toContain('member events for bots');
+      expect(text).toContain('always logged');
+    });
+
+    it('accepts 25 ignored channels and rejects 26', () => {
+      expect(
+        GuildConfigSchemas.eventlogs.safeParse({ ...valid, ignoredChannelIds: channels(25) })
+          .success,
+      ).toBe(true);
+      const result = GuildConfigSchemas.eventlogs.safeParse({
+        ...valid,
+        ignoredChannelIds: channels(26),
+      });
+      expect(result.error?.issues[0]?.message).toBe('Choose at most 25.');
+    });
+
+    it('rejects a bad channel ID and unknown keys', () => {
+      const result = GuildConfigSchemas.eventlogs.safeParse({ ...valid, voiceChannelId: 'abc' });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.path).toEqual(['voiceChannelId']);
+      expect(GuildConfigSchemas.eventlogs.safeParse({ ...valid, extra: 1 }).success).toBe(false);
+    });
+
+    it('describes every field for a server admin', () => {
+      for (const field of Object.values(GuildConfigSchemas.eventlogs.shape)) {
+        expect(field.description?.length).toBeGreaterThan(20);
+      }
+    });
+  });
+
   it('lists the modules with only keys the bot reads', () => {
     expect(GUILD_CONFIG_MODULES).toEqual([
       'general',
       'moderation',
       'automod',
       'logging',
+      'eventlogs',
       'commands',
       'autoroles',
       'tickets',
@@ -261,6 +327,14 @@ describe('GuildConfigSchemas', () => {
       ]);
     }
     expect(Object.keys(GuildConfigSchemas.logging.shape)).toEqual(['logChannelId']);
+    expect(Object.keys(GuildConfigSchemas.eventlogs.shape)).toEqual([
+      'messageChannelId',
+      'memberChannelId',
+      'serverChannelId',
+      'voiceChannelId',
+      'ignoredChannelIds',
+      'ignoreBots',
+    ]);
     expect(Object.keys(GuildConfigSchemas.moderation.shape)).toEqual(['escalationSteps']);
     expect(Object.keys(GuildConfigSchemas.commands.shape)).toEqual(['overrides']);
     expect(Object.keys(GuildConfigSchemas.autoroles.shape)).toEqual([

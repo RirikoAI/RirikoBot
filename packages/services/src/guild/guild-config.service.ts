@@ -42,6 +42,7 @@ import {
   AutoVoiceRepository,
   CommandCatalogRepository,
   CommandSettingsRepository,
+  EventLogSettingsRepository,
   FreeGameRepository,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
@@ -319,6 +320,7 @@ export interface GuildConfigServiceDeps {
   freeGames: FreeGameRepository;
   welcomer: WelcomerRepository;
   tickets: TicketRepository;
+  eventLogs: EventLogSettingsRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -468,6 +470,33 @@ export class GuildConfigService {
               transcriptChannelId: values.transcriptChannelId,
               maxOpenPerUser: values.maxOpenPerUser,
               welcomeMessage: values.welcomeMessage,
+            },
+            tx,
+          );
+        },
+      },
+      eventlogs: {
+        read: async (guildId, tx) => {
+          const row = await deps.eventLogs.get(guildId, tx);
+          return {
+            messageChannelId: row?.messageChannelId ?? null,
+            memberChannelId: row?.memberChannelId ?? null,
+            serverChannelId: row?.serverChannelId ?? null,
+            voiceChannelId: row?.voiceChannelId ?? null,
+            ignoredChannelIds: row?.ignoredChannelIds ?? [],
+            ignoreBots: row?.ignoreBots ?? true,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.eventLogs.upsert(
+            guildId,
+            {
+              messageChannelId: values.messageChannelId,
+              memberChannelId: values.memberChannelId,
+              serverChannelId: values.serverChannelId,
+              voiceChannelId: values.voiceChannelId,
+              ignoredChannelIds: values.ignoredChannelIds,
+              ignoreBots: values.ignoreBots,
             },
             tx,
           );
@@ -757,6 +786,7 @@ export function createGuildConfigService(
     freeGames: new FreeGameRepository(db),
     welcomer: new WelcomerRepository(db),
     tickets: new TicketRepository(db),
+    eventLogs: new EventLogSettingsRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit: new AuditLogRepository(db),
     ...options,

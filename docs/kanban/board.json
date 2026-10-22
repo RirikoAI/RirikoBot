@@ -504,7 +504,9 @@
       "points": 21,
       "status": "TODO",
       "children": [
-        "STORY-198"
+        "STORY-198",
+        "STORY-199",
+        "BUG-0052"
       ],
       "requires": [],
       "blocks": [],
@@ -3210,6 +3212,67 @@
       },
       "acceptance": [
         "TASK-1981 to TASK-1986 are DONE."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm test:coverage"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [
+        "TASK-1991",
+        "TASK-1992",
+        "TASK-1993",
+        "TASK-1994",
+        "TASK-1995",
+        "TASK-1996"
+      ],
+      "requires": [
+        "STORY-198"
+      ],
+      "model": "large",
+      "handovers": [
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "STORY-199",
+      "parent": "EPIC-021",
+      "title": "Server Event Logs: Message, Member, Server and Voice Logs to Chosen Channels",
+      "points": 21,
+      "status": "DONE",
+      "description": "Maintainer (2026-10-22): the next essential feature after tickets. Today the log channel only receives moderation cases, anti-raid alerts and dashboard notices. Ririko posts an embed for each server event to the channel picked for its category: messages (edited, deleted, bulk deleted), members (joined, left, nickname, roles, timeout, ban, unban), server (channels and roles created, deleted or renamed) and voice (joined, left, moved). Each category is off until a channel is picked. Admins can ignore channels and bots. Settings live in a new `eventlogs` guild config module, edited on the Logging dashboard page.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/",
+          "packages/database/src/repositories/",
+          "packages/core/src/config/guild-config.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/event-logs/",
+          "packages/discord/src/client/factory.ts",
+          "apps/bot/src/listeners/",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/main.ts",
+          "apps/web/src/app/dashboard/[guildId]/logging/",
+          "docs/"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "CommandOverrideService",
+          "DEFAULT_GATEWAY_INTENTS",
+          "registerMemberListener",
+          "ModerationLogService"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas logging GuildConfigService stores logging",
+          "CommandOverrideService cache invalidate guild:configChanged",
+          "DEFAULT_GATEWAY_INTENTS DEFAULT_SWEEPERS createDiscordClient"
+        ]
+      },
+      "acceptance": [
+        "TASK-1991 to TASK-1996 are DONE."
       ],
       "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm test:coverage"
     }
@@ -11335,6 +11398,362 @@
         "LEGAL_DOCUMENTS_DATE (and so TERMS_VERSION) is 2026-10-21; AI_CONSENT_VERSION stays 2026-10-15 as its own constant; consent.service.test.ts asserts both."
       ],
       "verify_cmd": "pnpm docs:build && pnpm vitest run packages/services/src/privacy apps/bot/src/privacy apps/bot/src/terms-notice.test.ts && pnpm --filter @ririko/services typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-1991",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1991",
+      "parent": "STORY-199",
+      "points": 3,
+      "status": "DONE",
+      "title": "Event Log Settings Table, Migrations and EventLogSettingsRepository",
+      "description": "One per-server settings table on both dialects, its additive migration and a small repository. No Discord code.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/event-logs.ts",
+          "packages/database/src/schema/pg/event-logs.ts",
+          "packages/database/src/schema/sqlite/index.ts",
+          "packages/database/src/schema/pg/index.ts",
+          "packages/database/src/schema/types/index.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/migrations/",
+          "packages/database/src/migrations/",
+          "packages/database/src/repositories/event-log-settings.repository.ts",
+          "packages/database/src/repositories/event-log-settings.repository.behaviour.test.ts",
+          "packages/database/src/repositories/index.ts",
+          "packages/database/src/repositories/guild-data-inventory.ts",
+          "packages/database/src/schema/sqlite/tickets.ts",
+          "packages/database/src/schema/pg/tickets.ts",
+          "packages/database/src/repositories/ticket.repository.ts"
+        ],
+        "symbols": [
+          "TicketRepository.getSettings",
+          "TicketRepository.upsertSettings",
+          "ticketSettings",
+          "GUILD_DATA_INVENTORY"
+        ],
+        "entry_points": [
+          "packages/database/src/repositories/index.ts"
+        ],
+        "codegraph_queries": [
+          "TicketRepository getSettings upsertSettings ticketSettings onConflictDoUpdate",
+          "guild-data-inventory GuildDataEntry ticket_settings"
+        ]
+      },
+      "acceptance": [
+        "New table `event_log_settings` on both dialects: guild_id (primary key), message_channel_id, member_channel_id, server_channel_id, voice_channel_id (all nullable), ignored_channel_ids (JSON string array, default []), ignore_bots (boolean, default true), updated_at.",
+        "`pnpm db:generate` output is committed for both dialects; the migration only creates the table, and `pnpm db:check` passes.",
+        "EventLogSettingsRepository (exported from @ririko/database) has get(guildId) returning the row or null, and upsert(guildId, patch) that creates or changes the given fields, both taking an optional tx. Built like TicketRepository.getSettings and upsertSettings.",
+        "guild-data-inventory.ts lists event_log_settings with action `delete`, and its test passes. The table has no user ID column.",
+        "A behaviour test covers get on a missing row, upsert create, upsert of a partial patch keeping the other fields, and the JSON list, on SQLite (and PostgreSQL in test-postgres, the same way ticket.repository.behaviour.test.ts does)."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src/repositories/event-log-settings.repository.behaviour.test.ts packages/database/src/repositories/guild-data-inventory.test.ts packages/database/src/repositories/user-data-inventory.test.ts packages/database/src/schema && pnpm --filter @ririko/database typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1991"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1992",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1992",
+      "parent": "STORY-199",
+      "points": 2,
+      "status": "DONE",
+      "title": "The `eventlogs` Guild Config Module",
+      "description": "A new `eventlogs` entry in GuildConfigSchemas and a store in GuildConfigService that reads and writes event_log_settings, like the `tickets` module.",
+      "context": {
+        "files": [
+          "packages/core/src/config/guild-config.ts",
+          "packages/core/src/config/guild-config.test.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/guild/__tests__/guild-config.service.test.ts",
+          "apps/web/src/lib/server/services.ts"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "GuildConfigServiceDeps",
+          "createGuildConfigService",
+          "OptionalSnowflakeSetting",
+          "SnowflakeListSetting",
+          "FlagSetting"
+        ],
+        "entry_points": [
+          "packages/core/src/config/guild-config.ts"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas tickets logging OptionalSnowflakeSetting SnowflakeListSetting",
+          "GuildConfigService stores tickets read write upsertSettings",
+          "createGuildConfigService GuildConfigServiceDeps tickets"
+        ]
+      },
+      "acceptance": [
+        "GuildConfigSchemas has a strict `eventlogs` module: messageChannelId, memberChannelId, serverChannelId, voiceChannelId (OptionalSnowflakeSetting each; empty turns that category off), ignoredChannelIds (SnowflakeListSetting, at most 25), ignoreBots (FlagSetting). Each field has a describe() text.",
+        "GuildConfigService reads `eventlogs` from EventLogSettingsRepository.get (defaults: every channel null, no ignored channels, ignoreBots true) and writes with upsert inside the audit transaction, like the `tickets` store.",
+        "Every construction of GuildConfigService gets the repository (createGuildConfigService and the web services), and `pnpm typecheck` passes.",
+        "Tests cover the schema (valid values, 26 ignored channels, a bad ID) and the store (defaults, write then read back)."
+      ],
+      "verify_cmd": "pnpm vitest run packages/core/src/config/guild-config.test.ts packages/services/src/guild && pnpm typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1992"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1993",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1993",
+      "parent": "STORY-199",
+      "points": 5,
+      "status": "DONE",
+      "title": "EventLogService: Cached Settings, Ignore Rules and One Embed per Event",
+      "description": "The Discord-facing logic in packages/services/src/event-logs: it decides whether an event is logged, builds its embed and sends it. TASK-1994 only forwards gateway events to it.",
+      "context": {
+        "files": [
+          "packages/services/src/event-logs/event-log.service.ts",
+          "packages/services/src/event-logs/embeds.ts",
+          "packages/services/src/event-logs/types.ts",
+          "packages/services/src/event-logs/index.ts",
+          "packages/services/src/event-logs/__tests__/",
+          "packages/services/src/index.ts",
+          "packages/services/src/guild/command-override.service.ts",
+          "packages/services/src/moderation/moderation-log.service.ts",
+          "packages/services/src/tickets/transcript.ts",
+          "packages/core/src/config/guild-config.ts",
+          "packages/core/src/config/guild-config.test.ts"
+        ],
+        "symbols": [
+          "CommandOverrideService",
+          "ModerationLogService.buildCaseEmbed",
+          "EventLogSettingsRepository"
+        ],
+        "entry_points": [
+          "packages/services/src/event-logs/index.ts"
+        ],
+        "codegraph_queries": [
+          "CommandOverrideService list invalidate cacheTtlMs",
+          "ModerationLogService buildCaseEmbed MODERATION_COLORS EmbedBuilder",
+          "EventLogSettingsRepository get upsert"
+        ]
+      },
+      "acceptance": [
+        "EventLogService caches each server's settings for 5 minutes and has invalidate(guildId), like CommandOverrideService. A read error is logged and that event is skipped; it never throws to the gateway.",
+        "Methods, one per event, each taking discord.js objects: messageEdited(old, new), messageDeleted(message), messagesBulkDeleted(messages, channel), memberJoined, memberLeft, memberUpdated(old, new) (nickname, roles added or removed, timeout set or lifted), memberBanned(ban), memberUnbanned(ban), channelCreated, channelDeleted, channelUpdated (name only), roleCreated, roleDeleted, roleUpdated (name only), voiceStateChanged(old, new) (join, leave, move only; mute and deafen are ignored).",
+        "An event is logged only when its category channel is set and still exists. Message events are skipped in ignored channels (a thread follows its parent), from bots when ignoreBots is on, in DMs, and in the category channel itself. An edit whose content did not change (an embed or link preview update) is skipped.",
+        "Each embed names the event, the user or channel (mention plus ID), the time, and the details: old and new content for edits, content and attachment names for deletes (or \"Content unknown\" for a partial message), the count and a .txt file of cached messages for bulk deletes, account age for joins, roles added and removed, and so on. Content longer than an embed field is cut with an ellipsis. Colours match the event kind (green create or join, red delete or leave, amber change).",
+        "Mentions in logged content never ping: every send uses allowedMentions { parse: [] }.",
+        "Sending is best-effort: a missing permission or a deleted channel is logged with the guild and channel IDs only, never message content.",
+        "Unit tests cover each event method, every skip rule, content cutting, the bulk-delete file, the cache and invalidate, and a failed send.",
+        "ignoreBots skips bot messages and bot voice activity only; member events for bots are always logged, and the ignoreBots describe() text says so."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/event-logs && pnpm --filter @ririko/services typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1993"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1994",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1994",
+      "parent": "STORY-199",
+      "points": 5,
+      "status": "DONE",
+      "title": "Event Log Listener, the GuildModeration Intent and Bot Wiring",
+      "description": "Forwards gateway events to EventLogService and drops its cache on dashboard changes.",
+      "context": {
+        "files": [
+          "apps/bot/src/listeners/event-log.listener.ts",
+          "apps/bot/src/listeners/event-log.listener.test.ts",
+          "apps/bot/src/listeners/index.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/index.ts",
+          "packages/discord/src/client/factory.ts",
+          "packages/discord/src/client/client.test.ts",
+          "apps/bot/src/listeners/member.listener.ts",
+          "apps/bot/src/listeners/moderation-listeners.test.ts",
+          "apps/bot/src/guild-config-sync.test.ts",
+          "apps/bot/src/listeners/__tests__/event-log.listener.test.ts"
+        ],
+        "symbols": [
+          "registerMemberListener",
+          "registerVoiceListener",
+          "createBotServices",
+          "BotServices",
+          "DEFAULT_GATEWAY_INTENTS"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "registerMemberListener guildMemberAdd guildMemberRemove",
+          "main.ts registerVoiceListener registerMemberListener guild:configChanged",
+          "createBotServices eventBus.on guild:configChanged invalidate",
+          "DEFAULT_GATEWAY_INTENTS GatewayIntentBits"
+        ]
+      },
+      "acceptance": [
+        "A new registerEventLogListener(client, services) subscribes to messageUpdate, messageDelete, messageDeleteBulk, guildMemberAdd, guildMemberRemove, guildMemberUpdate, guildBanAdd, guildBanRemove, channelCreate, channelDelete, channelUpdate, roleCreate, roleDelete, roleUpdate and voiceStateUpdate, and forwards each to EventLogService. Each handler has its own try/catch, and DM channels are skipped before the service is called.",
+        "main.ts registers it next to the other listeners. The existing member, voice and channelDelete handlers are unchanged.",
+        "DEFAULT_GATEWAY_INTENTS adds GatewayIntentBits.GuildModeration (needed for ban events; it is not a privileged intent). The client test (packages/discord/src/client/client.test.ts) is updated.",
+        "BotServices builds EventLogSettingsRepository and EventLogService. services.ts invalidates the service's cache on guild:configChanged for the `eventlogs` module.",
+        "Tests check that every event is forwarded, that an error in one handler is caught and logged, and that the cache is dropped on a config change."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/listeners packages/discord/src/client && pnpm --filter @ririko/bot typecheck && pnpm --filter @ririko/discord typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1992"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1995",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1995",
+      "parent": "STORY-199",
+      "points": 3,
+      "status": "DONE",
+      "title": "Event Log Settings on the Logging Dashboard Page",
+      "description": "A second form on the Logging page for the `eventlogs` module. The existing log channel form stays as it is.",
+      "context": {
+        "files": [
+          "apps/web/src/app/dashboard/[guildId]/logging/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/logging/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/logging/actions.test.ts",
+          "apps/web/src/app/dashboard/[guildId]/tickets/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/tickets/actions.ts",
+          "apps/web/src/components/guild-pickers.tsx",
+          "apps/web/src/lib/server/guilds/audit-log.ts",
+          "apps/web/src/lib/server/guilds/audit-log.test.ts",
+          "apps/web/src/lib/server/authorization-coverage.test.ts"
+        ],
+        "symbols": [
+          "LoggingSettingsPage",
+          "saveLoggingSettings",
+          "saveTicketSettings",
+          "saveGuildSettings",
+          "readFormFields",
+          "checkMessageChannel",
+          "ChannelSelectField",
+          "ChannelListField",
+          "MODULE_LABELS"
+        ],
+        "entry_points": [
+          "apps/web/src/app/dashboard/[guildId]/logging/page.tsx"
+        ],
+        "codegraph_queries": [
+          "LoggingSettingsPage saveLoggingSettings",
+          "saveTicketSettings readFormFields checkMessageChannel",
+          "ChannelSelectField ChannelListField guild-pickers",
+          "MODULE_LABELS audit-log"
+        ]
+      },
+      "acceptance": [
+        "The Logging page keeps its log channel form and adds an \"Event logs\" form with four channel pickers (Message log, Member log, Server log, Voice log, each with the empty label \"Off\"), an ignored channels list and an \"Ignore bots\" switch. Each description says what is logged there and that Ririko needs View Channel, Send Messages, Embed Links and Attach Files.",
+        "The save action uses saveGuildSettings with readFormFields and checks that each picked channel is a message channel of this server (checkMessageChannel), as saveTicketSettings does. authorization-coverage.test.ts lists it.",
+        "MODULE_LABELS has `eventlogs: 'Event Logs'`.",
+        "Tests cover a valid save, an unknown channel, and the label."
+      ],
+      "verify_cmd": "pnpm vitest run 'apps/web/src/app/dashboard/[guildId]/logging' apps/web/src/lib/server && pnpm --filter @ririko/web typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1994",
+        "TASK-1995"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1996",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1996",
+      "parent": "STORY-199",
+      "points": 3,
+      "status": "DONE",
+      "title": "Document Event Logs for Server Admins and in the Privacy Policy",
+      "description": "User docs for event logs, and the privacy policy change (English and Malay) for content posted to log channels.",
+      "context": {
+        "files": [
+          "docs/dashboard.md",
+          "docs/moderation.md",
+          "docs/modules.md",
+          "docs/legal/privacy.md",
+          "docs/legal/ms/privacy.md",
+          "packages/services/src/privacy/consent.service.ts",
+          "packages/services/src/privacy/consent.service.test.ts"
+        ],
+        "symbols": [
+          "LEGAL_DOCUMENTS_DATE"
+        ],
+        "codegraph_queries": [
+          "EventLogService messageDeleted memberUpdated voiceStateChanged",
+          "LEGAL_DOCUMENTS_DATE TERMS_VERSION"
+        ]
+      },
+      "acceptance": [
+        "docs/dashboard.md section 4.4 (Logging) describes the event log form: the four categories, what each logs, the ignore rules and the permissions.",
+        "docs/moderation.md (or the docs page that covers the log channel today) explains how event logs differ from the moderation case log, with a link to the dashboard section.",
+        "The docs say that deleted message content is shown only for messages Ririko saw in the last hour (the message cache sweeps after one hour), and that the GuildModeration intent is needed for ban events (no portal change, it is not privileged).",
+        "docs/legal/privacy.md and docs/legal/ms/privacy.md say that when a server turns event logs on, Ririko posts message content, edits, member changes and voice activity to the server's chosen channels, and does not store them. Both files and LEGAL_DOCUMENTS_DATE are dated 2026-10-22; AI_CONSENT_VERSION stays 2026-10-15 (see the STORY-199 note), and consent.service.test.ts asserts it.",
+        "Every statement matches the merged code of TASK-1991 to TASK-1995, and `pnpm docs:build` passes."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm vitest run packages/services/src/privacy && pnpm format:check"
     }
   ],
   "chores": [
@@ -13756,6 +14175,53 @@
         "A test with energy at 00:00 and potions at 06:00 (same offset), at a time between the two boundaries, shows that drinking a potion and then reading or spending energy gives no second refill and no second bonus. Another shows the potion counter resets at the potion boundary and not at the energy boundary. A repository test covers a row whose lastPotionResetDate is null. With equal schedules, every existing test passes and no existing assertion is removed."
       ],
       "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src packages/services/src/waifu-tcg packages/services/src/economy apps/bot/src/commands/tcg apps/bot/src/commands/economy && pnpm --filter @ririko/database typecheck && pnpm --filter @ririko/services typecheck && pnpm --filter @ririko/bot typecheck && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "BUG-0052",
+      "parent": "EPIC-021",
+      "title": "Logging Page Says Ignored Channels Skip All Events, but Only Messages Are Skipped",
+      "points": 1,
+      "status": "DONE",
+      "model": "small",
+      "requires": [
+        "TASK-1995",
+        "TASK-1996"
+      ],
+      "handovers": [
+        "BUG-0052",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "description": "Found in review of TASK-1996 (FLAG on STORY-199). EventLogService applies ignoredChannelIds to message events only. The Logging page description says every event in those channels is skipped.",
+      "context": {
+        "files": [
+          "apps/web/src/app/dashboard/[guildId]/logging/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/logging/actions.test.ts",
+          "packages/core/src/config/guild-config.ts",
+          "docs/dashboard.md"
+        ],
+        "symbols": [
+          "LoggingSettingsPage",
+          "ChannelListField",
+          "EventLogService.messageAllowed"
+        ],
+        "codegraph_queries": [
+          "LoggingSettingsPage ignoredChannelIds ChannelListField includeVoice",
+          "EventLogService messageAllowed ignoredChannelIds"
+        ]
+      },
+      "acceptance": [
+        "The Ignored channels description on the Logging page says messages in these channels (and threads under them, and the text chat of picked voice channels) are not logged, and that member, server and voice events are always logged. includeVoice stays, because a voice channel text chat is a message channel.",
+        "The ignoredChannelIds describe() text in guild-config.ts says the same in one line.",
+        "docs/dashboard.md 4.4 matches this wording."
+      ],
+      "verify_cmd": "pnpm vitest run 'apps/web/src/app/dashboard/[guildId]/logging' packages/core/src/config && pnpm --filter @ririko/web typecheck && pnpm docs:build && pnpm lint --quiet && pnpm format:check"
     }
   ],
   "active_in_progress_ticket": null

@@ -19,3 +19,9 @@ See docs/kanban/protocol.md section 6.
 4. Starboard. Nothing exists; the reaction listener is already there.
 
 Add a story here when the maintainer picks the next one.
+
+---
+
+## GROOMING · 2026-10-22T02:10:00Z · claude-opus-5-5 (coordinator)
+
+STORY-198 (support tickets) is DONE and merged (PR #740). On 2026-10-22 the maintainer asked for the next essential feature. Server event logs, item 2 of the gap list, is groomed as STORY-199.

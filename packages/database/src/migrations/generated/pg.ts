@@ -218,5 +218,13 @@ export const PG_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "0b7893c8ce838c218b9e6f97ca05dc64069dbecfb315bd823220024d938c93a5",
     "contract": false
+  },
+  {
+    "id": "0007_tan_excalibur",
+    "statements": [
+      "CREATE TABLE \"event_log_settings\" (\n\t\"guild_id\" varchar(32) PRIMARY KEY NOT NULL,\n\t\"message_channel_id\" varchar(32),\n\t\"member_channel_id\" varchar(32),\n\t\"server_channel_id\" varchar(32),\n\t\"voice_channel_id\" varchar(32),\n\t\"ignored_channel_ids\" jsonb DEFAULT '[]'::jsonb NOT NULL,\n\t\"ignore_bots\" boolean DEFAULT true NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\n);"
+    ],
+    "checksum": "3d17787028e0e4e68028193e2f304f94bcd9ea4ec71d529b1deda0103dbccf43",
+    "contract": false
   }
 ];

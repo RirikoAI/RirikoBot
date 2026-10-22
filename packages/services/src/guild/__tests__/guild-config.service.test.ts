@@ -7,6 +7,7 @@ import {
   CommandCatalogRepository,
   CommandSettingsRepository,
   createDatabaseClient,
+  EventLogSettingsRepository,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   ModerationRepository,
@@ -43,6 +44,7 @@ describe('GuildConfigService (TASK-1111)', () => {
   let autoRoles: AutoRoleRepository;
   let autoVoice: AutoVoiceRepository;
   let tickets: TicketRepository;
+  let eventLogs: EventLogSettingsRepository;
   let service: GuildConfigService;
 
   beforeEach(async () => {
@@ -60,6 +62,7 @@ describe('GuildConfigService (TASK-1111)', () => {
     autoRoles = new AutoRoleRepository(db);
     autoVoice = new AutoVoiceRepository(db);
     tickets = new TicketRepository(db);
+    eventLogs = new EventLogSettingsRepository(db);
     service = new GuildConfigService({
       db,
       guildSettings: new GuildSettingsRepository(db),
@@ -74,6 +77,7 @@ describe('GuildConfigService (TASK-1111)', () => {
       freeGames: new FreeGameRepository(db),
       welcomer: new WelcomerRepository(db),
       tickets: new TicketRepository(db),
+      eventLogs: new EventLogSettingsRepository(db),
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -734,6 +738,91 @@ describe('GuildConfigService (TASK-1111)', () => {
     });
   });
 
+  describe('eventlogs (TASK-1992)', () => {
+    const MESSAGES = '700000000000000001';
+    const MEMBERS = '700000000000000002';
+    const SERVER = '700000000000000003';
+    const VOICE = '700000000000000004';
+    const STAFF_CHAT = '700000000000000005';
+    const DEFAULTS = {
+      messageChannelId: null,
+      memberChannelId: null,
+      serverChannelId: null,
+      voiceChannelId: null,
+      ignoredChannelIds: [],
+      ignoreBots: true,
+    };
+
+    it('reads defaults for a guild without a settings row', async () => {
+      expect(await eventLogs.get('g1')).toBeNull();
+      expect(await service.get('g1', 'eventlogs')).toEqual(DEFAULTS);
+    });
+
+    it('writes settings, reads them back and audits the field diff', async () => {
+      const { changes } = await service.update(
+        'g1',
+        'eventlogs',
+        {
+          messageChannelId: MESSAGES,
+          memberChannelId: MEMBERS,
+          serverChannelId: SERVER,
+          voiceChannelId: VOICE,
+          ignoredChannelIds: [STAFF_CHAT, STAFF_CHAT],
+          ignoreBots: false,
+        },
+        dashboardActor,
+      );
+      expect(changes.map((change) => change.field)).toEqual([
+        'messageChannelId',
+        'memberChannelId',
+        'serverChannelId',
+        'voiceChannelId',
+        'ignoredChannelIds',
+        'ignoreBots',
+      ]);
+      const saved = {
+        messageChannelId: MESSAGES,
+        memberChannelId: MEMBERS,
+        serverChannelId: SERVER,
+        voiceChannelId: VOICE,
+        ignoredChannelIds: [STAFF_CHAT],
+        ignoreBots: false,
+      };
+      expect(await service.get('g1', 'eventlogs')).toEqual(saved);
+      expect(await eventLogs.get('g1')).toMatchObject({
+        messageChannelId: MESSAGES,
+        ignoredChannelIds: [STAFF_CHAT],
+        ignoreBots: false,
+      });
+      expect(await service.get('g2', 'eventlogs')).toEqual(DEFAULTS);
+      expect(auditRows().map((audit) => audit.action)).toEqual(['guild_config.eventlogs.update']);
+
+      await service.update(
+        'g1',
+        'eventlogs',
+        { messageChannelId: 'none', voiceChannelId: '', ignoredChannelIds: '' },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'eventlogs')).toEqual({
+        ...saved,
+        messageChannelId: null,
+        voiceChannelId: null,
+        ignoredChannelIds: [],
+      });
+    });
+
+    it('rejects 26 ignored channels and a bad channel ID without saving', async () => {
+      const ids = Array.from({ length: 26 }, (_, i) => `7000000000000001${10 + i}`);
+      await expect(
+        service.update('g1', 'eventlogs', { ignoredChannelIds: ids }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { ignoredChannelIds: ['Choose at most 25.'] } });
+      await expect(
+        service.update('g1', 'eventlogs', { messageChannelId: 'general' }, dashboardActor),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      expect(await eventLogs.get('g1')).toBeNull();
+    });
+  });
+
   describe('tickets (TASK-1982)', () => {
     const CATEGORY = '600000000000000001';
     const STAFF = '600000000000000002';
@@ -1221,6 +1310,7 @@ describe('GuildConfigService ai (TASK-1162)', () => {
       freeGames: new FreeGameRepository(db),
       welcomer: new WelcomerRepository(db),
       tickets: new TicketRepository(db),
+      eventLogs: new EventLogSettingsRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -1330,6 +1420,7 @@ describe('GuildConfigService images (TASK-1163)', () => {
       freeGames: new FreeGameRepository(db),
       welcomer: new WelcomerRepository(db),
       tickets: new TicketRepository(db),
+      eventLogs: new EventLogSettingsRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
