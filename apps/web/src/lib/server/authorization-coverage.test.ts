@@ -47,6 +47,7 @@ describe('Server Action and route handler authorization coverage (TASK-1173)', (
         'app/dashboard/[guildId]/tcg/actions.ts#saveTcgSettings',
         'app/dashboard/[guildId]/giveaways/actions.ts#endGiveaway',
         'app/dashboard/[guildId]/giveaways/actions.ts#rerollGiveaway',
+        'app/dashboard/[guildId]/starboard/actions.ts#saveStarboardSettings',
         'app/dashboard/[guildId]/music/actions.ts#saveMusicSettings',
         'app/dashboard/[guildId]/ai/actions.ts#saveAiSettings',
         'app/dashboard/[guildId]/images/actions.ts#saveImageSettings',

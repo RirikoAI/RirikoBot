@@ -344,6 +344,74 @@ describe('GuildConfigSchemas', () => {
     });
   });
 
+  describe('starboard (TASK-2012)', () => {
+    const channels = (count: number) =>
+      Array.from({ length: count }, (_, i) => `50000000000000${String(i).padStart(4, '0')}`);
+    const valid = {
+      channelId: '100000000000000001',
+      emoji: '⭐',
+      threshold: 3,
+      allowSelfStar: false,
+      ignoredChannelIds: channels(2),
+    };
+
+    it('accepts typed values and plain CLI strings', () => {
+      expect(GuildConfigSchemas.starboard.safeParse(valid).data).toEqual(valid);
+      const fromCli = GuildConfigSchemas.starboard.safeParse({
+        channelId: 'none',
+        emoji: '  <a:party:123456789012345678>  ',
+        threshold: '10',
+        allowSelfStar: 'yes',
+        ignoredChannelIds: channels(2).join(' '),
+      });
+      expect(fromCli.data).toEqual({
+        channelId: null,
+        emoji: '<a:party:123456789012345678>',
+        threshold: 10,
+        allowSelfStar: true,
+        ignoredChannelIds: channels(2),
+      });
+    });
+
+    it('accepts thresholds 1 and 100 and rejects 0 and 101', () => {
+      for (const threshold of [1, 100]) {
+        expect(GuildConfigSchemas.starboard.safeParse({ ...valid, threshold }).success).toBe(true);
+      }
+      for (const threshold of [0, 101, 2.5]) {
+        const result = GuildConfigSchemas.starboard.safeParse({ ...valid, threshold });
+        expect(result.error?.issues[0]?.path).toEqual(['threshold']);
+        expect(result.error?.issues[0]?.message).toBe('Enter a whole number from 1 to 100.');
+      }
+    });
+
+    it('accepts 25 ignored channels and rejects 26', () => {
+      expect(
+        GuildConfigSchemas.starboard.safeParse({ ...valid, ignoredChannelIds: channels(25) })
+          .success,
+      ).toBe(true);
+      const result = GuildConfigSchemas.starboard.safeParse({
+        ...valid,
+        ignoredChannelIds: channels(26),
+      });
+      expect(result.error?.issues[0]?.message).toBe('Choose at most 25.');
+    });
+
+    it('rejects a bad channel ID, a bad flag and unknown keys', () => {
+      const result = GuildConfigSchemas.starboard.safeParse({ ...valid, channelId: 'abc' });
+      expect(result.error?.issues[0]?.path).toEqual(['channelId']);
+      expect(
+        GuildConfigSchemas.starboard.safeParse({ ...valid, allowSelfStar: 'maybe' }).success,
+      ).toBe(false);
+      expect(GuildConfigSchemas.starboard.safeParse({ ...valid, extra: 1 }).success).toBe(false);
+    });
+
+    it('describes every field for a server admin', () => {
+      for (const field of Object.values(GuildConfigSchemas.starboard.shape)) {
+        expect(field.description?.length).toBeGreaterThan(20);
+      }
+    });
+  });
+
   it('lists the modules with only keys the bot reads', () => {
     expect(GUILD_CONFIG_MODULES).toEqual([
       'general',
@@ -357,6 +425,7 @@ describe('GuildConfigSchemas', () => {
       'autovoice',
       'xp',
       'levelroles',
+      'starboard',
       'games',
       'music',
       'ai',
@@ -416,6 +485,13 @@ describe('GuildConfigSchemas', () => {
     expect(Object.keys(GuildConfigSchemas.levelroles.shape)).toEqual([
       'rewards',
       'keepPreviousRoles',
+    ]);
+    expect(Object.keys(GuildConfigSchemas.starboard.shape)).toEqual([
+      'channelId',
+      'emoji',
+      'threshold',
+      'allowSelfStar',
+      'ignoredChannelIds',
     ]);
     expect(Object.keys(GuildConfigSchemas.games.shape)).toEqual(['maxWager', 'rules']);
     expect(isGuildConfigModule('general')).toBe(true);

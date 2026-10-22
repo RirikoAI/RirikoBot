@@ -64,6 +64,13 @@
       "when": 1792642988722,
       "tag": "0008_nervous_photon",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792648832750,
+      "tag": "0009_mixed_living_lightning",
+      "breakpoints": true
     }
   ]
 }

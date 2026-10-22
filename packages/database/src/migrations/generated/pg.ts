@@ -234,5 +234,16 @@ export const PG_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "7d56a5810e6a8d55aa75527b73ed25be294164dd81c650941963c4f844cf7ea6",
     "contract": false
+  },
+  {
+    "id": "0009_mixed_living_lightning",
+    "statements": [
+      "CREATE TABLE \"starboard_posts\" (\n\t\"message_id\" varchar(32) PRIMARY KEY NOT NULL,\n\t\"guild_id\" varchar(32) NOT NULL,\n\t\"channel_id\" varchar(32) NOT NULL,\n\t\"author_id\" varchar(32) NOT NULL,\n\t\"starboard_message_id\" varchar(32),\n\t\"star_count\" integer DEFAULT 0 NOT NULL,\n\t\"removed\" boolean DEFAULT false NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\n);",
+      "CREATE TABLE \"starboard_settings\" (\n\t\"guild_id\" varchar(32) PRIMARY KEY NOT NULL,\n\t\"channel_id\" varchar(32),\n\t\"emoji\" varchar(64) DEFAULT '⭐' NOT NULL,\n\t\"threshold\" integer DEFAULT 3 NOT NULL,\n\t\"allow_self_star\" boolean DEFAULT false NOT NULL,\n\t\"ignored_channel_ids\" jsonb DEFAULT '[]'::jsonb NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\n);",
+      "CREATE INDEX \"idx_pg_starboard_posts_guild\" ON \"starboard_posts\" USING btree (\"guild_id\");",
+      "CREATE UNIQUE INDEX \"uq_pg_starboard_posts_starboard_message\" ON \"starboard_posts\" USING btree (\"starboard_message_id\");"
+    ],
+    "checksum": "1dff5d91aa8f3ea0eb34054abf57c9c9789c3281d4e9e188c091cb23de239cb3",
+    "contract": false
   }
 ];

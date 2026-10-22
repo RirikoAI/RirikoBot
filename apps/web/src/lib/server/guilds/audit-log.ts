@@ -51,6 +51,7 @@ const MODULE_LABELS: Record<string, string> = {
   autovoice: 'Auto Voice',
   xp: 'XP & Ranking',
   levelroles: 'Level Roles',
+  starboard: 'Starboard',
   games: 'Games',
   tcg: 'Waifu TCG',
 };

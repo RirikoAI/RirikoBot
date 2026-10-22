@@ -103,6 +103,8 @@ export const GUILD_DATA_INVENTORY: readonly GuildDataEntry[] = [
     action: 'detach',
     note: "A user's reminder. It is sent by DM first, so it still works after the bot leaves; only the server link (used for the time zone) is removed.",
   },
+  { table: 'starboard_posts', action: 'delete' },
+  { table: 'starboard_settings', action: 'delete' },
   { table: 'stream_announcements', action: 'delete' },
   { table: 'stream_subscriptions', action: 'delete' },
   { table: 'temporary_roles', action: 'delete' },

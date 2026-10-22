@@ -143,6 +143,7 @@
 | `STORY-198` | Story | Support Tickets: Open-Ticket Panel, Private Ticket Channels, Claim and Close with Transcripts | 21 | EPIC-021 | [STORY-198.md](./handovers/STORY-198.md) |
 | `STORY-199` | Story | Server Event Logs: Message, Member, Server and Voice Logs to Chosen Channels | 21 | EPIC-021 | [STORY-199.md](./handovers/STORY-199.md) |
 | `STORY-200` | Story | Level Role Rewards: Roles Given Automatically at Chosen Levels | 21 | EPIC-021 | [STORY-200.md](./handovers/STORY-200.md) |
+| `STORY-201` | Story | Starboard: Repost Popular Messages to a Highlights Channel | 21 | EPIC-021 | [STORY-201.md](./handovers/STORY-201.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -442,6 +443,12 @@
 | `TASK-2005` | Task | The /levelroles Command: List, Add, Remove and Sync | 3 | STORY-200 | [TASK-2005.md](./handovers/TASK-2005.md) |
 | `TASK-2006` | Task | Level Role Rewards on the XP & Ranking Dashboard Page | 3 | STORY-200 | [TASK-2006.md](./handovers/TASK-2006.md) |
 | `TASK-2007` | Task | Document Level Role Rewards for Server Admins | 2 | STORY-200 | [TASK-2007.md](./handovers/TASK-2007.md) |
+| `TASK-2011` | Task | Starboard Settings and Posts Tables, Migrations and Repositories | 3 | STORY-201 | [TASK-2011.md](./handovers/TASK-2011.md) |
+| `TASK-2012` | Task | The `starboard` Guild Config Module | 2 | STORY-201 | [TASK-2012.md](./handovers/TASK-2012.md) |
+| `TASK-2013` | Task | StarboardService: Count Stars, Post, Update and Remove Starboard Copies | 5 | STORY-201 | [TASK-2013.md](./handovers/TASK-2013.md) |
+| `TASK-2014` | Task | Starboard Listener and Bot Wiring | 5 | STORY-201 | [TASK-2014.md](./handovers/TASK-2014.md) |
+| `TASK-2015` | Task | Starboard Dashboard Page | 3 | STORY-201 | [TASK-2015.md](./handovers/TASK-2015.md) |
+| `TASK-2016` | Task | Document the Starboard and Update the Privacy Policy | 3 | STORY-201 | [TASK-2016.md](./handovers/TASK-2016.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -553,4 +560,4 @@
 | `EPIC-018` | Dashboard Usability Improvements | DONE | 21 | STORY-182, STORY-183, STORY-184 | [EPIC-018.md](./handovers/EPIC-018.md) |
 | `EPIC-019` | Production Harness: Controlled, Automated and Safeguarded Releases | DONE | 21 | STORY-185, STORY-186 | [EPIC-019.md](./handovers/EPIC-019.md) |
 | `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, STORY-193, STORY-194, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045, STORY-195, CHORE-2005, STORY-196, CHORE-2006, CHORE-2007, BUG-0049, CHORE-2008, STORY-197, BUG-0050, CHORE-2009, BUG-0051 | [EPIC-020.md](./handovers/EPIC-020.md) |
-| `EPIC-021` | Essential Server Tools | TODO | 21 | STORY-198, STORY-199, BUG-0052, STORY-200 | [EPIC-021.md](./handovers/EPIC-021.md) |
+| `EPIC-021` | Essential Server Tools | TODO | 21 | STORY-198, STORY-199, BUG-0052, STORY-200, STORY-201 | [EPIC-021.md](./handovers/EPIC-021.md) |

@@ -4,6 +4,11 @@ import { AUTOMOD_ACTIONS, EscalationPolicySchema } from './moderation-settings.j
 import { CommandOverridesSchema } from './command-overrides.js';
 import { AutoVoiceHubsSchema } from './auto-voice.js';
 import { LevelRoleRewardsSchema } from './level-roles.js';
+import {
+  MAX_STARBOARD_IGNORED_CHANNELS,
+  MAX_STARBOARD_THRESHOLD,
+  StarboardEmojiSetting,
+} from './starboard.js';
 import { GameRulesSchema, MAX_GAME_WAGER_LIMIT } from './games.js';
 import {
   AI_MODEL_CHOICES,
@@ -404,6 +409,25 @@ export const GuildConfigSchemas = {
       ),
       keepPreviousRoles: FlagSetting.describe(
         'Keep the reward roles of lower levels on (stack them) or off (a member holds only the reward of their highest level)',
+      ),
+    })
+    .strict(),
+  starboard: z
+    .object({
+      channelId: OptionalSnowflakeSetting.describe(
+        'Channel where popular messages are reposted; empty turns the starboard off',
+      ),
+      emoji: StarboardEmojiSetting.describe(
+        'Emoji members react with: one Unicode emoji such as ⭐, or one custom server emoji written as <:name:id> or <a:name:id>',
+      ),
+      threshold: IntSetting(1, MAX_STARBOARD_THRESHOLD).describe(
+        `Reactions a message needs to reach the starboard (1 to ${MAX_STARBOARD_THRESHOLD})`,
+      ),
+      allowSelfStar: FlagSetting.describe(
+        "Count the message author's own reaction on or off (off by default)",
+      ),
+      ignoredChannelIds: SnowflakeListSetting(MAX_STARBOARD_IGNORED_CHANNELS).describe(
+        `Channel IDs whose messages never reach the starboard, comma separated (at most ${MAX_STARBOARD_IGNORED_CHANNELS})`,
       ),
     })
     .strict(),
