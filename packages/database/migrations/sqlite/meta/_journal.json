@@ -50,6 +50,13 @@
       "when": 1792598786262,
       "tag": "0006_strong_ares",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1792634062388,
+      "tag": "0007_busy_proteus",
+      "breakpoints": true
     }
   ]
 }

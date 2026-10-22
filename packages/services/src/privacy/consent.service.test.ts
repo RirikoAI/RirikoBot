@@ -21,7 +21,7 @@ function setup(found: UserConsent | null = null) {
 describe('ConsentService', () => {
   it('owns the current versions: the terms follow the legal texts, the AI consent keeps its own date', () => {
     const { service } = setup();
-    expect(TERMS_VERSION).toBe('2026-10-21');
+    expect(TERMS_VERSION).toBe('2026-10-22');
     expect(AI_CONSENT_VERSION).toBe('2026-10-15');
     expect(service.versionOf('terms')).toBe(TERMS_VERSION);
     expect(service.versionOf('ai')).toBe(AI_CONSENT_VERSION);

@@ -141,6 +141,7 @@
 | `STORY-196` | Story | npx ririko: the npm Package Becomes a Zero-Dependency 2.0 Starter | 8 | EPIC-020 | [STORY-196.md](./handovers/STORY-196.md) |
 | `STORY-197` | Story | Energy at a Glance: the /energy and !energy Command | 3 | EPIC-020 | [STORY-197.md](./handovers/STORY-197.md) |
 | `STORY-198` | Story | Support Tickets: Open-Ticket Panel, Private Ticket Channels, Claim and Close with Transcripts | 21 | EPIC-021 | [STORY-198.md](./handovers/STORY-198.md) |
+| `STORY-199` | Story | Server Event Logs: Message, Member, Server and Voice Logs to Chosen Channels | 21 | EPIC-021 | [STORY-199.md](./handovers/STORY-199.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -427,6 +428,12 @@
 | `TASK-1984` | Task | /ticket Command (Slash and Prefix), Panel, Buttons, Modals and Bot Wiring | 5 | STORY-198 | [TASK-1984.md](./handovers/TASK-1984.md) |
 | `TASK-1985` | Task | Tickets Dashboard Page with a Category Picker | 3 | STORY-198 | [TASK-1985.md](./handovers/TASK-1985.md) |
 | `TASK-1986` | Task | Document Support Tickets for Server Admins and in the Privacy Policy | 1 | STORY-198 | [TASK-1986.md](./handovers/TASK-1986.md) |
+| `TASK-1991` | Task | Event Log Settings Table, Migrations and EventLogSettingsRepository | 3 | STORY-199 | [TASK-1991.md](./handovers/TASK-1991.md) |
+| `TASK-1992` | Task | The `eventlogs` Guild Config Module | 2 | STORY-199 | [TASK-1992.md](./handovers/TASK-1992.md) |
+| `TASK-1993` | Task | EventLogService: Cached Settings, Ignore Rules and One Embed per Event | 5 | STORY-199 | [TASK-1993.md](./handovers/TASK-1993.md) |
+| `TASK-1994` | Task | Event Log Listener, the GuildModeration Intent and Bot Wiring | 5 | STORY-199 | [TASK-1994.md](./handovers/TASK-1994.md) |
+| `TASK-1995` | Task | Event Log Settings on the Logging Dashboard Page | 3 | STORY-199 | [TASK-1995.md](./handovers/TASK-1995.md) |
+| `TASK-1996` | Task | Document Event Logs for Server Admins and in the Privacy Policy | 3 | STORY-199 | [TASK-1996.md](./handovers/TASK-1996.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -502,6 +509,7 @@
 | `BUG-0049` | Bug | Docker Images 2.0.0 Carry Critical and High CVEs From the Base Image, the Bundled npm and Old Dashboard Dependencies | 5 | EPIC-020 | [BUG-0049.md](./handovers/BUG-0049.md) |
 | `BUG-0050` | Bug | Energy Is Shown, Spent or Refunded Without the Daily Reset: /dungeon status, /adventure and the Floor Refund | 3 | EPIC-020 | [BUG-0050.md](./handovers/BUG-0050.md) |
 | `BUG-0051` | Bug | Energy and the Potion Limit Share One Stored Reset Date: a Potion Can Refill Energy Again When Their Reset Times Differ | 5 | EPIC-020 | [BUG-0051.md](./handovers/BUG-0051.md) |
+| `BUG-0052` | Bug | Logging Page Says Ignored Channels Skip All Events, but Only Messages Are Skipped | 1 | EPIC-021 | [BUG-0052.md](./handovers/BUG-0052.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |
@@ -537,4 +545,4 @@
 | `EPIC-018` | Dashboard Usability Improvements | DONE | 21 | STORY-182, STORY-183, STORY-184 | [EPIC-018.md](./handovers/EPIC-018.md) |
 | `EPIC-019` | Production Harness: Controlled, Automated and Safeguarded Releases | DONE | 21 | STORY-185, STORY-186 | [EPIC-019.md](./handovers/EPIC-019.md) |
 | `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, STORY-193, STORY-194, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045, STORY-195, CHORE-2005, STORY-196, CHORE-2006, CHORE-2007, BUG-0049, CHORE-2008, STORY-197, BUG-0050, CHORE-2009, BUG-0051 | [EPIC-020.md](./handovers/EPIC-020.md) |
-| `EPIC-021` | Essential Server Tools | TODO | 21 | STORY-198 | [EPIC-021.md](./handovers/EPIC-021.md) |
+| `EPIC-021` | Essential Server Tools | TODO | 21 | STORY-198, STORY-199, BUG-0052 | [EPIC-021.md](./handovers/EPIC-021.md) |

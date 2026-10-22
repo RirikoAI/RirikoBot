@@ -10,6 +10,7 @@ import {
   registerMemberListener,
   registerReactionListener,
   registerGuildRegistryListener,
+  registerEventLogListener,
 } from './index.js';
 import { syncCommandCatalog } from './command-catalog.js';
 import { createCommandRouter, createHelpOptions } from './command-router.js';
@@ -129,6 +130,7 @@ export async function main(): Promise<void> {
   registerMemberListener(bot.client, services);
   registerReactionListener(bot.client, services);
   registerGuildRegistryListener(bot.client, services);
+  registerEventLogListener(bot.client, services);
 
   // Bind interactive Help Center UI components, Music Controller buttons, Giveaway buttons, and Role components
   registerComponentInteractions(bot.client, {

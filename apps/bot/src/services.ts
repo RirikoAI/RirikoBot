@@ -11,6 +11,7 @@ import {
   GuildRepository,
   CommandCatalogRepository,
   CommandSettingsRepository,
+  EventLogSettingsRepository,
   LeaderboardRepository,
   ItemRepository,
   InventoryRepository,
@@ -172,6 +173,7 @@ import {
   ConsentService,
   DataRetentionService,
   CommandOverrideService,
+  EventLogService,
   BotStatusReporter,
   ReactionGifService,
   MemeSynthesizer,
@@ -258,6 +260,8 @@ export interface BotServices {
   legalLinks: LegalLinks;
   /** Per-guild and per-channel command overrides read by the router middlewares. */
   commandOverrideService: CommandOverrideService;
+  /** Posts message, member, server and voice events to the channels chosen on the Logging page. */
+  eventLogService: EventLogService;
   /** Registered commands, written at startup so the dashboard and CLI can list them. */
   commandCatalogRepo: CommandCatalogRepository;
   /** The servers the bot is in, with owner and inviter; kept current by the guild registry listener. */
@@ -633,6 +637,10 @@ export async function createBotServices(
   eventBus.on('guild:configChanged', ({ guildId, module }) => {
     // The Games page writes the games' server-wide overrides too.
     if (module === 'commands' || module === 'games') commandOverrideService.invalidate(guildId);
+  });
+  const eventLogService = new EventLogService({ repo: new EventLogSettingsRepository(db) });
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'eventlogs') eventLogService.invalidate(guildId);
   });
   const commandCatalogRepo = new CommandCatalogRepository(db);
   const maintenanceService = new MaintenanceService({ eventBus });
@@ -1117,6 +1125,7 @@ export async function createBotServices(
     dataRetentionService,
     legalLinks,
     commandOverrideService,
+    eventLogService,
     commandCatalogRepo,
     guildRepo,
     botStatusReporter,

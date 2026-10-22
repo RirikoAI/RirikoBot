@@ -222,5 +222,13 @@ export const SQLITE_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "80e8f607b72d782e7ce8fb83fd1823e75fbcab971c9e1b83340a218dd4e36260",
     "contract": false
+  },
+  {
+    "id": "0007_busy_proteus",
+    "statements": [
+      "CREATE TABLE `event_log_settings` (\n\t`guild_id` text PRIMARY KEY NOT NULL,\n\t`message_channel_id` text,\n\t`member_channel_id` text,\n\t`server_channel_id` text,\n\t`voice_channel_id` text,\n\t`ignored_channel_ids` text DEFAULT '[]' NOT NULL,\n\t`ignore_bots` integer DEFAULT true NOT NULL,\n\t`updated_at` integer NOT NULL\n);"
+    ],
+    "checksum": "47d1fb6f164862c6641d36239397ebdd9ecfda93a7c3576a8a73d1c42ed1b2b1",
+    "contract": false
   }
 ];

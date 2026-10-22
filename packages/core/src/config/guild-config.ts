@@ -215,6 +215,8 @@ export const MAX_TICKET_STAFF_ROLES = 10;
 export const MAX_TICKETS_PER_USER = 5;
 /** Longest welcome message posted in a new ticket channel. */
 export const MAX_TICKET_WELCOME_MESSAGE_LENGTH = 1000;
+/** Most channels a server can exclude from its event logs. */
+export const MAX_EVENT_LOG_IGNORED_CHANNELS = 25;
 const MAX_NO_XP_CHANNELS = 50;
 /** Highest per-guild XP rate. Levels also raise the global bank capacity, so the rate is capped. */
 export const MAX_XP_RATE_PERCENT = 300;
@@ -301,6 +303,28 @@ export const GuildConfigSchemas = {
     .object({
       logChannelId: OptionalSnowflakeSetting.describe(
         'Channel for moderation cases, anti-raid alerts and dashboard change notices; empty for none',
+      ),
+    })
+    .strict(),
+  eventlogs: z
+    .object({
+      messageChannelId: OptionalSnowflakeSetting.describe(
+        'Channel for the message log (edited, deleted and bulk deleted messages); empty turns it off',
+      ),
+      memberChannelId: OptionalSnowflakeSetting.describe(
+        'Channel for the member log (joins, leaves, nicknames, roles, timeouts, bans); empty turns it off',
+      ),
+      serverChannelId: OptionalSnowflakeSetting.describe(
+        'Channel for the server log (channels and roles created, deleted or renamed); empty turns it off',
+      ),
+      voiceChannelId: OptionalSnowflakeSetting.describe(
+        'Channel for the voice log (members joining, leaving and moving between voice channels); empty turns it off',
+      ),
+      ignoredChannelIds: SnowflakeListSetting(MAX_EVENT_LOG_IGNORED_CHANNELS).describe(
+        `Channel IDs whose messages the event logs skip, threads under them included, comma separated (at most ${MAX_EVENT_LOG_IGNORED_CHANNELS}); member, server and voice events are always logged`,
+      ),
+      ignoreBots: FlagSetting.describe(
+        "Leave out bots' messages and voice activity; member events for bots (joins, leaves, bans, roles) are always logged",
       ),
     })
     .strict(),

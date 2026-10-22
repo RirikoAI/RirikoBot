@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Last updated: 2026-10-21
+Last updated: 2026-10-22
 
 Read this text in Bahasa Malaysia: [Dasar Privasi](ms/privacy.md). If the two versions differ, this English version prevails.
 
@@ -59,8 +59,9 @@ Ririko keeps its data in the operator's database. Each item below has a purpose 
 | 3.14. Command usage counts | For each server, each day and each command, a number that says how many times the command ran. The count does not say who ran it. Commands outside a server are not counted. | To show server managers how the bot is used. Server's legitimate interest. |
 | 3.15. Bot status | The bot's connection delay, the number of servers, the version, and the voice channels that have members (channel IDs and the number of members). It holds no names of members. | To show the health of the bot. Service. |
 | 3.16. Support tickets | The number and channel of each ticket, the ID of the member who opened it, the subject that member typed, the staff who claimed or closed it, the close reason, and the open and close times. Ririko does not keep the messages. A transcript is posted to a channel in the server and is not stored by Ririko. When you ask for erasure, your ID and your subject are removed from the tickets you opened. If you claimed or closed a ticket, your ID is replaced by a code that does not name you. | To run support tickets and to show who handled each one. Service. |
+| 3.17. Event logs | Off until a server's managers pick a log channel. When they do, Ririko posts to that channel, as an embed, the content of messages that were edited or deleted (and the list of attachment names), members who joined, left, changed nickname or roles, were timed out or banned, changes to channels and roles, and members who joined, left or moved between voice channels. Each post names the member (mention and ID) and the time. Ririko does not store these posts. It reads the content of a deleted message only from the short-lived memory of messages it saw in the last hour, and it saves nothing. Only the server's settings (the chosen channels, the ignored channels and the bots switch) are stored, and they hold no member data. The posts stay in the Discord channel under that server's rules and Discord's policy. | To give server managers a record of what happens in their server. Server's legitimate interest. |
 
-3.17. Ririko does not collect email addresses. It does not sell personal data and does not send marketing.
+3.18. Ririko does not collect email addresses. It does not sell personal data and does not send marketing.
 
 ## 4. Notice and Consent
 

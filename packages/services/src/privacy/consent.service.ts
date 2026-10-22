@@ -1,7 +1,7 @@
 import type { UserConsentRepository, UserConsentKind } from '@ririko/database';
 
 /** "Last updated" date of the Terms of Service and the Privacy Policy (docs/legal). */
-export const LEGAL_DOCUMENTS_DATE = '2026-10-21';
+export const LEGAL_DOCUMENTS_DATE = '2026-10-22';
 
 /** The version of the terms notice. Raise it when the terms or the policy change in substance. */
 export const TERMS_VERSION = LEGAL_DOCUMENTS_DATE;

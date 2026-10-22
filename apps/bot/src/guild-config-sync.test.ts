@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   CommandSettingsRepository,
+  EventLogSettingsRepository,
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
@@ -102,5 +103,45 @@ describe('guild config changes from other processes (CHORE-1101)', () => {
     expect(await services.dropManager.resolveGuildConfig('guild-1')).toMatchObject({
       timezone: 'Asia/Tokyo',
     });
+  });
+
+  it('drops the cached event log settings once the change feed reports an eventlogs write (TASK-1994)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    const send = vi.fn().mockResolvedValue(undefined);
+    const guild = {
+      id: 'guild-1',
+      memberCount: 3,
+      channels: { cache: new Map([['log-1', { id: 'log-1', isSendable: () => true, send }]]) },
+    };
+    const joined = () =>
+      services.eventLogService.memberJoined({
+        id: 'user-1',
+        guild,
+        user: { id: 'user-1', tag: 'user#1', createdTimestamp: Date.now() },
+      } as never);
+    await joined();
+    expect(send).not.toHaveBeenCalled();
+
+    // What the dashboard does: save the member log channel and bump the feed.
+    await new EventLogSettingsRepository(db).upsert('guild-1', { memberChannelId: 'log-1' });
+    await new GuildConfigVersionRepository(db).bump('guild-1', 'eventlogs', new Date());
+
+    await joined();
+    expect(send).not.toHaveBeenCalled();
+    await services.guildConfigWatcher.tick();
+    await joined();
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the event log cache when another module changes (TASK-1994)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    const invalidate = vi.spyOn(services.eventLogService, 'invalidate');
+
+    await new GuildConfigVersionRepository(db).bump('guild-1', 'general', new Date());
+    await services.guildConfigWatcher.tick();
+
+    expect(invalidate).not.toHaveBeenCalled();
   });
 });
