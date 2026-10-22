@@ -509,7 +509,8 @@
         "BUG-0052",
         "STORY-200",
         "STORY-201",
-        "STORY-202"
+        "STORY-202",
+        "CHORE-2011"
       ],
       "requires": [],
       "blocks": [],
@@ -13789,6 +13790,61 @@
         "CORE_VERSION in packages/core/src/index.ts is 2.0.2, so /api/health and ririko --version report 2.0.2; the three tests that assert it (apps/bot/src/index.test.ts, apps/cli/src/program.test.ts, apps/web/src/app/api/health/route.test.ts) expect 2.0.2. pnpm build, pnpm typecheck, pnpm format:check and those three test files pass."
       ],
       "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/bot/src/index.test.ts apps/cli/src/program.test.ts apps/web/src/app/api/health/route.test.ts packages/core/src/index.test.ts && pnpm format:check"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "small",
+      "handovers": [
+        "CHORE-2011",
+        "CHORE-2010",
+        "EPIC-021"
+      ],
+      "id": "CHORE-2011",
+      "parent": "EPIC-021",
+      "points": 1,
+      "status": "DONE",
+      "title": "Version 2.1.0 in Every Workspace package.json",
+      "description": "EPIC-021 (support tickets, event logs, level role rewards, starboard, and the setup commands of STORY-202, PRs #739 to #744) ships as the 2.1.0 minor release. docs/release.md section 4 step 2 says package.json must hold the version before the tag. Same files as CHORE-2010.",
+      "context": {
+        "files": [
+          "package.json",
+          "apps/bot/package.json",
+          "apps/cli/package.json",
+          "apps/web/package.json",
+          "packages/ai/package.json",
+          "packages/core/package.json",
+          "packages/database/package.json",
+          "packages/discord/package.json",
+          "packages/music/package.json",
+          "website/package.json",
+          "packages/core/src/index.ts",
+          "apps/bot/src/index.test.ts",
+          "apps/cli/src/program.test.ts",
+          "apps/web/src/app/api/health/route.test.ts",
+          "packages/core/src/index.test.ts",
+          "website/src/components/DiscordDemo/reply.ts",
+          "scripts/website-demo-reply.test.ts"
+        ],
+        "symbols": [
+          "CORE_VERSION",
+          "BOT_VERSION"
+        ],
+        "codegraph_queries": [
+          "CORE_VERSION BOT_VERSION releaseTags RELEASE_TAG_PATTERN"
+        ]
+      },
+      "acceptance": [
+        "The \"version\" field is 2.1.0 in the root package.json, apps/bot, apps/cli, apps/web, packages/ai, packages/core, packages/database, packages/discord, packages/music and website. apps/starter (the npm starter, versioned on its own) and packages/music-private (a separate repository) keep their own versions.",
+        "CORE_VERSION in packages/core/src/index.ts and BOT_VERSION in website/src/components/DiscordDemo/reply.ts are 2.1.0, and the five tests that assert the version (apps/bot/src/index.test.ts, apps/cli/src/program.test.ts, apps/web/src/app/api/health/route.test.ts, packages/core/src/index.test.ts, scripts/website-demo-reply.test.ts) expect 2.1.0.",
+        "No other line changes. Strings such as IP addresses or sample tags that merely contain 2.0.2 are not the app version and stay. pnpm-lock.yaml changes only if it records these versions."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/bot/src/index.test.ts apps/cli/src/program.test.ts apps/web/src/app/api/health/route.test.ts packages/core/src/index.test.ts scripts/website-demo-reply.test.ts && pnpm format:check"
     }
   ],
   "bugs": [
