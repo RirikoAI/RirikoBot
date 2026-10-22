@@ -84,6 +84,7 @@ export const GUILD_DATA_INVENTORY: readonly GuildDataEntry[] = [
     note: 'guild_id is null for DMs, which stay. Prompts made in the server go with it.',
   },
   { table: 'leaderboard_snapshots', action: 'delete' },
+  { table: 'level_role_settings', action: 'delete' },
   { table: 'moderation_cases', action: 'delete' },
   { table: 'moderation_notes', action: 'delete' },
   { table: 'moderation_rules', action: 'delete' },

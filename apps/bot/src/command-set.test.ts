@@ -33,6 +33,7 @@ const GUILD_SCOPED = [
   'farewell',
   'autorole',
   'temprole',
+  'levelroles',
   'create-reaction-role',
   'reaction-roles',
   'autovoice',

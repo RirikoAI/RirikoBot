@@ -292,6 +292,58 @@ describe('GuildConfigSchemas', () => {
     });
   });
 
+  describe('levelroles (TASK-2002)', () => {
+    const REGULAR = '100000000000000001';
+    const VETERAN = '100000000000000002';
+
+    it('sorts the rewards and accepts a flag word from the CLI', () => {
+      const result = GuildConfigSchemas.levelroles.safeParse({
+        rewards: [
+          { level: 20, roleId: VETERAN },
+          { level: 5, roleId: REGULAR },
+        ],
+        keepPreviousRoles: false,
+      });
+      expect(result.data).toEqual({
+        rewards: [
+          { level: 5, roleId: REGULAR },
+          { level: 20, roleId: VETERAN },
+        ],
+        keepPreviousRoles: false,
+      });
+      const fromCli = GuildConfigSchemas.levelroles.safeParse({
+        rewards: JSON.stringify([{ level: 5, roleId: REGULAR }]),
+        keepPreviousRoles: 'off',
+      });
+      expect(fromCli.data).toEqual({
+        rewards: [{ level: 5, roleId: REGULAR }],
+        keepPreviousRoles: false,
+      });
+    });
+
+    it('reports a bad row with its path, and rejects unknown keys', () => {
+      const bad = GuildConfigSchemas.levelroles.safeParse({
+        rewards: [{ level: 0, roleId: REGULAR }],
+        keepPreviousRoles: true,
+      });
+      expect(bad.error?.issues[0]?.path).toEqual(['rewards', 0, 'level']);
+      expect(
+        GuildConfigSchemas.levelroles.safeParse({ rewards: [], keepPreviousRoles: 'maybe' })
+          .success,
+      ).toBe(false);
+      expect(
+        GuildConfigSchemas.levelroles.safeParse({ rewards: [], keepPreviousRoles: true, extra: 1 })
+          .success,
+      ).toBe(false);
+    });
+
+    it('describes every field for a server admin', () => {
+      for (const field of Object.values(GuildConfigSchemas.levelroles.shape)) {
+        expect(field.description?.length).toBeGreaterThan(20);
+      }
+    });
+  });
+
   it('lists the modules with only keys the bot reads', () => {
     expect(GUILD_CONFIG_MODULES).toEqual([
       'general',
@@ -304,6 +356,7 @@ describe('GuildConfigSchemas', () => {
       'tickets',
       'autovoice',
       'xp',
+      'levelroles',
       'games',
       'music',
       'ai',
@@ -359,6 +412,10 @@ describe('GuildConfigSchemas', () => {
       'noXpChannelIds',
       'noXpRoleIds',
       'voiceXpEnabled',
+    ]);
+    expect(Object.keys(GuildConfigSchemas.levelroles.shape)).toEqual([
+      'rewards',
+      'keepPreviousRoles',
     ]);
     expect(Object.keys(GuildConfigSchemas.games.shape)).toEqual(['maxWager', 'rules']);
     expect(isGuildConfigModule('general')).toBe(true);

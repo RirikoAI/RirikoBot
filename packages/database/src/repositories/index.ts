@@ -20,6 +20,7 @@ export * from './free-game.repository.js';
 export * from './giveaway.repository.js';
 export * from './ticket.repository.js';
 export * from './event-log-settings.repository.js';
+export * from './level-role-settings.repository.js';
 export * from './autovoice.repository.js';
 export * from './autovoice-channel.repository.js';
 export * from './waifu-asset.repository.js';

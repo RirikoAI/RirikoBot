@@ -506,7 +506,8 @@
       "children": [
         "STORY-198",
         "STORY-199",
-        "BUG-0052"
+        "BUG-0052",
+        "STORY-200"
       ],
       "requires": [],
       "blocks": [],
@@ -3273,6 +3274,71 @@
       },
       "acceptance": [
         "TASK-1991 to TASK-1996 are DONE."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm test:coverage"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [
+        "TASK-2001",
+        "TASK-2002",
+        "TASK-2003",
+        "TASK-2004",
+        "TASK-2005",
+        "TASK-2006",
+        "TASK-2007"
+      ],
+      "requires": [
+        "STORY-199"
+      ],
+      "model": "large",
+      "handovers": [
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "STORY-200",
+      "parent": "EPIC-021",
+      "title": "Level Role Rewards: Roles Given Automatically at Chosen Levels",
+      "points": 21,
+      "status": "DONE",
+      "description": "Maintainer (2026-10-22): the next essential feature after event logs. Admins pick roles that members get when they reach a level (for example level 5 gets @Regular, level 20 gets @Veteran). Ririko gives the roles on every level-up from chat, voice or items, gives them back when a member rejoins, and can sync existing members on request. A server chooses whether members keep lower reward roles or only hold the highest one. Settings live in a new `levelroles` guild config module, edited on the XP & Ranking dashboard page and with the /levelroles command.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/",
+          "packages/database/src/repositories/",
+          "packages/core/src/config/guild-config.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/level-roles/",
+          "packages/services/src/economy/leveling.service.ts",
+          "packages/services/src/roles/autorole.service.ts",
+          "apps/bot/src/listeners/",
+          "apps/bot/src/commands/roles/",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/main.ts",
+          "apps/web/src/app/dashboard/[guildId]/xp/",
+          "docs/"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "LevelingService.addExperience",
+          "leveling:levelUp",
+          "AutoRoleService",
+          "XpRepository",
+          "checkAssignableRoles"
+        ],
+        "codegraph_queries": [
+          "LevelingService addExperience leveling:levelUp LevelUpEvent",
+          "GuildConfigSchemas xp autoroles GuildConfigService stores",
+          "AutoRoleService validateRole managed highest position"
+        ]
+      },
+      "acceptance": [
+        "TASK-2001 to TASK-2007 are DONE."
       ],
       "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm test:coverage"
     }
@@ -11754,6 +11820,419 @@
         "Every statement matches the merged code of TASK-1991 to TASK-1995, and `pnpm docs:build` passes."
       ],
       "verify_cmd": "pnpm docs:build && pnpm vitest run packages/services/src/privacy && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-2001",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2001",
+      "parent": "STORY-200",
+      "points": 3,
+      "status": "DONE",
+      "title": "Level Role Settings Table, Migrations, Repository and XP Accounts by Level",
+      "description": "One per-server settings table on both dialects, its additive migration, a small repository, and an XpRepository query for the members at or above a level. No Discord code.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/level-roles.ts",
+          "packages/database/src/schema/pg/level-roles.ts",
+          "packages/database/src/schema/sqlite/index.ts",
+          "packages/database/src/schema/pg/index.ts",
+          "packages/database/src/schema/types/index.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/migrations/",
+          "packages/database/src/migrations/",
+          "packages/database/src/repositories/level-role-settings.repository.ts",
+          "packages/database/src/repositories/level-role-settings.repository.behaviour.test.ts",
+          "packages/database/src/repositories/index.ts",
+          "packages/database/src/repositories/guild-data-inventory.ts",
+          "packages/database/src/repositories/xp.repository.ts",
+          "packages/database/src/repositories/xp.repository.behaviour.test.ts",
+          "packages/database/src/schema/sqlite/event-logs.ts",
+          "packages/database/src/schema/pg/event-logs.ts",
+          "packages/database/src/repositories/event-log-settings.repository.ts"
+        ],
+        "symbols": [
+          "EventLogSettingsRepository",
+          "eventLogSettings",
+          "XpRepository.getAllGuildAccounts",
+          "GUILD_DATA_INVENTORY"
+        ],
+        "entry_points": [
+          "packages/database/src/repositories/index.ts"
+        ],
+        "codegraph_queries": [
+          "EventLogSettingsRepository get upsert eventLogSettings",
+          "XpRepository getAllGuildAccounts getAccount level",
+          "guild-data-inventory GuildDataEntry event_log_settings"
+        ]
+      },
+      "acceptance": [
+        "New table `level_role_settings` on both dialects: guild_id (primary key), rewards (JSON list of { level, roleId }, default []), keep_previous_roles (boolean, default true), updated_at. Built like event_log_settings.",
+        "`pnpm db:generate` output is committed for both dialects; the new migration only creates the table, and `pnpm db:check` passes.",
+        "LevelRoleSettingsRepository (exported from @ririko/database) has get(guildId) returning the row or null, and upsert(guildId, patch) that creates or changes the given fields, both taking an optional tx.",
+        "XpRepository has listMembersAtLevel(guildId, minLevel, tx?) returning { userId, level } for every account of that guild with level >= minLevel, highest level first.",
+        "guild-data-inventory.ts lists level_role_settings with action `delete`, and its test passes. The table has no user ID column.",
+        "Behaviour tests cover the repository (missing row, create, partial patch, the JSON list) and listMembersAtLevel (other guilds and lower levels left out, order), on SQLite and on PostgreSQL in test-postgres, like event-log-settings.repository.behaviour.test.ts."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src/repositories/level-role-settings.repository.behaviour.test.ts packages/database/src/repositories/xp.repository.behaviour.test.ts packages/database/src/repositories/guild-data-inventory.test.ts packages/database/src/repositories/user-data-inventory.test.ts packages/database/src/schema && pnpm --filter @ririko/database typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2001"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2002",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2002",
+      "parent": "STORY-200",
+      "points": 2,
+      "status": "DONE",
+      "title": "The `levelroles` Guild Config Module and Its Rewards Schema",
+      "description": "A validated rewards list in @ririko/core, a new `levelroles` entry in GuildConfigSchemas, and a store in GuildConfigService that reads and writes level_role_settings.",
+      "context": {
+        "files": [
+          "packages/core/src/config/level-roles.ts",
+          "packages/core/src/config/auto-voice.ts",
+          "packages/core/src/config/guild-config.ts",
+          "packages/core/src/config/guild-config.test.ts",
+          "packages/core/src/index.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/guild/__tests__/guild-config.service.test.ts",
+          "apps/web/src/lib/server/services.ts"
+        ],
+        "symbols": [
+          "AutoVoiceHubsSchema",
+          "JsonSetting",
+          "FlagSetting",
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "createGuildConfigService"
+        ],
+        "entry_points": [
+          "packages/core/src/config/guild-config.ts"
+        ],
+        "codegraph_queries": [
+          "AutoVoiceHubsSchema JsonSetting autovoice hubs",
+          "GuildConfigSchemas eventlogs GuildConfigService stores eventlogs",
+          "createGuildConfigService GuildConfigServiceDeps eventLogs"
+        ]
+      },
+      "acceptance": [
+        "`packages/core/src/config/level-roles.ts` exports MAX_LEVEL_ROLE_REWARDS = 25, MAX_REWARD_LEVEL = 1000, a LevelRoleReward type and LevelRoleRewardsSchema: a list of { level (whole number 1 to 1000), roleId (snowflake) }, at most 25, no level twice, no role twice, sorted by level. Each error message is plain English, like AutoVoiceHubsSchema.",
+        "GuildConfigSchemas has a strict `levelroles` module: rewards (JsonSetting(LevelRoleRewardsSchema)) and keepPreviousRoles (FlagSetting). Each has a describe() text.",
+        "GuildConfigService reads `levelroles` from LevelRoleSettingsRepository.get (defaults: no rewards, keepPreviousRoles true) and writes with upsert inside the audit transaction, like the `eventlogs` store. Every construction gets the repository, and `pnpm typecheck` passes.",
+        "Tests cover the schema (valid list sorted, level 0 and 1001, a repeated level, a repeated role, 26 rewards, a bad ID) and the store (defaults, write then read back)."
+      ],
+      "verify_cmd": "pnpm vitest run packages/core/src/config packages/services/src/guild && pnpm typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2002"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2003",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2003",
+      "parent": "STORY-200",
+      "points": 5,
+      "status": "DONE",
+      "title": "LevelRoleService: Cached Settings, the Roles for a Level, Safe Assignment and Server Sync",
+      "description": "The Discord-facing logic in packages/services/src/level-roles. It works out which reward roles a member should hold at a level, gives and removes them safely, and syncs a whole server. TASK-2004 and TASK-2005 only call it.",
+      "context": {
+        "files": [
+          "packages/services/src/level-roles/level-role.service.ts",
+          "packages/services/src/level-roles/types.ts",
+          "packages/services/src/level-roles/index.ts",
+          "packages/services/src/level-roles/__tests__/",
+          "packages/services/src/index.ts",
+          "packages/services/src/event-logs/event-log.service.ts",
+          "packages/services/src/roles/autorole.service.ts"
+        ],
+        "symbols": [
+          "EventLogService",
+          "AutoRoleService.validateRole",
+          "LevelRoleSettingsRepository",
+          "XpRepository.listMembersAtLevel"
+        ],
+        "entry_points": [
+          "packages/services/src/level-roles/index.ts"
+        ],
+        "codegraph_queries": [
+          "EventLogService settings cache invalidate cacheTtlMs now",
+          "AutoRoleService validateRole managed highest position",
+          "LevelRoleSettingsRepository get XpRepository listMembersAtLevel"
+        ]
+      },
+      "acceptance": [
+        "A pure rolesForLevel(rewards, level, keepPreviousRoles) returns { keep, remove }: with keepPreviousRoles, every reward role at or below the level; without it, only the role of the highest reward at or below the level, and every other reward role goes in remove. Level 0 or no rewards gives empty lists.",
+        "LevelRoleService caches each server's settings for 5 minutes and has invalidate(guildId), like EventLogService.",
+        "applyForMember(member, level) adds the missing roles and (without keepPreviousRoles) removes the other reward roles the member holds, with the audit log reason \"Level <n> reward\". It skips a role that no longer exists, @everyone, a managed role, and a role at or above Ririko's highest role, and does nothing when Ririko lacks Manage Roles. It never removes a role that is not a reward. It returns { added, removed, skipped } and never throws: a Discord error is logged with the guild and role IDs.",
+        "syncGuild(guild) walks XpRepository.listMembersAtLevel from the lowest reward level, fetches members in batches of 100, skips users who left, and applies each one in turn. Only one sync per server runs at a time (a second call returns { busy: true }). It returns the number of members checked and the roles added and removed.",
+        "Unit tests cover rolesForLevel (both modes, gaps, skipped levels from a multi-level jump), each skip rule, the remove rule, a failed role call, the cache, sync batching, members who left, and the one-sync-at-a-time rule."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/level-roles && pnpm --filter @ririko/services typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2003"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2004",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2004",
+      "parent": "STORY-200",
+      "points": 3,
+      "status": "DONE",
+      "title": "Give Reward Roles on Level-Up and Rejoin, and Bot Wiring",
+      "description": "Hooks LevelRoleService into the bot: the `leveling:levelUp` event (chat, voice and items all emit it), guildMemberAdd for members who come back, and cache invalidation on dashboard changes.",
+      "context": {
+        "files": [
+          "apps/bot/src/listeners/level-roles.listener.ts",
+          "apps/bot/src/listeners/__tests__/level-roles.listener.test.ts",
+          "apps/bot/src/listeners/index.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/guild-config-sync.test.ts",
+          "apps/bot/src/listeners/event-log.listener.ts",
+          "packages/services/src/economy/leveling.service.ts",
+          "packages/core/src/events/types.ts"
+        ],
+        "symbols": [
+          "registerEventLogListener",
+          "createBotServices",
+          "BotServices",
+          "leveling:levelUp",
+          "XpRepository.getAccount"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "registerEventLogListener guildMemberAdd main.ts",
+          "createBotServices eventBus.on guild:configChanged eventlogs invalidate",
+          "LevelingService addExperience eventBus emit leveling:levelUp"
+        ]
+      },
+      "acceptance": [
+        "registerLevelRolesListener(client, services) handles `leveling:levelUp` on the event bus: it fetches the guild and member (skipping a guild Ririko left or a member who left) and calls applyForMember with the new level. It runs whatever the announcement settings say.",
+        "On guildMemberAdd for a human member, it reads the member's XP account for that guild and calls applyForMember when the level is above 0 and the server has rewards. Bots are skipped.",
+        "Each handler has its own try/catch and logs errors; nothing reaches the gateway or the event bus as an unhandled rejection.",
+        "BotServices builds LevelRoleSettingsRepository and LevelRoleService. services.ts invalidates the service's cache on guild:configChanged for the `levelroles` module, and guild-config-sync.test.ts covers it.",
+        "main.ts registers the listener next to the other listeners.",
+        "Tests check the level-up path, a member who left, the rejoin path (level 0, no rewards, bot), error handling, and the cache drop."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/listeners apps/bot/src/guild-config-sync.test.ts && pnpm --filter @ririko/bot typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2003"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2005",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2005",
+      "parent": "STORY-200",
+      "points": 3,
+      "status": "DONE",
+      "title": "The /levelroles Command: List, Add, Remove and Sync",
+      "description": "One command with slash and prefix forms for server staff. Changes go through GuildConfigService so they are validated, audited and reach the dashboard.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/roles/level-roles.command.ts",
+          "apps/bot/src/commands/roles/__tests__/",
+          "apps/bot/src/commands/roles/index.ts",
+          "apps/bot/src/commands/roles/autorole.command.ts",
+          "apps/bot/src/commands/tickets/ticket.command.ts",
+          "docs/commands.md",
+          "apps/bot/src/command-set.test.ts"
+        ],
+        "symbols": [
+          "createAutoRoleCommand",
+          "createTicketCommand",
+          "Command",
+          "CommandContext",
+          "GuildConfigService.set"
+        ],
+        "entry_points": [
+          "apps/bot/src/commands/roles/index.ts"
+        ],
+        "codegraph_queries": [
+          "createTicketCommand subcommand guildConfig set audit",
+          "createAutoRoleCommand resolveRole hasAdminPermission",
+          "roles command index registration"
+        ]
+      },
+      "acceptance": [
+        "`/levelroles` (prefix `!levelroles`) has actions list, add <level> <role>, remove <level> and sync. Slash and prefix forms behave the same, like /autorole.",
+        "list shows every reward (level and role mention) and whether lower roles are kept; mentions never ping.",
+        "add and remove change the `levelroles` module through GuildConfigService, so the schema rules apply (25 rewards, level 1 to 1000, no repeats) and the change is in the audit log as the member. add also refuses a role Ririko cannot give (managed, @everyone, at or above Ririko's highest role) with a plain reason. Adding a level that has a reward replaces its role.",
+        "sync runs LevelRoleService.syncGuild, replies first that it started, and then reports how many members were checked and roles added or removed, or that a sync is already running.",
+        "Only members with Manage Roles or Manage Server (or Administrator) can use add, remove and sync; list is open to everyone.",
+        "The command is registered and appears in the command list tests and docs/commands.md.",
+        "Tests cover each action, permissions, a refused role, a schema error, and the busy sync."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/commands && pnpm --filter @ririko/bot typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2002"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2006",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2006",
+      "parent": "STORY-200",
+      "points": 3,
+      "status": "DONE",
+      "title": "Level Role Rewards on the XP & Ranking Dashboard Page",
+      "description": "A second form on the XP & Ranking page for the `levelroles` module, with a row editor for level and role. The existing XP form stays as it is.",
+      "context": {
+        "files": [
+          "apps/web/src/app/dashboard/[guildId]/xp/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/xp/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/xp/actions.test.ts",
+          "apps/web/src/app/dashboard/[guildId]/xp/level-rewards-field.tsx",
+          "apps/web/src/app/dashboard/[guildId]/xp/level-rewards-field.test.tsx",
+          "apps/web/src/app/dashboard/[guildId]/autovoice/auto-voice-hubs-field.tsx",
+          "apps/web/src/app/dashboard/[guildId]/autovoice/actions.ts",
+          "apps/web/src/lib/server/guilds/setting-checks.ts",
+          "apps/web/src/lib/server/guilds/audit-log.ts",
+          "apps/web/src/lib/server/guilds/audit-log.test.ts",
+          "apps/web/src/lib/server/authorization-coverage.test.ts",
+          "apps/web/src/components/guild-pickers.tsx",
+          "apps/web/src/app/dashboard/[guildId]/xp/page.test.tsx",
+          "apps/web/src/lib/server/guilds/setting-checks.test.ts"
+        ],
+        "symbols": [
+          "XpSettingsPage",
+          "saveXpSettings",
+          "AutoVoiceHubsField",
+          "checkAutoVoiceHubs",
+          "checkAssignableRoles",
+          "saveGuildSettings",
+          "MODULE_LABELS"
+        ],
+        "entry_points": [
+          "apps/web/src/app/dashboard/[guildId]/xp/page.tsx"
+        ],
+        "codegraph_queries": [
+          "XpSettingsPage saveXpSettings",
+          "AutoVoiceHubsField useSettingsField rows",
+          "checkAssignableRoles checkAutoVoiceHubs setting-checks",
+          "MODULE_LABELS audit-log"
+        ]
+      },
+      "acceptance": [
+        "The XP & Ranking page keeps its form and adds a \"Level role rewards\" form: rows of level (number 1 to 1000) and role (picker of this server's roles), add and remove row buttons (at most 25), and a \"Keep lower reward roles\" switch. The descriptions say that Ririko needs Manage Roles and a role above the reward roles, that rewards apply from the next level-up, and that /levelroles sync gives them to members who already have the level.",
+        "The save action uses saveGuildSettings and checks with checkAssignableRoles that every role exists in this server and Ririko can give it, like the autoroles page. authorization-coverage.test.ts lists it.",
+        "MODULE_LABELS has `levelroles: 'Level Roles'`.",
+        "Tests cover the row editor (add, remove, limit), a valid save, a role Ririko cannot give, a schema error, and the label."
+      ],
+      "verify_cmd": "pnpm vitest run 'apps/web/src/app/dashboard/[guildId]/xp' apps/web/src/lib/server && pnpm --filter @ririko/web typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2004",
+        "TASK-2005",
+        "TASK-2006"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2007",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2007",
+      "parent": "STORY-200",
+      "points": 2,
+      "status": "DONE",
+      "title": "Document Level Role Rewards for Server Admins",
+      "description": "User docs for level role rewards in the economy, dashboard and commands pages.",
+      "context": {
+        "files": [
+          "docs/economy.md",
+          "docs/dashboard.md",
+          "docs/commands.md",
+          "docs/legal/privacy.md",
+          "docs/waifu-tcg.md"
+        ],
+        "symbols": [
+          "rolesForLevel",
+          "LevelRoleService.syncGuild"
+        ],
+        "codegraph_queries": [
+          "LevelRoleService applyForMember syncGuild rolesForLevel"
+        ]
+      },
+      "acceptance": [
+        "docs/economy.md has a Level Role Rewards section: how to set rewards (dashboard and /levelroles), when roles are given (every level-up from chat, voice or items, and on rejoin), the keep-lower-roles choice, sync, what happens when a reward is removed (members keep the role), and the permissions and role order Ririko needs.",
+        "docs/dashboard.md describes the new form on the XP & Ranking page, and docs/commands.md lists /levelroles.",
+        "The privacy policy is checked: level role rewards store only role IDs and levels per server and use XP that the policy already covers. If no change is needed, the PROGRESS entry says so and the legal docs are untouched.",
+        "Every statement matches the merged code of TASK-2001 to TASK-2006, and `pnpm docs:build` passes."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm format:check"
     }
   ],
   "chores": [

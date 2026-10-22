@@ -106,6 +106,10 @@ export type NewTicket = typeof sqlite.tickets.$inferInsert;
 export type EventLogSettings = typeof sqlite.eventLogSettings.$inferSelect;
 export type NewEventLogSettings = typeof sqlite.eventLogSettings.$inferInsert;
 
+// Level role rewards
+export type LevelRoleSettings = typeof sqlite.levelRoleSettings.$inferSelect;
+export type NewLevelRoleSettings = typeof sqlite.levelRoleSettings.$inferInsert;
+
 // Stream Platforms
 export type Streamer = typeof sqlite.streamers.$inferSelect;
 export type NewStreamer = typeof sqlite.streamers.$inferInsert;

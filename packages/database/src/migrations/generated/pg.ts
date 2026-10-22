@@ -226,5 +226,13 @@ export const PG_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "3d17787028e0e4e68028193e2f304f94bcd9ea4ec71d529b1deda0103dbccf43",
     "contract": false
+  },
+  {
+    "id": "0008_nervous_photon",
+    "statements": [
+      "CREATE TABLE \"level_role_settings\" (\n\t\"guild_id\" varchar(32) PRIMARY KEY NOT NULL,\n\t\"rewards\" jsonb DEFAULT '[]'::jsonb NOT NULL,\n\t\"keep_previous_roles\" boolean DEFAULT true NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL\n);"
+    ],
+    "checksum": "7d56a5810e6a8d55aa75527b73ed25be294164dd81c650941963c4f844cf7ea6",
+    "contract": false
   }
 ];

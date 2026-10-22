@@ -57,6 +57,13 @@
       "when": 1792634062388,
       "tag": "0007_busy_proteus",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1792642987906,
+      "tag": "0008_spicy_menace",
+      "breakpoints": true
     }
   ]
 }

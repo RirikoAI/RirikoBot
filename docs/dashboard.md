@@ -67,7 +67,7 @@ The sidebar groups the pages. This table tells you what each page does and where
 | Members | Auto Voice | Sets up "Join to Create" channels. | [modules.md](modules.md) |
 | Members | Welcome Card | Sets the welcome card. | [modules.md](modules.md) |
 | Members | Farewell Card | Sets the farewell card. | [modules.md](modules.md) |
-| Engagement | XP & Ranking | Sets XP rules and level-up messages. | [economy.md](economy.md) |
+| Engagement | XP & Ranking | Sets XP rules, level-up messages and level role rewards. | Section 4.7 and [economy.md](economy.md) |
 | Engagement | Games | Sets wager limits, game switches and cooldowns. | [modules.md](modules.md) |
 | Engagement | Giveaways | Ends giveaways and rerolls winners. | [modules.md](modules.md) |
 | Waifu TCG | Waifu TCG | Sets card drops and the TCG Manager Role. | [waifu-tcg.md](waifu-tcg.md) |
@@ -150,6 +150,24 @@ The Audit Log lists the changes made to the server's settings, newest first, 25 
 ### 4.6. Change Notices
 
 When someone changes a setting on the dashboard, Ririko posts a notice in the log channel. The notice says who changed which module and which fields. Text that members typed is shown as plain code and never pings anyone.
+
+### 4.7. XP & Ranking
+
+The XP & Ranking page has two forms. You need the **Manage Server** permission.
+
+**XP settings.** The first form sets level-up messages, the XP rate, the channels and roles that earn no XP, and voice rewards. Each setting is in [economy.md](economy.md), section 7.
+
+**Level role rewards.** The second form gives members a role when they reach a level.
+
+- Each row has a level (1 to 1000) and a role. Choose **Add reward** for a new row and **Remove** to delete one. A server can have up to 25 rewards. **Add reward** is greyed out at 25.
+- The role picker lists the roles that Ririko can give. A role that another row already uses is not shown again. A saved role that Ririko can no longer give is marked, so you can replace it.
+- **Keep lower reward roles** is on by default. On, a member keeps the reward roles of every level they reached. Off, a member holds only the role of their highest reward.
+- Ririko does not save a role that was deleted or that it cannot give, and it does not save a level or a role that is used twice. It shows an error and saves nothing.
+- Save the form to apply it. The new rewards are given at the next level-up. To give them to members who already have the level, run `/levelroles action:sync` in Discord.
+
+The XP form and the rewards form save on their own. A save on the rewards form shows in the Audit Log as "Level Roles settings changed". Ririko needs the **Manage Roles** permission and a role above the reward roles. See [economy.md](economy.md), section 8, for when roles are given, the keep switch, sync and the permissions.
+
+With the command line, the keys are `levelroles.rewards` (a JSON list, for example `[{"level":5,"roleId":"123456789012345678"}]`) and `levelroles.keepPreviousRoles`.
 
 ## 5. Command Line
 
