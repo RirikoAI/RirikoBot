@@ -33,6 +33,7 @@ export const GUILD_NAV_ITEMS = [
   { slug: 'xp', label: 'XP & Ranking', group: 'engagement' },
   { slug: 'games', label: 'Games', group: 'engagement' },
   { slug: 'giveaways', label: 'Giveaways', group: 'engagement' },
+  { slug: 'starboard', label: 'Starboard', group: 'engagement' },
   { slug: 'tcg', label: 'Waifu TCG', group: 'tcg' },
   { slug: 'tcg/achievements', label: 'TCG Achievements', group: 'tcg' },
   { slug: 'music', label: 'Music', group: 'features' },

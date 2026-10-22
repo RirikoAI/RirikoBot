@@ -10,6 +10,7 @@ export * from './giveaways.js';
 export * from './tickets.js';
 export * from './event-logs.js';
 export * from './level-roles.js';
+export * from './starboard.js';
 export * from './streams.js';
 export * from './free-games.js';
 export * from './tcg.js';

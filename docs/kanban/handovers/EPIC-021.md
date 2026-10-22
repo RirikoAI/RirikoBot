@@ -31,3 +31,9 @@ STORY-198 (support tickets) is DONE and merged (PR #740). On 2026-10-22 the main
 ## GROOMING · 2026-10-22T04:40:00Z · claude-opus-5-5 (coordinator)
 
 STORY-199 (server event logs) is DONE and merged (PR #741). On 2026-10-22 the maintainer asked for the next essential feature. Level role rewards, item 3 of the gap list, is groomed as STORY-200. The starboard is left.
+
+---
+
+## GROOMING · 2026-10-22T06:10:00Z · claude-opus-5-5 (coordinator)
+
+STORY-200 (level role rewards) is DONE and merged (PR #742). The maintainer asked for the last one of the day, so the starboard (item 4) is groomed as STORY-201. After it, every item on the gap list is covered.

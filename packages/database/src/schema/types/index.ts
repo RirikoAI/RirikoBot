@@ -110,6 +110,12 @@ export type NewEventLogSettings = typeof sqlite.eventLogSettings.$inferInsert;
 export type LevelRoleSettings = typeof sqlite.levelRoleSettings.$inferSelect;
 export type NewLevelRoleSettings = typeof sqlite.levelRoleSettings.$inferInsert;
 
+// Starboard
+export type StarboardSettings = typeof sqlite.starboardSettings.$inferSelect;
+export type NewStarboardSettings = typeof sqlite.starboardSettings.$inferInsert;
+export type StarboardPost = typeof sqlite.starboardPosts.$inferSelect;
+export type NewStarboardPost = typeof sqlite.starboardPosts.$inferInsert;
+
 // Stream Platforms
 export type Streamer = typeof sqlite.streamers.$inferSelect;
 export type NewStreamer = typeof sqlite.streamers.$inferInsert;

@@ -1,6 +1,6 @@
 # Server Modules
 
-This page covers the community features of Ririko: roles, giveaways, support tickets, voice channels, welcome cards, stream alerts, free games, reminders, mini-games, and fun commands. Music, AI, economy, moderation and the card game have their own pages.
+This page covers the community features of Ririko: roles, giveaways, support tickets, voice channels, welcome cards, stream alerts, free games, reminders, mini-games, fun commands, and the starboard. Music, AI, economy, moderation and the card game have their own pages.
 
 ## 1. Overview
 
@@ -21,6 +21,7 @@ Most features work as soon as the bot is in your server. Some need a few setting
 | Server settings | General | No | 10 |
 | Mini-games | Games | No | 11 |
 | Anime, reactions, memes | None | No | 12 |
+| Starboard | Starboard | Yes. Pick a channel. | 13 |
 
 To use the dashboard, see [dashboard.md](dashboard.md). To turn a command off, use the **Commands** page. See [commands.md](commands.md).
 
@@ -437,3 +438,58 @@ Templates: `0days`, `allmyhomies`, `always-been`, `american-chopper`, `chad`, `e
 - Each template uses its own number of texts. `american-chopper` has up to five panels.
 - Prefix forms: `!meme chad text1 | text2` and `!chad text1 | text2`.
 - The cooldown is 3 seconds.
+
+## 13. Starboard
+
+The starboard shows the best messages of your server. When a message gets enough stars, Ririko posts a copy of it in a channel you pick. Members can find the highlights there without scrolling. The starboard is off until you pick the channel.
+
+**Turn it on.**
+
+1. Open the dashboard **Starboard** page. It is in the Engagement group. You need the **Manage Server** permission.
+2. Pick the **Starboard channel**. Leave it on **Off** to keep the starboard off.
+3. Check the **Emoji**. The default is ⭐. You can use any one emoji, or a custom server emoji.
+4. Set **Stars needed**, from 1 to 100. The default is 3.
+5. Pick **Ignored channels** if some channels should never reach the starboard. You can pick up to 25.
+6. Save. The change takes effect at once. Ririko reads the settings again within 5 minutes at the latest.
+
+For a custom server emoji, type its text as `<:name:id>` (animated: `<a:name:id>`). To get that text, type a backslash before the emoji in Discord, like `\:name:`, and send. Keycap emoji such as 1️⃣ are not accepted. There is no command for the starboard. With the command line, the keys are `starboard.channelId`, `starboard.emoji`, `starboard.threshold`, `starboard.allowSelfStar` and `starboard.ignoredChannelIds`. Saves show in the Audit Log as "Starboard settings changed".
+
+**How stars are counted.**
+
+- Only the emoji you chose counts. Other reactions do not.
+- Stars are counted on the original message. Stars on the copy do not count.
+- The author's own star does not count. To count it, turn on **Count the author's own star**.
+- Stars from bots never count, and neither does Ririko's own reaction.
+- Ririko checks a message when someone adds or removes a star on it. Stars given while Ririko was offline are counted at the next change. Old messages work too.
+
+**When a copy is posted, updated and removed.**
+
+- **Posted.** When a message reaches the number of stars, Ririko posts one copy. It posts only once for a message, even when many stars arrive at the same time.
+- **Updated.** The line above the copy shows the emoji, the stars and the channel, such as `⭐ 5 | #general`. It changes when stars are added or removed.
+- **Removed when stars fall.** If the stars fall below the number needed, Ririko deletes the copy. If the message gets enough stars again later, Ririko posts a new copy.
+- **Removed with the original.** When the original message is deleted, Ririko deletes the copy too. This includes a bulk delete.
+- **Not updated for edits.** The copy shows the message as it was when posted. If the author edits the original later, the copy does not change.
+- **Turning it off.** If you choose **Off**, new stars are ignored. Copies already posted stay, and their counts stop changing.
+
+**What the copy shows.** The copy is an embed with the author's name (the server nickname, if there is one) and avatar, the text of the message (cut to 4,096 characters), the first image, the names of other attachments, and a **Source** line with the channel and a **Jump to message** link. The embed has the time of the original message. Mentions inside the copy never ping anyone.
+
+**What is skipped.** Ririko never posts:
+
+- messages in the starboard channel itself,
+- messages in the ignored channels, and in the threads under them,
+- messages from an age-restricted (NSFW) channel, or a thread of one, when the starboard channel is not age-restricted too,
+- messages from webhooks, system messages (such as "member joined"), and direct messages,
+- anything at all, when the starboard channel was deleted or is not a text channel.
+
+**If staff delete a copy.** Ririko marks that message as removed and never posts it again, even if more stars arrive. Ririko sees this at once. If it was offline, it finds out the next time it tries to change the count.
+
+**Known limit: a changed starboard channel.** Ririko finds the copy in the channel that is set now. If you change the starboard channel or turn it off, then delete an original, Ririko removes its record but cannot delete a copy left in the old channel. Staff can delete that copy by hand.
+
+**Permissions.** Ririko needs these permissions.
+
+- In the starboard channel: **View Channel**, **Send Messages**, **Embed Links** and **Read Message History**.
+- In the channels you want to count: **View Channel**, so Ririko sees the stars. It also needs **Read Message History** to read a message that it did not see before.
+
+If Ririko cannot post, it writes a note in the host's console and tries again the next time that message gets or loses a star.
+
+**What Ririko stores.** For each starred message, Ririko stores the IDs of the message, channel, author and copy, the star count, and whether staff removed the copy. It does not store the text. Ririko deletes this record when the original is deleted, when the stars fall below the number needed, with the server's data, and when a member asks for their data to be deleted. The copy itself is a normal Discord message in your channel. See the [privacy policy](legal/privacy.md), section 3.18.

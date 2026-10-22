@@ -238,5 +238,16 @@ export const SQLITE_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "37c2f951aa954f3849da662749901c129513b915f82384b793627c9a2517bbff",
     "contract": false
+  },
+  {
+    "id": "0009_slippery_donald_blake",
+    "statements": [
+      "CREATE TABLE `starboard_posts` (\n\t`message_id` text PRIMARY KEY NOT NULL,\n\t`guild_id` text NOT NULL,\n\t`channel_id` text NOT NULL,\n\t`author_id` text NOT NULL,\n\t`starboard_message_id` text,\n\t`star_count` integer DEFAULT 0 NOT NULL,\n\t`removed` integer DEFAULT false NOT NULL,\n\t`created_at` integer NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
+      "CREATE INDEX `idx_starboard_posts_guild` ON `starboard_posts` (`guild_id`);",
+      "CREATE UNIQUE INDEX `uq_starboard_posts_starboard_message` ON `starboard_posts` (`starboard_message_id`);",
+      "CREATE TABLE `starboard_settings` (\n\t`guild_id` text PRIMARY KEY NOT NULL,\n\t`channel_id` text,\n\t`emoji` text DEFAULT '⭐' NOT NULL,\n\t`threshold` integer DEFAULT 3 NOT NULL,\n\t`allow_self_star` integer DEFAULT false NOT NULL,\n\t`ignored_channel_ids` text DEFAULT '[]' NOT NULL,\n\t`updated_at` integer NOT NULL\n);"
+    ],
+    "checksum": "0b66aacec62dc4db73f3ded3af81e0e6daebec95274903e6ea8cffc87af99fb0",
+    "contract": false
   }
 ];

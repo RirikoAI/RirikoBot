@@ -13,6 +13,7 @@ import {
   CommandSettingsRepository,
   EventLogSettingsRepository,
   LevelRoleSettingsRepository,
+  StarboardRepository,
   LeaderboardRepository,
   ItemRepository,
   InventoryRepository,
@@ -176,6 +177,7 @@ import {
   CommandOverrideService,
   EventLogService,
   LevelRoleService,
+  StarboardService,
   BotStatusReporter,
   ReactionGifService,
   MemeSynthesizer,
@@ -266,6 +268,8 @@ export interface BotServices {
   eventLogService: EventLogService;
   /** Gives the roles chosen on the XP & Ranking page at a level and when a member returns. */
   levelRoleService: LevelRoleService;
+  /** Copies messages that reach the star threshold to the starboard channel chosen on the Engagement page. */
+  starboardService: StarboardService;
   /** Registered commands, written at startup so the dashboard and CLI can list them. */
   commandCatalogRepo: CommandCatalogRepository;
   /** The servers the bot is in, with owner and inviter; kept current by the guild registry listener. */
@@ -652,6 +656,15 @@ export async function createBotServices(
   });
   eventBus.on('guild:configChanged', ({ guildId, module }) => {
     if (module === 'levelroles') levelRoleService.invalidate(guildId);
+  });
+  const starboardService = new StarboardService({
+    repo: new StarboardRepository(db),
+    // The client is optional (tests build services without one), so the server is looked up when
+    // an event arrives. Without a client no server is found and the service does nothing.
+    guilds: { cache: { get: (guildId) => discordClient?.guilds.cache.get(guildId) } },
+  });
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'starboard') starboardService.invalidate(guildId);
   });
   const commandCatalogRepo = new CommandCatalogRepository(db);
   const maintenanceService = new MaintenanceService({ eventBus });
@@ -1138,6 +1151,7 @@ export async function createBotServices(
     commandOverrideService,
     eventLogService,
     levelRoleService,
+    starboardService,
     commandCatalogRepo,
     guildRepo,
     botStatusReporter,

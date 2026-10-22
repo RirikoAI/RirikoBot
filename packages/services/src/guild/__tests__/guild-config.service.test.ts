@@ -16,6 +16,7 @@ import {
   AiRepository,
   ImageRepository,
   FreeGameRepository,
+  StarboardRepository,
   TicketRepository,
   WelcomerRepository,
   type SqliteDatabaseClient,
@@ -47,6 +48,7 @@ describe('GuildConfigService (TASK-1111)', () => {
   let tickets: TicketRepository;
   let eventLogs: EventLogSettingsRepository;
   let levelRoles: LevelRoleSettingsRepository;
+  let starboard: StarboardRepository;
   let service: GuildConfigService;
 
   beforeEach(async () => {
@@ -66,6 +68,7 @@ describe('GuildConfigService (TASK-1111)', () => {
     tickets = new TicketRepository(db);
     eventLogs = new EventLogSettingsRepository(db);
     levelRoles = new LevelRoleSettingsRepository(db);
+    starboard = new StarboardRepository(db);
     service = new GuildConfigService({
       db,
       guildSettings: new GuildSettingsRepository(db),
@@ -82,6 +85,7 @@ describe('GuildConfigService (TASK-1111)', () => {
       tickets: new TicketRepository(db),
       eventLogs: new EventLogSettingsRepository(db),
       levelRoles,
+      starboard,
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -920,6 +924,101 @@ describe('GuildConfigService (TASK-1111)', () => {
     });
   });
 
+  describe('starboard (TASK-2012)', () => {
+    const CHANNEL = '900000000000000001';
+    const MEME_CHANNEL = '900000000000000002';
+    const DEFAULTS = {
+      channelId: null,
+      emoji: '⭐',
+      threshold: 3,
+      allowSelfStar: false,
+      ignoredChannelIds: [],
+    };
+
+    it('reads defaults for a guild without a settings row', async () => {
+      expect(await starboard.getSettings('g1')).toBeNull();
+      expect(await service.get('g1', 'starboard')).toEqual(DEFAULTS);
+    });
+
+    it('writes settings, reads them back and audits the field diff', async () => {
+      const { changes } = await service.update(
+        'g1',
+        'starboard',
+        {
+          channelId: CHANNEL,
+          emoji: '<:pog:123456789012345678>',
+          threshold: 5,
+          allowSelfStar: true,
+          ignoredChannelIds: [MEME_CHANNEL, MEME_CHANNEL],
+        },
+        dashboardActor,
+      );
+      expect(changes.map((change) => change.field)).toEqual([
+        'channelId',
+        'emoji',
+        'threshold',
+        'allowSelfStar',
+        'ignoredChannelIds',
+      ]);
+      const saved = {
+        channelId: CHANNEL,
+        emoji: '<:pog:123456789012345678>',
+        threshold: 5,
+        allowSelfStar: true,
+        ignoredChannelIds: [MEME_CHANNEL],
+      };
+      expect(await service.get('g1', 'starboard')).toEqual(saved);
+      expect(await starboard.getSettings('g1')).toMatchObject(saved);
+      expect(await service.get('g2', 'starboard')).toEqual(DEFAULTS);
+      expect(auditRows().map((audit) => audit.action)).toEqual(['guild_config.starboard.update']);
+    });
+
+    it('accepts plain words from the CLI, trims the emoji and keeps the other fields', async () => {
+      await service.update(
+        'g1',
+        'starboard',
+        { channelId: CHANNEL, emoji: ' 🌟 ', threshold: '10', allowSelfStar: 'on' },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'starboard')).toEqual({
+        ...DEFAULTS,
+        channelId: CHANNEL,
+        emoji: '🌟',
+        threshold: 10,
+        allowSelfStar: true,
+      });
+      await service.update(
+        'g1',
+        'starboard',
+        { channelId: 'none', ignoredChannelIds: '' },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'starboard')).toMatchObject({
+        channelId: null,
+        emoji: '🌟',
+        threshold: 10,
+      });
+    });
+
+    it('rejects a bad emoji, a threshold of 0 or 101 and 26 ignored channels without saving', async () => {
+      await expect(
+        service.update('g1', 'starboard', { emoji: 'star' }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { emoji: [expect.stringContaining('one emoji')] } });
+      await expect(
+        service.update('g1', 'starboard', { threshold: 0 }, dashboardActor),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      await expect(
+        service.update('g1', 'starboard', { threshold: 101 }, dashboardActor),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      const ids = Array.from({ length: 26 }, (_, i) => `9000000000000001${10 + i}`);
+      await expect(
+        service.update('g1', 'starboard', { ignoredChannelIds: ids }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { ignoredChannelIds: ['Choose at most 25.'] } });
+      expect(await starboard.getSettings('g1')).toBeNull();
+      expect(auditRows()).toEqual([]);
+    });
+  });
+
   describe('tickets (TASK-1982)', () => {
     const CATEGORY = '600000000000000001';
     const STAFF = '600000000000000002';
@@ -1409,6 +1508,7 @@ describe('GuildConfigService ai (TASK-1162)', () => {
       tickets: new TicketRepository(db),
       eventLogs: new EventLogSettingsRepository(db),
       levelRoles: new LevelRoleSettingsRepository(db),
+      starboard: new StarboardRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -1520,6 +1620,7 @@ describe('GuildConfigService images (TASK-1163)', () => {
       tickets: new TicketRepository(db),
       eventLogs: new EventLogSettingsRepository(db),
       levelRoles: new LevelRoleSettingsRepository(db),
+      starboard: new StarboardRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',

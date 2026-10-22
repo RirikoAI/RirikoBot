@@ -70,6 +70,7 @@ The sidebar groups the pages. This table tells you what each page does and where
 | Engagement | XP & Ranking | Sets XP rules, level-up messages and level role rewards. | Section 4.7 and [economy.md](economy.md) |
 | Engagement | Games | Sets wager limits, game switches and cooldowns. | [modules.md](modules.md) |
 | Engagement | Giveaways | Ends giveaways and rerolls winners. | [modules.md](modules.md) |
+| Engagement | Starboard | Picks the channel where popular messages are reposted, the emoji and the stars needed. | Section 4.8 and [modules.md](modules.md) |
 | Waifu TCG | Waifu TCG | Sets card drops and the TCG Manager Role. | [waifu-tcg.md](waifu-tcg.md) |
 | Waifu TCG | TCG Achievements | Shows how many members unlocked each achievement. | [waifu-tcg.md](waifu-tcg.md) |
 | Features | Music | Sets the default volume, music channel and DJ role. | [music.md](music.md) |
@@ -168,6 +169,26 @@ The XP & Ranking page has two forms. You need the **Manage Server** permission.
 The XP form and the rewards form save on their own. A save on the rewards form shows in the Audit Log as "Level Roles settings changed". Ririko needs the **Manage Roles** permission and a role above the reward roles. See [economy.md](economy.md), section 8, for when roles are given, the keep switch, sync and the permissions.
 
 With the command line, the keys are `levelroles.rewards` (a JSON list, for example `[{"level":5,"roleId":"123456789012345678"}]`) and `levelroles.keepPreviousRoles`.
+
+### 4.8. Starboard
+
+The Starboard page has one form. When a message gets enough stars, Ririko posts a copy of it in the starboard channel. How stars are counted, and when a copy is posted, updated and removed, is in [modules.md](modules.md), section 13.
+
+| Setting | What it does |
+|---|---|
+| Starboard channel | Where the copies go. Choose **Off** to turn the starboard off. Copies already posted stay. Ririko needs View Channel, Send Messages, Embed Links and Read Message History there. |
+| Emoji | The reaction that counts as a star. One emoji, such as ⭐ (the default), or a custom server emoji written as `<:name:id>` or `<a:name:id>`. |
+| Stars needed | How many stars a message needs before it is posted, from 1 to 100. The default is 3. |
+| Count the author's own star | Off by default. Bots' stars never count. |
+| Ignored channels | Messages in these channels, and in the threads under them, are never posted. Up to 25 channels. |
+
+- The starboard channel must be a text channel of this server. If it is not, Ririko shows an error and saves nothing.
+- A message from an age-restricted channel is posted only when the starboard channel is age-restricted too.
+- Ririko shows an error under a field if the emoji or the number is not valid, and it saves nothing.
+- A change takes effect at once. Ririko reads the settings again within 5 minutes at the latest. A save shows in the Audit Log as "Starboard settings changed".
+- What Ririko posts and keeps is described in the [privacy policy](legal/privacy.md), section 3.18.
+
+With the command line, the keys are `starboard.channelId`, `starboard.emoji`, `starboard.threshold`, `starboard.allowSelfStar` and `starboard.ignoredChannelIds`.
 
 ## 5. Command Line
 

@@ -29,4 +29,14 @@ describe('guild dashboard navigation', () => {
   it('starts at the overview page, the default landing page', () => {
     expect(GUILD_NAV_ITEMS[0].slug).toBe('overview');
   });
+
+  it('lists the Starboard page in the Engagement group after Giveaways', () => {
+    const slugs = GUILD_NAV_ITEMS.map((item) => item.slug);
+    expect(GUILD_NAV_ITEMS.find((item) => item.slug === 'starboard')).toEqual({
+      slug: 'starboard',
+      label: 'Starboard',
+      group: 'engagement',
+    });
+    expect(slugs.indexOf('starboard')).toBe(slugs.indexOf('giveaways') + 1);
+  });
 });

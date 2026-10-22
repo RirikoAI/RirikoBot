@@ -507,7 +507,8 @@
         "STORY-198",
         "STORY-199",
         "BUG-0052",
-        "STORY-200"
+        "STORY-200",
+        "STORY-201"
       ],
       "requires": [],
       "blocks": [],
@@ -3341,6 +3342,67 @@
         "TASK-2001 to TASK-2007 are DONE."
       ],
       "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm test:coverage"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [
+        "TASK-2011",
+        "TASK-2012",
+        "TASK-2013",
+        "TASK-2014",
+        "TASK-2015",
+        "TASK-2016"
+      ],
+      "requires": [
+        "STORY-200"
+      ],
+      "model": "large",
+      "handovers": [
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "STORY-201",
+      "parent": "EPIC-021",
+      "title": "Starboard: Repost Popular Messages to a Highlights Channel",
+      "points": 21,
+      "status": "DONE",
+      "description": "Maintainer (2026-10-22): the last essential feature of the day. When a message gets enough of the chosen reaction (⭐ by default), Ririko posts a copy to the starboard channel with the star count and a jump link, keeps the count up to date, and removes the copy when the original is deleted or drops below the threshold. Settings live in a new `starboard` guild config module, edited on a new Starboard dashboard page.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/",
+          "packages/database/src/repositories/",
+          "packages/core/src/config/guild-config.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/starboard/",
+          "apps/bot/src/listeners/",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/main.ts",
+          "apps/web/src/app/dashboard/[guildId]/starboard/",
+          "apps/web/src/lib/dashboard-nav.ts",
+          "docs/"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "EventLogService",
+          "registerReactionListener",
+          "DEFAULT_PARTIALS",
+          "GUILD_NAV_ITEMS"
+        ],
+        "codegraph_queries": [
+          "registerReactionListener messageReactionAdd partial fetch",
+          "EventLogService settings cache invalidate",
+          "GuildConfigSchemas eventlogs GuildConfigService stores"
+        ]
+      },
+      "acceptance": [
+        "TASK-2011 to TASK-2016 are DONE."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm docs:build && pnpm test:coverage"
     }
   ],
   "tasks": [
@@ -12233,6 +12295,351 @@
         "Every statement matches the merged code of TASK-2001 to TASK-2006, and `pnpm docs:build` passes."
       ],
       "verify_cmd": "pnpm docs:build && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-2011",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2011",
+      "parent": "STORY-201",
+      "points": 3,
+      "status": "DONE",
+      "title": "Starboard Settings and Posts Tables, Migrations and Repositories",
+      "description": "Two tables on both dialects (per-server settings, and one row per starred message), their additive migration, two small repositories and the data inventories. No Discord code.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/starboard.ts",
+          "packages/database/src/schema/pg/starboard.ts",
+          "packages/database/src/schema/sqlite/index.ts",
+          "packages/database/src/schema/pg/index.ts",
+          "packages/database/src/schema/types/index.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/migrations/",
+          "packages/database/src/migrations/",
+          "packages/database/src/repositories/starboard.repository.ts",
+          "packages/database/src/repositories/starboard.repository.behaviour.test.ts",
+          "packages/database/src/repositories/index.ts",
+          "packages/database/src/repositories/guild-data-inventory.ts",
+          "packages/database/src/repositories/user-data-inventory.ts",
+          "packages/database/src/schema/sqlite/level-roles.ts",
+          "packages/database/src/repositories/level-role-settings.repository.ts",
+          "packages/database/src/schema/sqlite/tickets.ts",
+          "packages/database/src/repositories/ticket.repository.ts"
+        ],
+        "symbols": [
+          "LevelRoleSettingsRepository",
+          "TicketRepository",
+          "GUILD_DATA_INVENTORY",
+          "USER_DATA_INVENTORY"
+        ],
+        "entry_points": [
+          "packages/database/src/repositories/index.ts"
+        ],
+        "codegraph_queries": [
+          "LevelRoleSettingsRepository get upsert levelRoleSettings",
+          "TicketRepository tickets uniqueIndex create find",
+          "USER_DATA_INVENTORY UserDataEntry tickets opener_id"
+        ]
+      },
+      "acceptance": [
+        "Table `starboard_settings` on both dialects: guild_id (primary key), channel_id (nullable; null is off), emoji (text, default ⭐), threshold (integer, default 3), allow_self_star (boolean, default false), ignored_channel_ids (JSON string list, default []), updated_at.",
+        "Table `starboard_posts` on both dialects: message_id (primary key), guild_id, channel_id (the original channel), author_id, starboard_message_id (nullable), star_count (integer), removed (boolean, default false: true when staff deleted the starboard copy, so it is never posted again), created_at, updated_at. Indexes on (guild_id) and a unique index on starboard_message_id.",
+        "`pnpm db:generate` output is committed for both dialects; the new migration only creates the two tables and their indexes, and `pnpm db:check` passes.",
+        "StarboardRepository (exported from @ririko/database) has getSettings(guildId) and upsertSettings(guildId, patch) like LevelRoleSettingsRepository, and for posts: findByMessage(messageId), findByStarboardMessage(starboardMessageId), insertPost (returns false instead of throwing on a duplicate message_id), updatePost(messageId, patch) and deletePost(messageId). Every method takes an optional tx.",
+        "guild-data-inventory.ts lists both tables with `delete`. user-data-inventory.ts lists starboard_posts.author_id with `delete`. Both inventory tests pass.",
+        "A behaviour test covers each method on SQLite and on PostgreSQL in test-postgres, including the duplicate insert."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src/repositories/starboard.repository.behaviour.test.ts packages/database/src/repositories/guild-data-inventory.test.ts packages/database/src/repositories/user-data-inventory.test.ts packages/database/src/schema && pnpm --filter @ririko/database typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2011"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2012",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2012",
+      "parent": "STORY-201",
+      "points": 2,
+      "status": "DONE",
+      "title": "The `starboard` Guild Config Module",
+      "description": "A new `starboard` entry in GuildConfigSchemas with an emoji setting, and a store in GuildConfigService that reads and writes starboard_settings.",
+      "context": {
+        "files": [
+          "packages/core/src/config/starboard.ts",
+          "packages/core/src/config/guild-config.ts",
+          "packages/core/src/config/guild-config.test.ts",
+          "packages/core/src/config/index.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/guild/__tests__/guild-config.service.test.ts",
+          "apps/web/src/lib/server/services.ts"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "createGuildConfigService",
+          "OptionalSnowflakeSetting",
+          "SnowflakeListSetting",
+          "IntSetting",
+          "FlagSetting"
+        ],
+        "entry_points": [
+          "packages/core/src/config/guild-config.ts"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas levelroles eventlogs IntSetting",
+          "GuildConfigService stores levelroles read write"
+        ]
+      },
+      "acceptance": [
+        "`packages/core/src/config/starboard.ts` exports DEFAULT_STARBOARD_EMOJI (⭐), MAX_STARBOARD_THRESHOLD (100), MAX_STARBOARD_IGNORED_CHANNELS (25), a StarboardEmojiSetting that accepts one Unicode emoji or one custom emoji written as `<:name:id>` or `<a:name:id>` (trimmed; anything else is refused with a plain message), and parseStarboardEmoji(value) returning { id: string | null; name: string } for matching reactions.",
+        "GuildConfigSchemas has a strict `starboard` module: channelId (OptionalSnowflakeSetting; empty turns the starboard off), emoji, threshold (1 to 100), allowSelfStar (FlagSetting), ignoredChannelIds (at most 25). Each field has a describe() text.",
+        "GuildConfigService reads `starboard` from StarboardRepository.getSettings (defaults: off, ⭐, 3, false, []) and writes with upsertSettings inside the audit transaction. Every construction gets the repository, and `pnpm typecheck` passes.",
+        "Tests cover the emoji setting (Unicode, Unicode with a variation selector, static and animated custom emoji, text, two emoji), parseStarboardEmoji, the module (bounds) and the store (defaults, write then read back)."
+      ],
+      "verify_cmd": "pnpm vitest run packages/core/src/config packages/services/src/guild && pnpm typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2012"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2013",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2013",
+      "parent": "STORY-201",
+      "points": 5,
+      "status": "DONE",
+      "title": "StarboardService: Count Stars, Post, Update and Remove Starboard Copies",
+      "description": "The Discord-facing logic in packages/services/src/starboard. TASK-2014 only forwards gateway events to it.",
+      "context": {
+        "files": [
+          "packages/services/src/starboard/starboard.service.ts",
+          "packages/services/src/starboard/embeds.ts",
+          "packages/services/src/starboard/types.ts",
+          "packages/services/src/starboard/index.ts",
+          "packages/services/src/starboard/__tests__/",
+          "packages/services/src/index.ts",
+          "packages/services/src/event-logs/event-log.service.ts",
+          "packages/services/src/event-logs/embeds.ts",
+          "packages/services/src/level-roles/level-role.service.ts"
+        ],
+        "symbols": [
+          "EventLogService",
+          "LevelRoleService",
+          "StarboardRepository",
+          "parseStarboardEmoji"
+        ],
+        "entry_points": [
+          "packages/services/src/starboard/index.ts"
+        ],
+        "codegraph_queries": [
+          "EventLogService settings cache invalidate embeds cut",
+          "StarboardRepository findByMessage insertPost updatePost",
+          "parseStarboardEmoji starboard config"
+        ]
+      },
+      "acceptance": [
+        "StarboardService caches each server's settings for 5 minutes with invalidate(guildId), like EventLogService. No method throws; errors are logged with guild, channel and message IDs only, never content.",
+        "reactionChanged(message) handles add, remove, remove-all and remove-emoji alike: it reads the matching reaction on the (fetched) message, counts it, and subtracts the author's own reaction when allowSelfStar is off (it checks the reactors only when the count could reach the threshold). Bot reactions are not counted.",
+        "A message is skipped when the starboard is off, the message is in the starboard channel itself or an ignored channel (a thread follows its parent), it is from a webhook or a system message, or its channel is NSFW and the starboard channel is not.",
+        "At or above the threshold with no post: it sends the copy and saves the row. With a post: it edits the count on the copy. Below the threshold: it deletes the copy and the row. A row marked removed is never posted again. Work for one message runs one at a time (an in-memory queue per message ID), so a burst of reactions posts once.",
+        "messageDeleted(messageId) deletes the copy and the row when an original is deleted, and marks the row removed when the copy itself is deleted (by staff).",
+        "The copy is an embed: author name and avatar, content cut to fit, the first image attachment or image embed as the image, other attachment names, the source channel and a jump link; the message content line is \"<emoji> <count> | <#channel>\". Mentions never ping (allowedMentions { parse: [] }).",
+        "Unit tests cover counting (self-star, bots), each skip rule, post, edit, remove below threshold, removed rows, the per-message queue, original and copy deletion, a failed send, and the embed."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/starboard && pnpm --filter @ririko/services typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2013"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2014",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2014",
+      "parent": "STORY-201",
+      "points": 5,
+      "status": "DONE",
+      "title": "Starboard Listener and Bot Wiring",
+      "description": "Forwards reaction and delete events to StarboardService, resolving partials, and drops its cache on dashboard changes.",
+      "context": {
+        "files": [
+          "apps/bot/src/listeners/starboard.listener.ts",
+          "apps/bot/src/listeners/__tests__/starboard.listener.test.ts",
+          "apps/bot/src/listeners/index.ts",
+          "apps/bot/src/listeners/reaction.listener.ts",
+          "apps/bot/src/listeners/event-log.listener.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/guild-config-sync.test.ts"
+        ],
+        "symbols": [
+          "registerReactionListener",
+          "registerEventLogListener",
+          "createBotServices",
+          "BotServices"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "registerReactionListener messageReactionAdd partial fetch",
+          "registerEventLogListener messageDelete messageDeleteBulk guarded",
+          "createBotServices guild:configChanged levelroles invalidate"
+        ]
+      },
+      "acceptance": [
+        "registerStarboardListener(client, services) subscribes to messageReactionAdd, messageReactionRemove, messageReactionRemoveAll, messageReactionRemoveEmoji, messageDelete and messageDeleteBulk. Reaction events fetch a partial message before calling reactionChanged; DMs are skipped. Delete events call messageDeleted for each message ID. Each handler has its own try/catch.",
+        "The existing reaction role and event log listeners are unchanged.",
+        "BotServices builds StarboardRepository and StarboardService. services.ts invalidates the cache on guild:configChanged for the `starboard` module, and guild-config-sync.test.ts covers it. main.ts registers the listener.",
+        "Tests check every event is forwarded, partial fetch (and a failed fetch), DM skip, error handling and the cache drop."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/listeners apps/bot/src/guild-config-sync.test.ts && pnpm --filter @ririko/bot typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2012"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2015",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2015",
+      "parent": "STORY-201",
+      "points": 3,
+      "status": "DONE",
+      "title": "Starboard Dashboard Page",
+      "description": "A new Starboard page in the Engagement group of the dashboard for the `starboard` module.",
+      "context": {
+        "files": [
+          "apps/web/src/app/dashboard/[guildId]/starboard/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/starboard/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/starboard/actions.test.ts",
+          "apps/web/src/app/dashboard/[guildId]/xp/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/logging/actions.ts",
+          "apps/web/src/lib/dashboard-nav.ts",
+          "apps/web/src/components/guild-nav.test.tsx",
+          "apps/web/src/lib/server/guilds/audit-log.ts",
+          "apps/web/src/lib/server/guilds/audit-log.test.ts",
+          "apps/web/src/lib/server/authorization-coverage.test.ts"
+        ],
+        "symbols": [
+          "GUILD_NAV_ITEMS",
+          "saveEventLogSettings",
+          "checkMessageChannel",
+          "saveGuildSettings",
+          "readFormFields",
+          "MODULE_LABELS"
+        ],
+        "entry_points": [
+          "apps/web/src/app/dashboard/[guildId]/starboard/page.tsx"
+        ],
+        "codegraph_queries": [
+          "GUILD_NAV_ITEMS dashboard-nav engagement",
+          "saveEventLogSettings readFormFields checkMessageChannel",
+          "MODULE_LABELS audit-log"
+        ]
+      },
+      "acceptance": [
+        "GUILD_NAV_ITEMS has `{ slug: 'starboard', label: 'Starboard', group: 'engagement' }` after Giveaways, and the nav test passes.",
+        "The page has: Starboard channel (picker, empty label \"Off\"), Emoji (text, with a hint for custom emoji), Stars needed (1 to 100), \"Count the author's own star\" switch, Ignored channels. The descriptions say what is posted, that a copy is removed when the original is deleted or falls below the threshold, and that Ririko needs View Channel, Send Messages, Embed Links and Read Message History.",
+        "The save action uses saveGuildSettings with readFormFields and checks the starboard channel with checkMessageChannel. authorization-coverage.test.ts lists it. MODULE_LABELS has `starboard: 'Starboard'`.",
+        "Tests cover a valid save, an unknown channel, a bad emoji, the nav item and the label."
+      ],
+      "verify_cmd": "pnpm vitest run 'apps/web/src/app/dashboard/[guildId]/starboard' apps/web/src/lib apps/web/src/components/guild-nav.test.tsx && pnpm --filter @ririko/web typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2014",
+        "TASK-2015"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2016",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2016",
+      "parent": "STORY-201",
+      "points": 3,
+      "status": "DONE",
+      "title": "Document the Starboard and Update the Privacy Policy",
+      "description": "User docs for the starboard, and the privacy policy rows (English and Malay) for reposted messages and the stored post records.",
+      "context": {
+        "files": [
+          "docs/modules.md",
+          "docs/dashboard.md",
+          "docs/legal/privacy.md",
+          "docs/legal/ms/privacy.md",
+          "packages/services/src/privacy/consent.service.ts"
+        ],
+        "symbols": [
+          "StarboardService",
+          "LEGAL_DOCUMENTS_DATE"
+        ],
+        "codegraph_queries": [
+          "StarboardService reactionChanged messageDeleted"
+        ]
+      },
+      "acceptance": [
+        "docs/modules.md has a Starboard section: setup, how stars are counted (own star, bots), when a copy is posted, updated and removed, the skip rules (starboard channel, ignored channels, NSFW), what staff deleting a copy does, and the permissions. docs/dashboard.md describes the new page and lists it in the page table.",
+        "docs/legal/privacy.md and docs/legal/ms/privacy.md describe the starboard: Ririko reposts the content, author name and avatar of starred messages to the server's starboard channel, and stores the message, channel, author and copy IDs and the star count, deleted with the original, with the server's data, and on a user data deletion request. The policy date stays 2026-10-22 (it has not been released since STORY-199 set it), so LEGAL_DOCUMENTS_DATE does not change; say so in the PROGRESS entry.",
+        "Every statement matches the merged code of TASK-2011 to TASK-2015, and `pnpm docs:build` passes."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm vitest run packages/services/src/privacy && pnpm format:check"
     }
   ],
   "chores": [

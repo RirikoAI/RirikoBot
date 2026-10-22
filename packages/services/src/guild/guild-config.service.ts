@@ -4,6 +4,7 @@ import {
   compareCommandOverrides,
   DEFAULT_ESCALATION_STEPS,
   DEFAULT_MUSIC_VOLUME,
+  DEFAULT_STARBOARD_EMOJI,
   AI_SPEAKING_STYLES,
   AI_TOOL_NAMES,
   allowedAiTools,
@@ -50,6 +51,7 @@ import {
   LevelRoleSettingsRepository,
   ModerationRepository,
   MusicRepository,
+  StarboardRepository,
   TicketRepository,
   WelcomerRepository,
   withTransaction,
@@ -323,6 +325,7 @@ export interface GuildConfigServiceDeps {
   tickets: TicketRepository;
   eventLogs: EventLogSettingsRepository;
   levelRoles: LevelRoleSettingsRepository;
+  starboard: StarboardRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -516,6 +519,31 @@ export class GuildConfigService {
           await deps.levelRoles.upsert(
             guildId,
             { rewards: values.rewards, keepPreviousRoles: values.keepPreviousRoles },
+            tx,
+          );
+        },
+      },
+      starboard: {
+        read: async (guildId, tx) => {
+          const row = await deps.starboard.getSettings(guildId, tx);
+          return {
+            channelId: row?.channelId ?? null,
+            emoji: row?.emoji ?? DEFAULT_STARBOARD_EMOJI,
+            threshold: row?.threshold ?? 3,
+            allowSelfStar: row?.allowSelfStar ?? false,
+            ignoredChannelIds: row?.ignoredChannelIds ?? [],
+          };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.starboard.upsertSettings(
+            guildId,
+            {
+              channelId: values.channelId,
+              emoji: values.emoji,
+              threshold: values.threshold,
+              allowSelfStar: values.allowSelfStar,
+              ignoredChannelIds: values.ignoredChannelIds,
+            },
             tx,
           );
         },
@@ -806,6 +834,7 @@ export function createGuildConfigService(
     tickets: new TicketRepository(db),
     eventLogs: new EventLogSettingsRepository(db),
     levelRoles: new LevelRoleSettingsRepository(db),
+    starboard: new StarboardRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit: new AuditLogRepository(db),
     ...options,

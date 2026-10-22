@@ -228,6 +228,12 @@ export const USER_DATA_INVENTORY: readonly UserDataEntry[] = [
   { table: 'player_energy', column: 'user_id', action: 'delete' },
   { table: 'reminders', column: 'user_id', action: 'delete' },
   {
+    table: 'starboard_posts',
+    column: 'author_id',
+    action: 'delete',
+    note: 'The record of a starred message the member wrote. The copy in the starboard channel is a Discord message and is not part of the bot database.',
+  },
+  {
     table: 'streamers',
     column: 'platform_user_id',
     action: 'keep',
