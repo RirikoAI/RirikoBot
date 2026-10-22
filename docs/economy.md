@@ -166,7 +166,7 @@ You need the **Manage Server** permission for the dashboard. The commands need *
 
 The picker shows only the roles that Ririko can give. A server can have up to 25 rewards. Each level and each role can be used once. Ririko does not save a role that was deleted or that it cannot give, and it shows an error.
 
-**Command.** `/levelroles`, or `!levelroles` with the prefix.
+**Command.** You can set up the rewards in Discord instead of the dashboard, with `/levelroles`, or `!levelroles` with the prefix. For example, `/levelroles action:add level:5 role:@Regular` gives `@Regular` at level 5, and `/levelroles action:stack enabled:false` turns off keeping lower reward roles.
 
 | Command | What it does |
 |---|---|
@@ -174,10 +174,11 @@ The picker shows only the roles that Ririko can give. A server can have up to 25
 | `/levelroles action:add level:5 role:@Regular` | Gives `@Regular` at level 5. If level 5 already has a reward, the new role replaces it. |
 | `/levelroles action:remove level:5` | Stops the reward of level 5. |
 | `/levelroles action:sync` | Gives the rewards to members who already have the level (see section 8.4). |
+| `/levelroles action:stack enabled:false` | Turns the keep lower reward roles switch on (`enabled:true`) or off (see section 8.3). With no value, it shows the current setting. |
 
-The prefix form is `!levelroles add 5 @Regular`, `!levelroles remove 5` and `!levelroles sync`. In the prefix form you can write the role as a mention, an ID or its exact name.
+The prefix form is `!levelroles add 5 @Regular`, `!levelroles remove 5`, `!levelroles sync` and `!levelroles stack off` (or `on`). In the prefix form you can write the role as a mention, an ID or its exact name.
 
-The commands use the same rules as the dashboard. `add` also refuses `@everyone`, a role that belongs to an integration, and a role that is not below Ririko's highest role. The command line works too: `ririko guild:config <server> levelroles.rewards <json>` and `levelroles.keepPreviousRoles`. Changes from the dashboard, the commands and the command line show in the Audit Log as "Level Roles settings changed". A change takes effect at once. Ririko reads the settings again within 5 minutes at the latest.
+Everyone can use `list`. The other actions need **Manage Roles**, **Manage Server** or **Administrator**. The commands use the same rules as the dashboard. `add` also refuses `@everyone`, a role that belongs to an integration, and a role that is not below Ririko's highest role. The command line works too: `ririko guild:config <server> levelroles.rewards <json>` and `levelroles.keepPreviousRoles`. Changes from the dashboard, the commands and the command line show in the Audit Log as "Level Roles settings changed". A change takes effect at once. Ririko reads the settings again within 5 minutes at the latest.
 
 ### 8.2. When Ririko Gives the Roles
 
@@ -195,6 +196,8 @@ This switch is on by default.
 - **Off.** A member holds only the role of their highest reward. At level 22 they hold the role of level 20, and Ririko removes the other reward roles, also those of higher levels.
 
 Ririko never removes a role that is not a reward. Roles from other bots, staff roles and roles that members pick for themselves stay as they are.
+
+To change the switch in Discord, run `/levelroles action:stack enabled:false` (or `!levelroles stack off`). The change applies at each member's next level-up. Run `/levelroles action:sync` to apply it to members who already have the roles.
 
 ### 8.4. Sync
 

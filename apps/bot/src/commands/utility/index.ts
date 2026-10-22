@@ -7,6 +7,7 @@ import { createGuildInfoCommand } from './guild-info.command.js';
 import { createMemberInfoCommand } from './member-info.command.js';
 import { createWelcomerCommand } from './welcomer.command.js';
 import { createFarewellCommand } from './farewell.command.js';
+import { createStarboardCommand } from './starboard.command.js';
 
 /**
  * Creates the complete suite of server utility and identity commands for EPIC-014:
@@ -17,6 +18,7 @@ import { createFarewellCommand } from './farewell.command.js';
  * - /member-info (!memberinfo, !userinfo, !whois)
  * - /welcomer (!welcome)
  * - /farewell (!goodbye)
+ * - /starboard (!star-board, !stars)
  */
 export function createUtilityCommands(services: BotServices): Command[] {
   return [
@@ -27,6 +29,7 @@ export function createUtilityCommands(services: BotServices): Command[] {
     createMemberInfoCommand(services),
     createWelcomerCommand(services),
     createFarewellCommand(services),
+    createStarboardCommand(services),
   ];
 }
 
@@ -37,3 +40,4 @@ export * from './guild-info.command.js';
 export * from './member-info.command.js';
 export * from './welcomer.command.js';
 export * from './farewell.command.js';
+export * from './starboard.command.js';

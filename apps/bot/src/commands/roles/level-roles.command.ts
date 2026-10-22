@@ -1,14 +1,14 @@
 import { EmbedBuilder, PermissionFlagsBits, type GuildMember, type Role } from 'discord.js';
 import { describeErrorForLog, type LevelRoleReward } from '@ririko/core';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
-import { GuildConfigValidationError } from '@ririko/services';
 import type { BotServices } from '../../services.js';
+import { parseToggle, saveGuildConfig } from '../shared/guild-config-command.js';
 
-export const LEVEL_ROLE_ACTIONS = ['list', 'add', 'remove', 'sync'] as const;
+export const LEVEL_ROLE_ACTIONS = ['list', 'add', 'remove', 'sync', 'stack'] as const;
 export type LevelRoleAction = (typeof LEVEL_ROLE_ACTIONS)[number];
 
 const USAGE =
-  'Usage: `/levelroles action:list|add|remove|sync`. Examples: `!levelroles add 5 @Regular`, `!levelroles remove 5`, `!levelroles sync`.';
+  'Usage: `/levelroles action:list|add|remove|sync|stack`. Examples: `!levelroles add 5 @Regular`, `!levelroles remove 5`, `!levelroles sync`, `!levelroles stack off`.';
 const NO_PERMISSION =
   'You need the Manage Roles, Manage Server or Administrator permission to change level role rewards.';
 const NO_BOT_PERMISSION =
@@ -26,6 +26,10 @@ interface LevelRoleRequest {
   /** The role text a prefix command carried, or the name of a slash role; null when none. */
   roleText: string | null;
   role: Role | null;
+  /** The stack switch: null when no value was given or the text is not on/off. */
+  toggle: boolean | null;
+  /** True when a stack value was given, even one that is not on/off. */
+  toggleGiven: boolean;
 }
 
 function canManage(member: GuildMember | null): boolean {
@@ -49,18 +53,21 @@ function findRole(ctx: CommandContext, text: string): Role | null {
 /**
  * Reads the action, level and role. A slash command carries typed options. A prefix command is
  * `!levelroles <action> <level> <role>`, where the role may be a mention, an ID or a name that
- * contains spaces.
+ * contains spaces, or `!levelroles stack on|off`.
  */
 function readRequest(ctx: CommandContext): LevelRoleRequest {
   if (ctx.source === 'slash') {
     const options = 'options' in ctx.raw ? ctx.raw.options : null;
     const role =
       options && 'getRole' in options ? ((options.getRole('role') as Role | null) ?? null) : null;
+    const enabled = ctx.options.getBoolean('enabled');
     return {
       action: ctx.options.getString('action')?.toLowerCase() ?? null,
       level: ctx.options.getInteger('level'),
       roleText: role?.id ?? null,
       role,
+      toggle: enabled,
+      toggleGiven: enabled !== null,
     };
   }
 
@@ -72,20 +79,14 @@ function readRequest(ctx: CommandContext): LevelRoleRequest {
     level: levelText && LEVEL_ARG.test(levelText) ? Number(levelText) : null,
     roleText: roleText || null,
     role: roleText ? findRole(ctx, roleText) : null,
+    toggle: parseToggle(args[1]),
+    toggleGiven: args[1] !== undefined,
   };
 }
 
 /** Ephemeral for slash commands; a prefix command has no private replies and ignores the flag. */
 async function say(ctx: CommandContext, content: string, ephemeral = true): Promise<void> {
   await ctx.reply({ content, ephemeral, allowedMentions: { parse: [] } });
-}
-
-/** The schema's messages without the row number, which means nothing for a single reward. */
-function describeValidationError(error: GuildConfigValidationError): string {
-  return Object.values(error.fieldErrors)
-    .flat()
-    .map((message) => message.replace(/^Row \d+: /, ''))
-    .join(' ');
 }
 
 async function listRewards(ctx: CommandContext, services: BotServices): Promise<void> {
@@ -125,19 +126,7 @@ async function saveRewards(
   services: BotServices,
   rewards: LevelRoleReward[],
 ): Promise<boolean> {
-  try {
-    await services.guildConfigService.update(
-      ctx.guildId!,
-      'levelroles',
-      { rewards },
-      { userId: ctx.user.id, source: 'discord' },
-    );
-    return true;
-  } catch (error) {
-    if (!(error instanceof GuildConfigValidationError)) throw error;
-    await say(ctx, describeValidationError(error));
-    return false;
-  }
+  return (await saveGuildConfig(ctx, services, 'levelroles', { rewards })) !== null;
 }
 
 async function addReward(
@@ -260,25 +249,57 @@ async function syncRewards(ctx: CommandContext, services: BotServices): Promise<
   }
 }
 
+const STACK_ON = 'Members keep the roles of lower levels.';
+const STACK_OFF = 'Members keep only the role of the highest level they reached.';
+
+/** Shows the keep-lower-roles setting, or sets it (`keepPreviousRoles`). */
+async function setStack(
+  ctx: CommandContext,
+  services: BotServices,
+  request: LevelRoleRequest,
+): Promise<void> {
+  if (!request.toggleGiven) {
+    const { keepPreviousRoles } = await services.guildConfigService.get(ctx.guildId!, 'levelroles');
+    await say(
+      ctx,
+      `Stacking is **${keepPreviousRoles ? 'on' : 'off'}**. ${keepPreviousRoles ? STACK_ON : STACK_OFF} Change it with \`/levelroles action:stack enabled:true\`.`,
+    );
+    return;
+  }
+  if (request.toggle === null) {
+    await say(ctx, `Say \`on\` or \`off\`, for example \`!levelroles stack off\`. ${USAGE}`);
+    return;
+  }
+  if (!(await saveGuildConfig(ctx, services, 'levelroles', { keepPreviousRoles: request.toggle })))
+    return;
+  await say(
+    ctx,
+    `Stacking is now **${request.toggle ? 'on' : 'off'}**. ${request.toggle ? STACK_ON : STACK_OFF} Run \`/levelroles action:sync\` to apply it to members who already have the roles.`,
+    false,
+  );
+}
+
 export function createLevelRolesCommand(services: BotServices): Command {
   return {
     metadata: {
       name: 'levelroles',
       registrationScope: 'guild',
       category: CommandCategory.UTILITY,
-      description: 'Roles given automatically at chosen levels: list, add, remove and sync',
+      description: 'Roles given automatically at chosen levels: list, add, remove, sync and stack',
       aliases: ['levelrole', 'level-roles', 'level-role'],
       isGuildOnly: true,
-      usage: '/levelroles <list|add|remove|sync> [level] [role]',
+      usage: '/levelroles <list|add|remove|sync|stack> [level] [role] [enabled]',
       examples: [
         '/levelroles action:list',
         '/levelroles action:add level:5 role:@Regular',
         '/levelroles action:remove level:5',
         '/levelroles action:sync',
+        '/levelroles action:stack enabled:false',
         '!levelroles',
         '!levelroles add 5 @Regular',
         '!levelroles remove 5',
         '!levelroles sync',
+        '!levelroles stack off',
       ],
       options: [
         {
@@ -291,6 +312,7 @@ export function createLevelRolesCommand(services: BotServices): Command {
             { name: 'Add (give a role at a level)', value: 'add' },
             { name: 'Remove (stop rewarding a level)', value: 'remove' },
             { name: 'Sync (give the roles to members who already have the level)', value: 'sync' },
+            { name: 'Stack (keep the roles of lower levels, on or off)', value: 'stack' },
           ],
         },
         {
@@ -305,6 +327,12 @@ export function createLevelRolesCommand(services: BotServices): Command {
           name: 'role',
           description: 'The role to give at that level (for add)',
           type: 'ROLE',
+          required: false,
+        },
+        {
+          name: 'enabled',
+          description: 'Keep the roles of lower levels: true or false (for stack)',
+          type: 'BOOLEAN',
           required: false,
         },
       ],
@@ -333,6 +361,7 @@ export function createLevelRolesCommand(services: BotServices): Command {
 
       if (action === 'add') await addReward(ctx, services, request);
       else if (action === 'remove') await removeReward(ctx, services, request);
+      else if (action === 'stack') await setStack(ctx, services, request);
       else await syncRewards(ctx, services);
     },
   };
