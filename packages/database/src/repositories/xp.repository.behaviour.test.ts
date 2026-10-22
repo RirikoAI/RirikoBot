@@ -177,6 +177,24 @@ describeDialects('XpRepository behaviour', (db) => {
     expect(await repo.getUserGlobalRank('nobody')).toBeNull();
   });
 
+  it('lists the members of a guild at or above a level, highest level first', async () => {
+    const repo = new XpRepository(db.client);
+    await repo.create({ userId: 'low', guildId: 'g1', level: 2 });
+    await repo.create({ userId: 'edge', guildId: 'g1', level: 5 });
+    await repo.create({ userId: 'high', guildId: 'g1', level: 20 });
+    await repo.create({ userId: 'mid', guildId: 'g1', level: 9 });
+    await repo.create({ userId: 'other-guild', guildId: 'g2', level: 50 });
+
+    expect(await repo.listMembersAtLevel('g1', 5)).toEqual([
+      { userId: 'high', level: 20 },
+      { userId: 'mid', level: 9 },
+      { userId: 'edge', level: 5 },
+    ]);
+    expect(await repo.listMembersAtLevel('g1', 21)).toEqual([]);
+    expect(await repo.listMembersAtLevel('g1', 0)).toHaveLength(4);
+    expect(await repo.listMembersAtLevel('nobody', 1)).toEqual([]);
+  });
+
   it('deletes an account once', async () => {
     const repo = new XpRepository(db.client);
     await repo.create({ userId: 'u1', guildId: 'g1' });

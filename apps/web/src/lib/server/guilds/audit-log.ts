@@ -50,6 +50,7 @@ const MODULE_LABELS: Record<string, string> = {
   eventlogs: 'Event Logs',
   autovoice: 'Auto Voice',
   xp: 'XP & Ranking',
+  levelroles: 'Level Roles',
   games: 'Games',
   tcg: 'Waifu TCG',
 };

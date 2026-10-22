@@ -230,5 +230,13 @@ export const SQLITE_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "47d1fb6f164862c6641d36239397ebdd9ecfda93a7c3576a8a73d1c42ed1b2b1",
     "contract": false
+  },
+  {
+    "id": "0008_spicy_menace",
+    "statements": [
+      "CREATE TABLE `level_role_settings` (\n\t`guild_id` text PRIMARY KEY NOT NULL,\n\t`rewards` text DEFAULT '[]' NOT NULL,\n\t`keep_previous_roles` integer DEFAULT true NOT NULL,\n\t`updated_at` integer NOT NULL\n);"
+    ],
+    "checksum": "37c2f951aa954f3849da662749901c129513b915f82384b793627c9a2517bbff",
+    "contract": false
   }
 ];

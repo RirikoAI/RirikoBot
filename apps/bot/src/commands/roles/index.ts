@@ -4,6 +4,7 @@ import { createCreateReactionRoleCommand } from './create-reaction-role.command.
 import { createReactionRolesCommand } from './reaction-roles.command.js';
 import { createAutoRoleCommand } from './autorole.command.js';
 import { createTempRoleCommand } from './temprole.command.js';
+import { createLevelRolesCommand } from './level-roles.command.js';
 
 export function createRoleCommands(services: BotServices): Command[] {
   return [
@@ -11,6 +12,7 @@ export function createRoleCommands(services: BotServices): Command[] {
     createReactionRolesCommand(services),
     createAutoRoleCommand(services),
     createTempRoleCommand(services),
+    createLevelRolesCommand(services),
   ];
 }
 
@@ -18,3 +20,4 @@ export * from './create-reaction-role.command.js';
 export * from './reaction-roles.command.js';
 export * from './autorole.command.js';
 export * from './temprole.command.js';
+export * from './level-roles.command.js';

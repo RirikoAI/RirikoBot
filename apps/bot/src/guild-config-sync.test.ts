@@ -5,6 +5,7 @@ import {
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
+  LevelRoleSettingsRepository,
   ModerationRepository,
   type DatabaseClient,
 } from '@ririko/database';
@@ -138,6 +139,48 @@ describe('guild config changes from other processes (CHORE-1101)', () => {
     db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
     const services = await createBotServices(db);
     const invalidate = vi.spyOn(services.eventLogService, 'invalidate');
+
+    await new GuildConfigVersionRepository(db).bump('guild-1', 'general', new Date());
+    await services.guildConfigWatcher.tick();
+
+    expect(invalidate).not.toHaveBeenCalled();
+  });
+
+  it('drops the cached level role settings once the change feed reports a levelroles write (TASK-2004)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    const add = vi.fn().mockResolvedValue(undefined);
+    const member = {
+      guild: {
+        id: 'guild-1',
+        roles: {
+          everyone: { id: 'guild-1' },
+          cache: new Map([['role-1', { id: 'role-1', managed: false, position: 1 }]]),
+        },
+        members: { me: { permissions: { has: () => true }, roles: { highest: { position: 10 } } } },
+      },
+      roles: { cache: new Map(), add },
+    };
+    await services.levelRoleService.applyForMember(member as never, 5);
+    expect(add).not.toHaveBeenCalled();
+
+    // What the dashboard does: save a reward and bump the feed.
+    await new LevelRoleSettingsRepository(db).upsert('guild-1', {
+      rewards: [{ level: 5, roleId: 'role-1' }],
+    });
+    await new GuildConfigVersionRepository(db).bump('guild-1', 'levelroles', new Date());
+
+    await services.levelRoleService.applyForMember(member as never, 5);
+    expect(add).not.toHaveBeenCalled();
+    await services.guildConfigWatcher.tick();
+    await services.levelRoleService.applyForMember(member as never, 5);
+    expect(add).toHaveBeenCalledWith(['role-1'], 'Level 5 reward');
+  });
+
+  it('keeps the level role cache when another module changes (TASK-2004)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    const invalidate = vi.spyOn(services.levelRoleService, 'invalidate');
 
     await new GuildConfigVersionRepository(db).bump('guild-1', 'general', new Date());
     await services.guildConfigWatcher.tick();

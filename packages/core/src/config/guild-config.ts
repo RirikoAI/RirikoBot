@@ -3,6 +3,7 @@ import { canonicalTimeZone } from '../time/time-zone.js';
 import { AUTOMOD_ACTIONS, EscalationPolicySchema } from './moderation-settings.js';
 import { CommandOverridesSchema } from './command-overrides.js';
 import { AutoVoiceHubsSchema } from './auto-voice.js';
+import { LevelRoleRewardsSchema } from './level-roles.js';
 import { GameRulesSchema, MAX_GAME_WAGER_LIMIT } from './games.js';
 import {
   AI_MODEL_CHOICES,
@@ -393,6 +394,16 @@ export const GuildConfigSchemas = {
       ),
       voiceXpEnabled: FlagSetting.describe(
         'Voice rewards on or off (credits and XP for time in voice with another unmuted member)',
+      ),
+    })
+    .strict(),
+  levelroles: z
+    .object({
+      rewards: JsonSetting(LevelRoleRewardsSchema).describe(
+        'Roles given at chosen levels as JSON, e.g. [{"level":5,"roleId":"123..."},{"level":20,"roleId":"456..."}] (at most 25, each level and role once)',
+      ),
+      keepPreviousRoles: FlagSetting.describe(
+        'Keep the reward roles of lower levels on (stack them) or off (a member holds only the reward of their highest level)',
       ),
     })
     .strict(),

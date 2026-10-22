@@ -47,6 +47,9 @@ describe('audit log formatting (TASK-1132)', () => {
       'Event Logs settings changed',
     );
     expect(describeAuditAction('guild_config.xp.update')).toBe('XP & Ranking settings changed');
+    expect(describeAuditAction('guild_config.levelroles.update')).toBe(
+      'Level Roles settings changed',
+    );
     expect(describeAuditAction('reaction_roles.publish')).toBe('Reaction role panel published');
     expect(describeAuditAction('giveaways.reroll')).toBe('Giveaway rerolled');
     expect(describeAuditAction('guild_config.music.update')).toBe('music settings changed');

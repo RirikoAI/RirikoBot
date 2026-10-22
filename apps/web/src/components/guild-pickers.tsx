@@ -55,7 +55,10 @@ export async function CategorySelectField({ guildId, defaultValue, ...field }: P
  * Options for roles Ririko can give, plus any saved role it cannot give (any more), labelled
  * as such. Without them a saved role would vanish from the form and be cleared on the next save.
  */
-async function assignableRoleOptions(guildId: string, saved: string[]): Promise<SelectOption[]> {
+export async function assignableRoleOptions(
+  guildId: string,
+  saved: string[],
+): Promise<SelectOption[]> {
   const { guildResources } = await getWebServices();
   const roles = await guildResources.assignableRoles(guildId);
   const options = roles.map((role) => ({ value: role.id, label: `@${role.name}` }));

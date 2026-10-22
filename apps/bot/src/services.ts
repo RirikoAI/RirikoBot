@@ -12,6 +12,7 @@ import {
   CommandCatalogRepository,
   CommandSettingsRepository,
   EventLogSettingsRepository,
+  LevelRoleSettingsRepository,
   LeaderboardRepository,
   ItemRepository,
   InventoryRepository,
@@ -174,6 +175,7 @@ import {
   DataRetentionService,
   CommandOverrideService,
   EventLogService,
+  LevelRoleService,
   BotStatusReporter,
   ReactionGifService,
   MemeSynthesizer,
@@ -262,6 +264,8 @@ export interface BotServices {
   commandOverrideService: CommandOverrideService;
   /** Posts message, member, server and voice events to the channels chosen on the Logging page. */
   eventLogService: EventLogService;
+  /** Gives the roles chosen on the XP & Ranking page at a level and when a member returns. */
+  levelRoleService: LevelRoleService;
   /** Registered commands, written at startup so the dashboard and CLI can list them. */
   commandCatalogRepo: CommandCatalogRepository;
   /** The servers the bot is in, with owner and inviter; kept current by the guild registry listener. */
@@ -641,6 +645,13 @@ export async function createBotServices(
   const eventLogService = new EventLogService({ repo: new EventLogSettingsRepository(db) });
   eventBus.on('guild:configChanged', ({ guildId, module }) => {
     if (module === 'eventlogs') eventLogService.invalidate(guildId);
+  });
+  const levelRoleService = new LevelRoleService({
+    settings: new LevelRoleSettingsRepository(db),
+    xp: xpRepo,
+  });
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'levelroles') levelRoleService.invalidate(guildId);
   });
   const commandCatalogRepo = new CommandCatalogRepository(db);
   const maintenanceService = new MaintenanceService({ eventBus });
@@ -1126,6 +1137,7 @@ export async function createBotServices(
     legalLinks,
     commandOverrideService,
     eventLogService,
+    levelRoleService,
     commandCatalogRepo,
     guildRepo,
     botStatusReporter,

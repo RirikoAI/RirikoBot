@@ -10,6 +10,7 @@ import {
   EventLogSettingsRepository,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
+  LevelRoleSettingsRepository,
   ModerationRepository,
   MusicRepository,
   AiRepository,
@@ -45,6 +46,7 @@ describe('GuildConfigService (TASK-1111)', () => {
   let autoVoice: AutoVoiceRepository;
   let tickets: TicketRepository;
   let eventLogs: EventLogSettingsRepository;
+  let levelRoles: LevelRoleSettingsRepository;
   let service: GuildConfigService;
 
   beforeEach(async () => {
@@ -63,6 +65,7 @@ describe('GuildConfigService (TASK-1111)', () => {
     autoVoice = new AutoVoiceRepository(db);
     tickets = new TicketRepository(db);
     eventLogs = new EventLogSettingsRepository(db);
+    levelRoles = new LevelRoleSettingsRepository(db);
     service = new GuildConfigService({
       db,
       guildSettings: new GuildSettingsRepository(db),
@@ -78,6 +81,7 @@ describe('GuildConfigService (TASK-1111)', () => {
       welcomer: new WelcomerRepository(db),
       tickets: new TicketRepository(db),
       eventLogs: new EventLogSettingsRepository(db),
+      levelRoles,
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -823,6 +827,99 @@ describe('GuildConfigService (TASK-1111)', () => {
     });
   });
 
+  describe('levelroles (TASK-2002)', () => {
+    const REGULAR = '800000000000000001';
+    const VETERAN = '800000000000000002';
+    const LEGEND = '800000000000000003';
+    const DEFAULTS = { rewards: [], keepPreviousRoles: true };
+
+    it('reads defaults for a guild without a settings row', async () => {
+      expect(await levelRoles.get('g1')).toBeNull();
+      expect(await service.get('g1', 'levelroles')).toEqual(DEFAULTS);
+    });
+
+    it('writes rewards sorted by level, reads them back and audits the diff', async () => {
+      const { changes } = await service.update(
+        'g1',
+        'levelroles',
+        {
+          rewards: [
+            { level: 20, roleId: VETERAN },
+            { level: 5, roleId: REGULAR },
+          ],
+          keepPreviousRoles: false,
+        },
+        dashboardActor,
+      );
+      expect(changes.map((change) => change.field)).toEqual(['rewards', 'keepPreviousRoles']);
+      const saved = {
+        rewards: [
+          { level: 5, roleId: REGULAR },
+          { level: 20, roleId: VETERAN },
+        ],
+        keepPreviousRoles: false,
+      };
+      expect(await service.get('g1', 'levelroles')).toEqual(saved);
+      expect(await levelRoles.get('g1')).toMatchObject(saved);
+      expect(await service.get('g2', 'levelroles')).toEqual(DEFAULTS);
+      expect(auditRows().map((audit) => audit.action)).toEqual(['guild_config.levelroles.update']);
+    });
+
+    it('accepts JSON text and plain words from the CLI, and keeps the other field', async () => {
+      await service.update(
+        'g1',
+        'levelroles',
+        { rewards: JSON.stringify([{ level: 10, roleId: LEGEND }]), keepPreviousRoles: 'off' },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'levelroles')).toEqual({
+        rewards: [{ level: 10, roleId: LEGEND }],
+        keepPreviousRoles: false,
+      });
+      await service.update('g1', 'levelroles', { rewards: '[]' }, { userId: 'cli', source: 'cli' });
+      expect(await service.get('g1', 'levelroles')).toEqual({
+        rewards: [],
+        keepPreviousRoles: false,
+      });
+    });
+
+    it('rejects a repeated level, a bad role and level 1001 without saving', async () => {
+      await expect(
+        service.update(
+          'g1',
+          'levelroles',
+          {
+            rewards: [
+              { level: 5, roleId: REGULAR },
+              { level: 5, roleId: VETERAN },
+            ],
+          },
+          dashboardActor,
+        ),
+      ).rejects.toMatchObject({
+        fieldErrors: { rewards: ['Row 2: This level already has a reward.'] },
+      });
+      await expect(
+        service.update(
+          'g1',
+          'levelroles',
+          { rewards: [{ level: 1001, roleId: REGULAR }] },
+          dashboardActor,
+        ),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      await expect(
+        service.update(
+          'g1',
+          'levelroles',
+          { rewards: [{ level: 3, roleId: 'Regular' }] },
+          dashboardActor,
+        ),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      expect(await levelRoles.get('g1')).toBeNull();
+      expect(auditRows()).toEqual([]);
+    });
+  });
+
   describe('tickets (TASK-1982)', () => {
     const CATEGORY = '600000000000000001';
     const STAFF = '600000000000000002';
@@ -1311,6 +1408,7 @@ describe('GuildConfigService ai (TASK-1162)', () => {
       welcomer: new WelcomerRepository(db),
       tickets: new TicketRepository(db),
       eventLogs: new EventLogSettingsRepository(db),
+      levelRoles: new LevelRoleSettingsRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -1421,6 +1519,7 @@ describe('GuildConfigService images (TASK-1163)', () => {
       welcomer: new WelcomerRepository(db),
       tickets: new TicketRepository(db),
       eventLogs: new EventLogSettingsRepository(db),
+      levelRoles: new LevelRoleSettingsRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',

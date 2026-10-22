@@ -1,4 +1,4 @@
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, gte, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { BaseRepository } from './base.js';
 import type { DatabaseClient } from '../client/types.js';
@@ -379,6 +379,38 @@ export class XpRepository extends BaseRepository<
         .where(eq(pgSchema.xpAccounts.guildId, guildId))
         .orderBy(desc(pgSchema.xpAccounts.xp));
       return rows as unknown as XpAccount[];
+    }
+  }
+
+  /**
+   * Every member of a guild at or above `minLevel`, highest level first. Used to give level role
+   * rewards to members who reached a level before the reward was added.
+   */
+  async listMembersAtLevel(
+    guildId: string,
+    minLevel: number,
+    tx?: DatabaseClient,
+  ): Promise<{ userId: string; level: number }[]> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      return client.db
+        .select({ userId: sqliteSchema.xpAccounts.userId, level: sqliteSchema.xpAccounts.level })
+        .from(sqliteSchema.xpAccounts)
+        .where(
+          and(
+            eq(sqliteSchema.xpAccounts.guildId, guildId),
+            gte(sqliteSchema.xpAccounts.level, minLevel),
+          ),
+        )
+        .orderBy(desc(sqliteSchema.xpAccounts.level), sqliteSchema.xpAccounts.userId);
+    } else {
+      return client.db
+        .select({ userId: pgSchema.xpAccounts.userId, level: pgSchema.xpAccounts.level })
+        .from(pgSchema.xpAccounts)
+        .where(
+          and(eq(pgSchema.xpAccounts.guildId, guildId), gte(pgSchema.xpAccounts.level, minLevel)),
+        )
+        .orderBy(desc(pgSchema.xpAccounts.level), pgSchema.xpAccounts.userId);
     }
   }
 

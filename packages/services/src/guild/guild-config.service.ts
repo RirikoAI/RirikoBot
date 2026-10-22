@@ -47,6 +47,7 @@ import {
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   ImageRepository,
+  LevelRoleSettingsRepository,
   ModerationRepository,
   MusicRepository,
   TicketRepository,
@@ -321,6 +322,7 @@ export interface GuildConfigServiceDeps {
   welcomer: WelcomerRepository;
   tickets: TicketRepository;
   eventLogs: EventLogSettingsRepository;
+  levelRoles: LevelRoleSettingsRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -498,6 +500,22 @@ export class GuildConfigService {
               ignoredChannelIds: values.ignoredChannelIds,
               ignoreBots: values.ignoreBots,
             },
+            tx,
+          );
+        },
+      },
+      levelroles: {
+        read: async (guildId, tx) => {
+          const row = await deps.levelRoles.get(guildId, tx);
+          return {
+            rewards: row?.rewards ?? [],
+            keepPreviousRoles: row?.keepPreviousRoles ?? true,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.levelRoles.upsert(
+            guildId,
+            { rewards: values.rewards, keepPreviousRoles: values.keepPreviousRoles },
             tx,
           );
         },
@@ -787,6 +805,7 @@ export function createGuildConfigService(
     welcomer: new WelcomerRepository(db),
     tickets: new TicketRepository(db),
     eventLogs: new EventLogSettingsRepository(db),
+    levelRoles: new LevelRoleSettingsRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit: new AuditLogRepository(db),
     ...options,

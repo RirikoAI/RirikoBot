@@ -42,6 +42,7 @@ describe('Server Action and route handler authorization coverage (TASK-1173)', (
         'app/dashboard/[guildId]/reaction-roles/actions.ts#removeReactionRoleBinding',
         'app/dashboard/[guildId]/reaction-roles/actions.ts#deleteReactionRolePanel',
         'app/dashboard/[guildId]/xp/actions.ts#saveXpSettings',
+        'app/dashboard/[guildId]/xp/actions.ts#saveLevelRoleSettings',
         'app/dashboard/[guildId]/games/actions.ts#saveGameSettings',
         'app/dashboard/[guildId]/tcg/actions.ts#saveTcgSettings',
         'app/dashboard/[guildId]/giveaways/actions.ts#endGiveaway',

@@ -93,7 +93,7 @@ Discord allows 100 slash commands in each scope. Ririko uses two scopes.
 Per-server commands:
 
 - Moderation: `automod`, `ban`, `unban`, `softban`, `kick`, `timeout`, `untimeout`, `warn`, `history`, `note`, `nick`, `purge`, `lock`, `unlock`.
-- Server setup: `prefix`, `welcomer`, `farewell`, `autorole`, `temprole`, `create-reaction-role`, `reaction-roles`, `autovoice`, `ticket`, `setup-music`.
+- Server setup: `prefix`, `welcomer`, `farewell`, `autorole`, `temprole`, `levelroles`, `create-reaction-role`, `reaction-roles`, `autovoice`, `ticket`, `setup-music`.
 - AI and images: `aichannel`, `aipersona`, `setup-stablediffusion-api`, `stablediffusion-model`.
 - Streams, events and cards: `stream`, `setup-stream-notification`, `giveaway`, `tcg-admin`.
 
@@ -250,6 +250,7 @@ See [modules.md](modules.md).
 | `/reaction-roles` | `reactionroles`, `rr` | Lists or removes reaction roles. | Manage Roles or Manage Server |
 | `/autorole` | `auto-role`, `joinrole` | Sets join and verification roles. | Manage Roles or Manage Server |
 | `/temprole` | `temporaryrole`, `trole` | Gives roles that expire. | Manage Roles or Manage Server |
+| `/levelroles` | `levelrole`, `level-roles`, `level-role` | Roles given at chosen levels: list, add, remove and sync. | Everyone to list. Manage Roles or Manage Server for the rest |
 | `/reminder` | `remindme`, `reminders` | Sets reminders. | Everyone |
 | `/prefix` | `setprefix` | Shows or sets the prefix. | Everyone to show. Manage Server to set |
 | `/timezone` | `tz`, `settimezone`, `set-timezone` | Shows or sets a time zone. | Everyone for yourself. Manage Server for the server |
