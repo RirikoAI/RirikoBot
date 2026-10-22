@@ -63,7 +63,7 @@ The sidebar groups the pages. This table tells you what each page does and where
 | Moderation | Audit Log | Lists changes made on the dashboard. | Section 4.5 |
 | Members | Auto Roles | Gives roles to new members and bots. | [modules.md](modules.md) |
 | Members | Reaction Roles | Builds role buttons and menus. | [modules.md](modules.md) |
-| Members | Tickets | Turns support tickets on and sets the category, staff roles and transcript channel. | [modules.md](modules.md) |
+| Members | Tickets | Turns support tickets on and sets the category, staff roles and transcript channel. You can also do this in Discord with `/ticket action:setup`. | [modules.md](modules.md) |
 | Members | Auto Voice | Sets up "Join to Create" channels. | [modules.md](modules.md) |
 | Members | Welcome Card | Sets the welcome card. | [modules.md](modules.md) |
 | Members | Farewell Card | Sets the farewell card. | [modules.md](modules.md) |
@@ -142,6 +142,8 @@ What to know:
 - Ban and unban events need the **Guild Moderation** gateway intent. It is not a privileged intent, so the host does not change anything in the Developer Portal. It takes effect after the bot restarts on a version that has it. Until then, the other events work and bans are not logged.
 - What Ririko posts and keeps is described in the [privacy policy](legal/privacy.md), section 3.17.
 
+**Set it up with a command.** You can set the event logs in Discord instead of this page. A member with **Manage Server** or **Administrator** runs `/eventlogs`. For example, `/eventlogs action:set type:message channel:#message-log` turns on the message log, `/eventlogs action:set type:all channel:#logs` uses one channel for all four logs, and `/eventlogs action:off type:voice` turns the voice log off. `/eventlogs action:ignore channel:#bot-spam` adds a channel to the ignored channels, or removes it if it is already there. `/eventlogs action:bots enabled:false` sets the bots switch, and `/eventlogs action:settings` shows what is set now. The prefix form is `!eventlogs set message #message-log`. The command saves the same settings as this page, and the Audit Log shows the change. See [moderation.md](moderation.md#2-commands).
+
 With the command line, the keys are `eventlogs.messageChannelId`, `eventlogs.memberChannelId`, `eventlogs.serverChannelId`, `eventlogs.voiceChannelId`, `eventlogs.ignoredChannelIds` and `eventlogs.ignoreBots`. Dashboard changes show in the Audit Log as "Event Logs settings changed".
 
 ### 4.5. Audit Log
@@ -168,6 +170,8 @@ The XP & Ranking page has two forms. You need the **Manage Server** permission.
 
 The XP form and the rewards form save on their own. A save on the rewards form shows in the Audit Log as "Level Roles settings changed". Ririko needs the **Manage Roles** permission and a role above the reward roles. See [economy.md](economy.md), section 8, for when roles are given, the keep switch, sync and the permissions.
 
+You can also set the rewards in Discord with `/levelroles`, and switch **Keep lower reward roles** with `/levelroles action:stack enabled:false`. See [economy.md](economy.md), section 8.
+
 With the command line, the keys are `levelroles.rewards` (a JSON list, for example `[{"level":5,"roleId":"123456789012345678"}]`) and `levelroles.keepPreviousRoles`.
 
 ### 4.8. Starboard
@@ -187,6 +191,8 @@ The Starboard page has one form. When a message gets enough stars, Ririko posts 
 - Ririko shows an error under a field if the emoji or the number is not valid, and it saves nothing.
 - A change takes effect at once. Ririko reads the settings again within 5 minutes at the latest. A save shows in the Audit Log as "Starboard settings changed".
 - What Ririko posts and keeps is described in the [privacy policy](legal/privacy.md), section 3.18.
+
+You can also set up the starboard in Discord. A member with **Manage Server** or **Administrator** runs, for example, `/starboard action:setup channel:#starboard emoji:⭐ threshold:3`. See [modules.md](modules.md), section 13.
 
 With the command line, the keys are `starboard.channelId`, `starboard.emoji`, `starboard.threshold`, `starboard.allowSelfStar` and `starboard.ignoredChannelIds`.
 

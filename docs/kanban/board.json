@@ -508,7 +508,8 @@
         "STORY-199",
         "BUG-0052",
         "STORY-200",
-        "STORY-201"
+        "STORY-201",
+        "STORY-202"
       ],
       "requires": [],
       "blocks": [],
@@ -3403,6 +3404,59 @@
         "TASK-2011 to TASK-2016 are DONE."
       ],
       "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm docs:build && pnpm test:coverage"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [
+        "TASK-2021",
+        "TASK-2022",
+        "TASK-2023",
+        "TASK-2024",
+        "TASK-2025"
+      ],
+      "requires": [],
+      "model": "large",
+      "handovers": [
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "STORY-202",
+      "parent": "EPIC-021",
+      "title": "Set Up Tickets, Starboard, Event Logs and Level Role Stacking with Commands",
+      "points": 21,
+      "status": "DONE",
+      "description": "Maintainer (2026-10-22): \"lets allow server owners to enable the features using commands\". Tickets, the starboard and event logs can only be turned on and configured on the dashboard, and the level role stacking switch is dashboard-only too. Add dual-dispatch (slash and prefix) setup actions for all four, for members with Manage Server or Administrator, saving through GuildConfigService like the dashboard. No new features and no schema change.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/shared/",
+          "apps/bot/src/commands/tickets/",
+          "apps/bot/src/commands/roles/level-roles.command.ts",
+          "apps/bot/src/commands/utility/",
+          "apps/bot/src/commands/moderation/",
+          "apps/bot/src/command-set.ts",
+          "docs/"
+        ],
+        "symbols": [
+          "GuildConfigService",
+          "GuildConfigSchemas",
+          "createTicketCommand",
+          "createLevelRolesCommand",
+          "registerBotCommands",
+          "GuildConfigWatcher"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas tickets starboard eventlogs levelroles",
+          "createTicketCommand createLevelRolesCommand saveRewards"
+        ]
+      },
+      "acceptance": [
+        "TASK-2021 to TASK-2025 are DONE."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm docs:build && pnpm test:coverage"
     }
   ],
   "tasks": [
@@ -12640,6 +12694,283 @@
         "Every statement matches the merged code of TASK-2011 to TASK-2015, and `pnpm docs:build` passes."
       ],
       "verify_cmd": "pnpm docs:build && pnpm vitest run packages/services/src/privacy && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-2021",
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "TASK-2021",
+      "parent": "STORY-202",
+      "points": 3,
+      "status": "DONE",
+      "title": "Shared Guild Config Command Helper and the /levelroles Stack Switch",
+      "description": "A small helper in apps/bot/src/commands/shared for commands that change guild config modules (manager check, save with validation reply, on/off parsing), and a new `stack` action on /levelroles that sets keepPreviousRoles, which today is only on the dashboard.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/shared/guild-config-command.ts",
+          "apps/bot/src/commands/shared/__tests__/",
+          "apps/bot/src/commands/roles/level-roles.command.ts",
+          "apps/bot/src/commands/roles/__tests__/level-roles.command.test.ts"
+        ],
+        "symbols": [
+          "createLevelRolesCommand",
+          "saveRewards",
+          "describeValidationError",
+          "canManage",
+          "GuildConfigService.update",
+          "GuildConfigValidationError",
+          "GuildConfigSchemas.levelroles"
+        ],
+        "entry_points": [
+          "/levelroles",
+          "prefix levelroles"
+        ],
+        "codegraph_queries": [
+          "createLevelRolesCommand saveRewards describeValidationError readRequest listRewards",
+          "GuildConfigService update GuildConfigValidationError fieldErrorsOf GuildConfigActor"
+        ]
+      },
+      "acceptance": [
+        "apps/bot/src/commands/shared/guild-config-command.ts exports: canManageServer(member) (Administrator or Manage Server), saveGuildConfig(ctx, services, module, patch) that calls guildConfigService.update with { userId: ctx.user.id, source: 'discord' }, replies with the validation message and returns null on GuildConfigValidationError (other errors are rethrown), and returns the saved values otherwise, and parseToggle(text) that reads on/off, true/false, yes/no and enable/disable (any case) and returns null for anything else. It has its own unit tests.",
+        "/levelroles has a new `stack` action: `/levelroles action:stack enabled:<true|false>` and `$levelroles stack on|off` set keepPreviousRoles; with no value it shows the current setting. It uses the existing levelroles permission rule (Manage Roles, Manage Server or Administrator). The usage text, examples and action choices include it.",
+        "saveRewards in level-roles.command.ts uses saveGuildConfig instead of its own try/catch; list, add, remove and sync behave as before and their existing tests still pass unchanged.",
+        "Every action works as a slash command and as a prefix command with the same result (dual dispatch), and the command is guild-only with registrationScope 'guild'.",
+        "Saving goes through services.guildConfigService.update with the actor { userId, source: 'discord' }, so the change is audited like a dashboard save and reaches the running bot through the GuildConfigWatcher (about 5 seconds). A GuildConfigValidationError is answered with its readable message and nothing is saved."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm vitest run apps/bot/src/commands/shared apps/bot/src/commands/roles"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2021"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2022",
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "TASK-2022",
+      "parent": "STORY-202",
+      "points": 5,
+      "status": "DONE",
+      "title": "Ticket Setup Actions: Setup, Enable, Disable, Staff and Settings",
+      "description": "Extend /ticket so a server manager can turn tickets on and set the category, staff roles and transcript channel from Discord, which today needs the dashboard Tickets page.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/tickets/ticket.command.ts",
+          "apps/bot/src/commands/tickets/__tests__/ticket.command.test.ts",
+          "apps/bot/src/commands/shared/guild-config-command.ts"
+        ],
+        "symbols": [
+          "createTicketCommand",
+          "readRequest",
+          "postPanel",
+          "isManager",
+          "TICKET_ACTIONS",
+          "GuildConfigSchemas.tickets",
+          "MAX_TICKET_STAFF_ROLES"
+        ],
+        "entry_points": [
+          "/ticket",
+          "prefix ticket"
+        ],
+        "codegraph_queries": [
+          "createTicketCommand readRequest postPanel isManager TICKET_ACTIONS",
+          "GuildConfigSchemas tickets categoryId staffRoleIds transcriptChannelId MAX_TICKET_STAFF_ROLES"
+        ]
+      },
+      "acceptance": [
+        "New actions on /ticket, all limited to Manage Server or Administrator (canManageServer): `setup` takes a category (required), an optional staff role and an optional transcript channel, saves categoryId, adds the role to staffRoleIds (no duplicates), sets transcriptChannelId when given and sets enabled true; `enable` sets enabled true but refuses with a clear message when no category is set; `disable` sets enabled false; `staff` adds the given role to staffRoleIds or removes it when it is already there; `settings` shows enabled, category, staff roles, transcript channel and max open tickets per member.",
+        "Slash: new options `category` (CHANNEL) and `role` (ROLE); `setup` reuses `channel` for the transcript channel. Prefix: `$ticket setup <category> [@role] [#channel]` where the category is an ID, a channel mention or an exact category name; `$ticket staff @role`; `$ticket enable|disable|settings`. A category that is not a category channel, or a transcript channel that is not a text channel, is refused.",
+        "After setup or enable, the reply warns (without refusing) when Ririko lacks Manage Channels on the category, and tells the manager to post the panel with `/ticket action:panel`. The existing panel, close, claim, add and remove actions and their tests are unchanged; USAGE, usage, examples and the action choices list the new actions.",
+        "Every action works as a slash command and as a prefix command with the same result (dual dispatch), and the command is guild-only with registrationScope 'guild'.",
+        "Saving goes through services.guildConfigService.update with the actor { userId, source: 'discord' }, so the change is audited like a dashboard save and reaches the running bot through the GuildConfigWatcher (about 5 seconds). A GuildConfigValidationError is answered with its readable message and nothing is saved.",
+        "Replies to a slash command are ephemeral; each change reply names the new value and mentions the dashboard page as the other place to edit it."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm vitest run apps/bot/src/commands/tickets"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2021"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2023",
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "TASK-2023",
+      "parent": "STORY-202",
+      "points": 5,
+      "status": "DONE",
+      "title": "New /starboard Command: Setup, Off, Self-Star, Ignore and Settings",
+      "description": "A new guild command so a server manager can turn the starboard on and change its settings from Discord, which today needs the dashboard Starboard page.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/utility/starboard.command.ts",
+          "apps/bot/src/commands/utility/__tests__/starboard.command.test.ts",
+          "apps/bot/src/commands/utility/index.ts",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/commands/shared/guild-config-command.ts",
+          "apps/bot/src/command-set.test.ts"
+        ],
+        "symbols": [
+          "GuildConfigSchemas.starboard",
+          "StarboardEmojiSetting",
+          "MAX_STARBOARD_THRESHOLD",
+          "MAX_STARBOARD_IGNORED_CHANNELS",
+          "registerBotCommands",
+          "createLevelRolesCommand"
+        ],
+        "entry_points": [
+          "/starboard",
+          "prefix starboard"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas starboard StarboardEmojiSetting MAX_STARBOARD_THRESHOLD MAX_STARBOARD_IGNORED_CHANNELS",
+          "registerBotCommands command-set.ts createUtilityCommands",
+          "createLevelRolesCommand readRequest say canManage"
+        ]
+      },
+      "acceptance": [
+        "A new `starboard` command (aliases `star-board`, `stars`; registrationScope guild; guild-only) registered with the other bot commands. Every action needs Manage Server or Administrator (canManageServer).",
+        "Actions: `setup` takes a channel (required), an optional emoji and an optional threshold, and saves channelId plus the given emoji and threshold (unset ones keep their current values); `off` clears channelId, which turns the starboard off; `selfstar` sets allowSelfStar on or off (no value shows it); `ignore` adds a channel to ignoredChannelIds or removes it when it is already there; `settings` shows channel (or off), emoji, threshold, self-star and ignored channels. Prefix: `$starboard setup #channel [emoji] [threshold]`, `$starboard off`, `$starboard selfstar on|off`, `$starboard ignore #channel`, `$starboard settings`; no action shows the settings.",
+        "setup refuses a channel that is not a text or announcement channel, and warns (without refusing) when Ririko cannot view, send messages or embed links there. Emoji and threshold values are checked by the starboard schema, and its message is shown when they are invalid.",
+        "Any test that lists every command name or counts the registered commands is updated for the new command.",
+        "Every action works as a slash command and as a prefix command with the same result (dual dispatch), and the command is guild-only with registrationScope 'guild'.",
+        "Saving goes through services.guildConfigService.update with the actor { userId, source: 'discord' }, so the change is audited like a dashboard save and reaches the running bot through the GuildConfigWatcher (about 5 seconds). A GuildConfigValidationError is answered with its readable message and nothing is saved.",
+        "Replies to a slash command are ephemeral; each change reply names the new value and mentions the dashboard page as the other place to edit it."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm vitest run apps/bot/src/commands/utility apps/bot/src/__tests__ apps/bot/test/integration/command-sync.test.ts"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2021"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2024",
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "TASK-2024",
+      "parent": "STORY-202",
+      "points": 5,
+      "status": "DONE",
+      "title": "New /eventlogs Command: Set, Off, Ignore, Bots and Settings",
+      "description": "A new guild command so a server manager can turn the four event logs on and change their settings from Discord, which today needs the dashboard Logging page.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/moderation/eventlogs.command.ts",
+          "apps/bot/src/commands/moderation/__tests__/eventlogs.command.test.ts",
+          "apps/bot/src/commands/moderation/index.ts",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/commands/shared/guild-config-command.ts",
+          "apps/bot/src/command-set.test.ts"
+        ],
+        "symbols": [
+          "GuildConfigSchemas.eventlogs",
+          "MAX_EVENT_LOG_IGNORED_CHANNELS",
+          "EventLogService",
+          "registerBotCommands"
+        ],
+        "entry_points": [
+          "/eventlogs",
+          "prefix eventlogs"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas eventlogs messageChannelId memberChannelId serverChannelId voiceChannelId ignoredChannelIds ignoreBots",
+          "registerBotCommands command-set.ts moderation commands index",
+          "EventLogService target messageAllowed"
+        ]
+      },
+      "acceptance": [
+        "A new `eventlogs` command (aliases `eventlog`, `event-logs`; registrationScope guild; guild-only) registered with the other bot commands. Every action needs Manage Server or Administrator (canManageServer). It must not take the name `logs` or any name or alias another command already uses.",
+        "Actions: `set` takes a log type (message, member, server, voice or all) and a channel and saves the matching *ChannelId field(s); `off` takes a log type (or all) and clears the matching field(s); `ignore` adds a channel to ignoredChannelIds or removes it when it is already there; `bots` sets ignoreBots on or off (no value shows it); `settings` shows the four channels (or off), ignored channels and ignore-bots. Prefix: `$eventlogs set <type> #channel`, `$eventlogs off <type>`, `$eventlogs ignore #channel`, `$eventlogs bots on|off`, `$eventlogs settings`; no action shows the settings. The reply for `ignore` says it affects the message log only.",
+        "set refuses a channel that is not a text or announcement channel, and warns (without refusing) when Ririko cannot view, send messages or embed links there.",
+        "Any test that lists every command name or counts the registered commands is updated for the new command.",
+        "Every action works as a slash command and as a prefix command with the same result (dual dispatch), and the command is guild-only with registrationScope 'guild'.",
+        "Saving goes through services.guildConfigService.update with the actor { userId, source: 'discord' }, so the change is audited like a dashboard save and reaches the running bot through the GuildConfigWatcher (about 5 seconds). A GuildConfigValidationError is answered with its readable message and nothing is saved.",
+        "Replies to a slash command are ephemeral; each change reply names the new value and mentions the dashboard page as the other place to edit it."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm vitest run apps/bot/src/commands/moderation apps/bot/src/__tests__ apps/bot/test/integration/command-sync.test.ts apps/bot/src/command-set.test.ts"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2022",
+        "TASK-2023",
+        "TASK-2024"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2025",
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "TASK-2025",
+      "parent": "STORY-202",
+      "points": 3,
+      "status": "DONE",
+      "title": "Document the Setup Commands for Tickets, Starboard, Event Logs and Level Roles",
+      "description": "User docs for the new setup commands, next to the dashboard instructions that exist today.",
+      "context": {
+        "files": [
+          "docs/commands.md",
+          "docs/modules.md",
+          "docs/moderation.md",
+          "docs/economy.md",
+          "docs/dashboard.md",
+          "website/",
+          "website/src/data/commands.json"
+        ],
+        "symbols": [
+          "createTicketCommand",
+          "createLevelRolesCommand"
+        ],
+        "codegraph_queries": [
+          "createTicketCommand createLevelRolesCommand starboard eventlogs command metadata usage examples"
+        ]
+      },
+      "acceptance": [
+        "docs/commands.md lists /starboard and /eventlogs and the new /ticket and /levelroles actions with their permission (Manage Server or Administrator; levelroles keeps Manage Roles too), in the same format as the existing entries.",
+        "The Tickets and Starboard sections (docs/modules.md), the event logs section (wherever STORY-199 documented it) and the level role rewards section (docs/economy.md section 8) each say the feature can be set up with the command as well as the dashboard, with one short example. docs/dashboard.md notes the command alternative on the Tickets, Logging, XP & Ranking and Starboard pages.",
+        "Every statement matches the merged code of TASK-2021 to TASK-2024; `pnpm docs:build` passes (it regenerates the website command list with `pnpm docs:commands`)."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm format:check"
     }
   ],
   "chores": [

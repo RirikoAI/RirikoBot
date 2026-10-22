@@ -92,8 +92,8 @@ Discord allows 100 slash commands in each scope. Ririko uses two scopes.
 
 Per-server commands:
 
-- Moderation: `automod`, `ban`, `unban`, `softban`, `kick`, `timeout`, `untimeout`, `warn`, `history`, `note`, `nick`, `purge`, `lock`, `unlock`.
-- Server setup: `prefix`, `welcomer`, `farewell`, `autorole`, `temprole`, `levelroles`, `create-reaction-role`, `reaction-roles`, `autovoice`, `ticket`, `setup-music`.
+- Moderation: `automod`, `eventlogs`, `ban`, `unban`, `softban`, `kick`, `timeout`, `untimeout`, `warn`, `history`, `note`, `nick`, `purge`, `lock`, `unlock`.
+- Server setup: `prefix`, `welcomer`, `farewell`, `autorole`, `temprole`, `levelroles`, `create-reaction-role`, `reaction-roles`, `autovoice`, `ticket`, `starboard`, `setup-music`.
 - AI and images: `aichannel`, `aipersona`, `setup-stablediffusion-api`, `stablediffusion-model`.
 - Streams, events and cards: `stream`, `setup-stream-notification`, `giveaway`, `tcg-admin`.
 
@@ -229,6 +229,7 @@ See [moderation.md](moderation.md). All moderation commands work in a server onl
 | `/history` | `modlogs`, `cases` | Shows a member's moderation history. | Timeout Members |
 | `/note` | | Adds or shows staff notes. | Timeout Members |
 | `/automod` | | Shows or changes AutoMod rules. | Manage Server |
+| `/eventlogs` | `eventlog`, `event-logs` | Sets up the message, member, server and voice event logs: set, off, ignore, bots and settings. | Manage Server or Administrator |
 
 ### 7.6. Server Tools
 
@@ -250,7 +251,7 @@ See [modules.md](modules.md).
 | `/reaction-roles` | `reactionroles`, `rr` | Lists or removes reaction roles. | Manage Roles or Manage Server |
 | `/autorole` | `auto-role`, `joinrole` | Sets join and verification roles. | Manage Roles or Manage Server |
 | `/temprole` | `temporaryrole`, `trole` | Gives roles that expire. | Manage Roles or Manage Server |
-| `/levelroles` | `levelrole`, `level-roles`, `level-role` | Roles given at chosen levels: list, add, remove and sync. | Everyone to list. Manage Roles or Manage Server for the rest |
+| `/levelroles` | `levelrole`, `level-roles`, `level-role` | Roles given at chosen levels: list, add, remove, sync, and stack (keep the roles of lower levels, on or off). | Everyone to list. Manage Roles, Manage Server or Administrator for the rest |
 | `/reminder` | `remindme`, `reminders` | Sets reminders. | Everyone |
 | `/prefix` | `setprefix` | Shows or sets the prefix. | Everyone to show. Manage Server to set |
 | `/timezone` | `tz`, `settimezone`, `set-timezone` | Shows or sets a time zone. | Everyone for yourself. Manage Server for the server |
@@ -259,7 +260,8 @@ See [modules.md](modules.md).
 | `/member-info` | `memberinfo`, `user-info`, `userinfo`, `whois` | Shows member information. | Everyone (server only) |
 | `/welcomer` | `welcome` | Sets the welcome card. | Manage Server |
 | `/farewell` | `goodbye` | Sets the farewell card. | Manage Server |
-| `/ticket` | `tickets` | Support tickets: post the panel, claim, close, and add or remove members. | Panel: Manage Server or Administrator. Close: the opener and staff. Claim, add and remove: staff |
+| `/ticket` | `tickets` | Support tickets: set them up (setup, enable, disable, staff, settings), post the panel, claim, close, and add or remove members. | Setup, enable, disable, staff, settings and panel: Manage Server or Administrator. Close: the opener and staff. Claim, add and remove: staff |
+| `/starboard` | `star-board`, `stars` | Sets up the starboard: setup, off, selfstar, ignore and settings. | Manage Server or Administrator |
 
 ### 7.7. Games
 

@@ -147,6 +147,8 @@ Support tickets give each member a private channel for help. A member presses **
 
 The panel is a message with one **Open Ticket** button. Only a member with **Manage Server** or **Administrator** can post it. The command refuses when tickets are off or have no category.
 
+**Set it up with a command.** You can also turn tickets on in Discord, without the dashboard. A member with **Manage Server** or **Administrator** runs, for example, `/ticket action:setup category:Tickets role:@Support channel:#transcripts` (or `!ticket setup Tickets @Support #transcripts`). This turns tickets on, sets the category, adds the staff role and sets the transcript channel. The role and the channel are optional. Then post the panel with `/ticket action:panel`. The command saves the same settings as the dashboard, so you see them on the **Tickets** page, and the Audit Log shows the change. The number of open tickets per member and the welcome message are set only on the dashboard.
+
 **What members do.**
 
 1. Press **Open Ticket**.
@@ -194,18 +196,28 @@ Ririko does not keep transcripts. It keeps only the ticket details.
 
 | Option | Required | What it does |
 |---|---|---|
-| `action` | Yes | `panel`, `close`, `claim`, `add` or `remove`. |
-| `channel` | No | For `panel`. Where to post the panel. The default is this channel. |
+| `action` | Yes | `setup`, `enable`, `disable`, `staff`, `settings`, `panel`, `close`, `claim`, `add` or `remove`. |
+| `category` | For `setup` | The category that ticket channels are created under. |
+| `role` | For `staff`. No for `setup` | The staff role. |
+| `channel` | No | For `panel`. Where to post the panel. The default is this channel. For `setup`, the transcript channel. |
 | `message` | No | For `panel`. The text on the panel. Up to 1,000 characters. |
 | `reason` | No | For `close`. Up to 500 characters. |
 | `user` | For `add` and `remove` | The member. |
 
-- `panel` needs **Manage Server** or **Administrator**.
+- `setup`, `enable`, `disable`, `staff`, `settings` and `panel` need **Manage Server** or **Administrator**.
+- `setup` turns tickets on, sets the category and, when you give them, adds the staff role and sets the transcript channel. It leaves the staff roles and the transcript channel alone when you do not give them. It refuses a category that is not a category, and a transcript channel that is not a text channel.
+- `enable` turns tickets on again. It refuses when no category is set. `disable` turns tickets off. Both keep the other settings.
+- `staff` adds the role to the staff roles, or removes it if it is already there. You can have up to 10.
+- `settings` shows whether tickets are on, the category, the staff roles, the transcript channel and how many tickets a member can have open.
+- After `setup`, Ririko warns you when it lacks **Manage Channels** in the category.
 - `close` works for the opener and the staff. `claim`, `add` and `remove` work for staff.
 - Every action except `panel` works only inside a ticket channel.
 
 Prefix form: `!ticket` (or `!tickets`).
 
+- `!ticket setup <category> [@role] [#transcript-channel]`. Example: `!ticket setup Tickets @Support #transcripts`. Write the category as its ID, `<#id>` or its exact name.
+- `!ticket enable`, `!ticket disable` and `!ticket settings`.
+- `!ticket staff <role>`. Mention the role, or give its ID or exact name.
 - `!ticket panel [#channel] [message]`. Example: `!ticket panel #support Need help?`
 - `!ticket close [reason]`. Example: `!ticket close spam`
 - `!ticket claim`
@@ -452,7 +464,19 @@ The starboard shows the best messages of your server. When a message gets enough
 5. Pick **Ignored channels** if some channels should never reach the starboard. You can pick up to 25.
 6. Save. The change takes effect at once. Ririko reads the settings again within 5 minutes at the latest.
 
-For a custom server emoji, type its text as `<:name:id>` (animated: `<a:name:id>`). To get that text, type a backslash before the emoji in Discord, like `\:name:`, and send. Keycap emoji such as 1️⃣ are not accepted. There is no command for the starboard. With the command line, the keys are `starboard.channelId`, `starboard.emoji`, `starboard.threshold`, `starboard.allowSelfStar` and `starboard.ignoredChannelIds`. Saves show in the Audit Log as "Starboard settings changed".
+**Set it up with a command.** You can also use `/starboard` in Discord instead of the dashboard. A member with **Manage Server** or **Administrator** runs, for example, `/starboard action:setup channel:#starboard emoji:⭐ threshold:3` (or `!starboard setup #starboard ⭐ 3`). This turns the starboard on in that channel. The emoji and the stars needed are optional, and Ririko keeps the current values when you leave them out. The command saves the same settings as the dashboard and shows the same errors, and the Audit Log shows the change.
+
+| Action | What it does |
+|---|---|
+| `setup` | Turns the starboard on in `channel`, a text or announcement channel. Sets `emoji` and `threshold` when you give them. |
+| `off` | Turns the starboard off. Copies already posted stay, and the other settings are kept. |
+| `selfstar` | Sets whether the author's own star counts. Use `enabled:true` or `enabled:false` (`!starboard selfstar on`). With no value it shows the current setting. |
+| `ignore` | Adds `channel` to the ignored channels, or removes it if it is already there (`!starboard ignore #spam`). You can have up to 25. |
+| `settings` | Shows the starboard channel, the emoji, the stars needed, the self-star switch and the ignored channels. This is the default. |
+
+On the prefix form, write `!starboard setup <channel> [emoji] [stars needed]`. A single number after the channel is read as the stars needed. If the emoji is a custom emoji from another server, or Ririko cannot post in the channel, the reply warns you but still saves.
+
+For a custom server emoji, type its text as `<:name:id>` (animated: `<a:name:id>`). To get that text, type a backslash before the emoji in Discord, like `\:name:`, and send. Keycap emoji such as 1️⃣ are not accepted. With the command line, the keys are `starboard.channelId`, `starboard.emoji`, `starboard.threshold`, `starboard.allowSelfStar` and `starboard.ignoredChannelIds`. Saves show in the Audit Log as "Starboard settings changed".
 
 **How stars are counted.**
 

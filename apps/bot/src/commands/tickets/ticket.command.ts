@@ -5,6 +5,7 @@ import {
   ChannelType,
   EmbedBuilder,
   PermissionFlagsBits,
+  type Guild,
   type GuildMember,
   type TextChannel,
   type User,
@@ -13,10 +14,25 @@ import { describeErrorForLog } from '@ririko/core';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import { TICKET_OPEN_BUTTON_ID, TICKET_REASON_MAX_LENGTH } from '@ririko/services';
 import type { BotServices } from '../../services.js';
+import { canManageServer, saveGuildConfig } from '../shared/guild-config-command.js';
 import { describeClosed } from './components.js';
 
-export const TICKET_ACTIONS = ['panel', 'close', 'claim', 'add', 'remove'] as const;
+export const TICKET_ACTIONS = [
+  'panel',
+  'close',
+  'claim',
+  'add',
+  'remove',
+  'setup',
+  'enable',
+  'disable',
+  'staff',
+  'settings',
+] as const;
 export type TicketAction = (typeof TICKET_ACTIONS)[number];
+
+/** The actions that change or show the server's ticket settings; they need Manage Server. */
+const SETTINGS_ACTIONS: readonly string[] = ['setup', 'enable', 'disable', 'staff', 'settings'];
 
 /** Longest panel message kept; an embed description allows more, a panel needs far less. */
 export const TICKET_PANEL_MESSAGE_MAX_LENGTH = 1000;
@@ -25,9 +41,15 @@ export const DEFAULT_PANEL_MESSAGE =
   'Need help? Press the button below and tell us what you need. A private channel opens for you and the staff.';
 
 const USAGE =
-  'Usage: `/ticket action:panel|close|claim|add|remove`. Examples: `!ticket panel #support Need help?`, `!ticket close spam`, `!ticket add @user`.';
+  'Usage: `/ticket action:setup|enable|disable|staff|settings|panel|close|claim|add|remove`. Examples: `!ticket setup Tickets @Support #transcripts`, `!ticket panel #support Need help?`, `!ticket close spam`, `!ticket add @user`.';
+const SETUP_USAGE =
+  'Say which category the tickets go under: `/ticket action:setup category:Tickets` or `!ticket setup Tickets @Support #transcripts`.';
 const NOT_A_TICKET = 'This channel is not an open ticket.';
 const DASHBOARD_HINT = 'Set them up on the **Tickets** page of the dashboard (Members section).';
+const EDIT_HINT = 'You can also change this on the **Tickets** page of the dashboard.';
+const PANEL_HINT = 'Post the panel with `/ticket action:panel`.';
+const NO_SETTINGS_PERMISSION =
+  'You need the Manage Server or Administrator permission to change the ticket settings.';
 
 /** What the person asked for, the same shape for a slash command and a prefix command. */
 interface TicketRequest {
@@ -38,10 +60,19 @@ interface TicketRequest {
   user: User | null;
   /** True when a user was named but could not be found. */
   userMissing: boolean;
+  /** The category a slash `setup` carried; the channel itself, checked later. */
+  category: unknown;
+  /** The category a prefix `setup` carried: an ID, a mention or an exact name. */
+  categoryRef: string | null;
+  /** The role of `setup` or `staff`: a mention, an ID or (for `staff`) an exact name. */
+  roleRef: string | null;
 }
 
 const CHANNEL_ARG = /^(?:<#)?(\d{17,20})>?$/;
 const USER_ARG = /^(?:<@!?)?(\d{17,20})>?$/;
+const ROLE_ARG = /^(?:<@&)?(\d{17,20})>?$/;
+/** A token that is a mention or an ID, which ends a category name in `!ticket setup`. */
+const REFERENCE_ARG = /^(?:<[#@]&?!?\d{17,20}>|\d{17,20})$/;
 
 function nullIfEmpty(text: string | null | undefined): string | null {
   const trimmed = text?.trim();
@@ -57,13 +88,23 @@ async function readRequest(ctx: CommandContext): Promise<TicketRequest> {
   if (ctx.source === 'slash') {
     const channel = await ctx.options.getChannel('channel');
     const user = await ctx.options.getUser('user');
+    const action = ctx.options.getString('action')?.toLowerCase() ?? null;
+    const category = action === 'setup' ? await ctx.options.getChannel('category') : null;
+    const options = ctx.raw && 'options' in ctx.raw ? ctx.raw.options : null;
+    const role =
+      (action === 'setup' || action === 'staff') && options && 'getRole' in options
+        ? (options.getRole('role') as { id: string } | null)
+        : null;
     return {
-      action: ctx.options.getString('action')?.toLowerCase() ?? null,
+      action,
       channelId: channel?.id ?? null,
       message: nullIfEmpty(ctx.options.getString('message')),
       reason: nullIfEmpty(ctx.options.getString('reason')),
       user,
       userMissing: false,
+      category,
+      categoryRef: null,
+      roleRef: role?.id ?? null,
     };
   }
 
@@ -76,9 +117,33 @@ async function readRequest(ctx: CommandContext): Promise<TicketRequest> {
     reason: null,
     user: null,
     userMissing: false,
+    category: null,
+    categoryRef: null,
+    roleRef: null,
   };
 
-  if (action === 'panel') {
+  if (action === 'setup') {
+    // `<category> [@role] [#channel]`: the category is an ID, a mention or a name that may have spaces.
+    const first = args[0];
+    const nameTokens: string[] = [];
+    if (first && CHANNEL_ARG.test(first)) {
+      request.categoryRef = first;
+      args.shift();
+    } else {
+      while (args.length > 0 && !REFERENCE_ARG.test(args[0]!)) nameTokens.push(args.shift()!);
+      request.categoryRef = nullIfEmpty(nameTokens.join(' '));
+    }
+    for (const token of args) {
+      if (token.startsWith('<@&')) request.roleRef ??= token;
+      else if (token.startsWith('<#')) request.channelId ??= CHANNEL_ARG.exec(token)?.[1] ?? null;
+      else if (REFERENCE_ARG.test(token)) {
+        if (request.roleRef === null) request.roleRef = token;
+        else request.channelId ??= token;
+      }
+    }
+  } else if (action === 'staff') {
+    request.roleRef = nullIfEmpty(args.join(' '));
+  } else if (action === 'panel') {
     const channelMatch = args[0]?.match(CHANNEL_ARG);
     if (channelMatch) {
       request.channelId = channelMatch[1] ?? null;
@@ -116,6 +181,182 @@ function isTextChannel(channel: unknown): channel is TextChannel {
 /** Ephemeral for slash commands; a prefix command has no private replies and ignores the flag. */
 async function say(ctx: CommandContext, content: string, ephemeral = true): Promise<void> {
   await ctx.reply({ content, ephemeral, allowedMentions: { parse: [] } });
+}
+
+/** A channel by ID from the cache, else from Discord; null when it cannot be found. */
+async function findChannel(guild: Guild, id: string) {
+  return guild.channels.cache.get(id) ?? (await guild.channels.fetch(id).catch(() => null));
+}
+
+/** A category channel by ID, mention or exact name (any case); null when none matches. */
+async function findCategory(guild: Guild, request: TicketRequest) {
+  if (request.category) return request.category as { id: string; type: ChannelType; name?: string };
+  const ref = request.categoryRef;
+  if (!ref) return null;
+  const id = CHANNEL_ARG.exec(ref)?.[1];
+  if (id) return findChannel(guild, id);
+  const name = ref.toLowerCase();
+  return (
+    [...guild.channels.cache.values()].find(
+      (channel) =>
+        channel.type === ChannelType.GuildCategory && channel.name.toLowerCase() === name,
+    ) ?? null
+  );
+}
+
+/** A role by mention, ID or exact name (any case); null when none matches. */
+function findRole(guild: Guild, ref: string) {
+  const id = ROLE_ARG.exec(ref)?.[1];
+  if (id) return guild.roles.cache.get(id) ?? null;
+  const name = ref.toLowerCase();
+  return [...guild.roles.cache.values()].find((role) => role.name.toLowerCase() === name) ?? null;
+}
+
+function describeStaffRoles(ids: readonly string[]): string {
+  return ids.length > 0 ? ids.map((id) => `<@&${id}>`).join(' ') : 'none';
+}
+
+function describeTranscript(id: string | null): string {
+  return id ? `<#${id}>` : 'the log channel (if one is set)';
+}
+
+/** `setup`, `enable`, `disable`, `staff` and `settings`: the same fields as the dashboard page. */
+async function configureTickets(
+  ctx: CommandContext,
+  services: BotServices,
+  member: GuildMember,
+  action: string,
+  request: TicketRequest,
+): Promise<void> {
+  if (!canManageServer(member)) {
+    await say(ctx, NO_SETTINGS_PERMISSION);
+    return;
+  }
+  const guild = ctx.guild!;
+  const current = await services.guildConfigService.get(guild.id, 'tickets');
+
+  if (action === 'settings') {
+    await say(
+      ctx,
+      [
+        '**Ticket settings**',
+        `Tickets: ${current.enabled ? 'on' : 'off'}`,
+        `Category: ${current.categoryId ? `<#${current.categoryId}>` : 'none'}`,
+        `Staff roles: ${describeStaffRoles(current.staffRoleIds)}`,
+        `Transcripts: ${describeTranscript(current.transcriptChannelId)}`,
+        `Open tickets per member: ${current.maxOpenPerUser}`,
+        EDIT_HINT,
+      ].join('\n'),
+    );
+    return;
+  }
+
+  if (action === 'disable') {
+    if (!(await saveGuildConfig(ctx, services, 'tickets', { enabled: false }))) return;
+    await say(ctx, `Tickets are now **off**. Members cannot open new tickets. ${EDIT_HINT}`);
+    return;
+  }
+
+  if (action === 'enable') {
+    if (!current.categoryId) {
+      await say(
+        ctx,
+        'Tickets have no category yet. Run `/ticket action:setup category:Tickets` first.',
+      );
+      return;
+    }
+    if (!(await saveGuildConfig(ctx, services, 'tickets', { enabled: true }))) return;
+    await say(
+      ctx,
+      `Tickets are now **on**, under <#${current.categoryId}>. ${PANEL_HINT} ${EDIT_HINT}`,
+    );
+    return;
+  }
+
+  if (action === 'staff') {
+    if (!request.roleRef) {
+      await say(
+        ctx,
+        'Say which role: `/ticket action:staff role:@Support` or `!ticket staff @Support`.',
+      );
+      return;
+    }
+    const role = findRole(guild, request.roleRef);
+    if (!role) {
+      await say(ctx, 'I could not find that role. Mention it or type its exact name.');
+      return;
+    }
+    const has = current.staffRoleIds.includes(role.id);
+    const staffRoleIds = has
+      ? current.staffRoleIds.filter((id) => id !== role.id)
+      : [...current.staffRoleIds, role.id];
+    const saved = await saveGuildConfig(ctx, services, 'tickets', { staffRoleIds });
+    if (!saved) return;
+    await say(
+      ctx,
+      `<@&${role.id}> is ${has ? 'no longer' : 'now'} a ticket staff role. Staff roles: ${describeStaffRoles(saved.staffRoleIds)}. ${EDIT_HINT}`,
+    );
+    return;
+  }
+
+  // setup
+  if (!request.category && !request.categoryRef) {
+    await say(ctx, SETUP_USAGE);
+    return;
+  }
+  const category = await findCategory(guild, request);
+  if (!category) {
+    await say(
+      ctx,
+      'I could not find that category. Give its ID, mention it or type its exact name.',
+    );
+    return;
+  }
+  if (category.type !== ChannelType.GuildCategory) {
+    await say(ctx, 'That is not a category. Pick a category channel, the folder tickets go under.');
+    return;
+  }
+
+  const patch: Record<string, unknown> = { enabled: true, categoryId: category.id };
+  if (request.roleRef) {
+    const role = findRole(guild, request.roleRef);
+    if (!role) {
+      await say(ctx, 'I could not find that role. Mention it or give its ID.');
+      return;
+    }
+    patch.staffRoleIds = current.staffRoleIds.includes(role.id)
+      ? current.staffRoleIds
+      : [...current.staffRoleIds, role.id];
+  }
+  if (request.channelId) {
+    const transcript = await findChannel(guild, request.channelId);
+    if (!isTextChannel(transcript)) {
+      await say(ctx, 'The transcript channel needs to be a text channel.');
+      return;
+    }
+    patch.transcriptChannelId = transcript.id;
+  }
+
+  const saved = await saveGuildConfig(ctx, services, 'tickets', patch);
+  if (!saved) return;
+
+  const me = guild.members.me;
+  const channelForPermissions = category as { permissionsFor?: (m: GuildMember) => unknown };
+  const granted = me
+    ? (channelForPermissions.permissionsFor?.(me) as
+        { has(flag: bigint): boolean } | null | undefined)
+    : undefined;
+  const warning =
+    me && !granted?.has(PermissionFlagsBits.ManageChannels)
+      ? ' I do not have **Manage Channels** in that category, so I cannot open tickets there yet.'
+      : '';
+  await say(
+    ctx,
+    [
+      `Tickets are now **on**, under <#${saved.categoryId}>. Staff roles: ${describeStaffRoles(saved.staffRoleIds)}. Transcripts: ${describeTranscript(saved.transcriptChannelId)}.${warning}`,
+      `${PANEL_HINT} ${EDIT_HINT}`,
+    ].join('\n'),
+  );
 }
 
 async function postPanel(
@@ -208,15 +449,23 @@ export function createTicketCommand(services: BotServices): Command {
       name: 'ticket',
       registrationScope: 'guild',
       category: CommandCategory.UTILITY,
-      description: 'Support tickets: post the panel, claim, close, and add or remove members',
+      description:
+        'Support tickets: set them up, post the panel, claim, close, and add or remove members',
       aliases: ['tickets'],
       isGuildOnly: true,
-      usage: '/ticket <panel|close|claim|add|remove>',
+      usage: '/ticket <setup|enable|disable|staff|settings|panel|close|claim|add|remove>',
       examples: [
+        '/ticket action:setup category:Tickets role:@Support channel:#transcripts',
+        '/ticket action:settings',
         '/ticket action:panel channel:#support message:Need help?',
         '/ticket action:close reason:Solved',
         '/ticket action:claim',
         '/ticket action:add user:@member',
+        '!ticket setup Tickets @Support #transcripts',
+        '!ticket staff @Support',
+        '!ticket enable',
+        '!ticket disable',
+        '!ticket settings',
         '!ticket panel #support Need help?',
         '!ticket close spam',
         '!ticket claim',
@@ -230,6 +479,11 @@ export function createTicketCommand(services: BotServices): Command {
           type: 'STRING',
           required: true,
           choices: [
+            { name: 'Setup (turn tickets on with a category)', value: 'setup' },
+            { name: 'Enable (turn tickets on)', value: 'enable' },
+            { name: 'Disable (turn tickets off)', value: 'disable' },
+            { name: 'Staff (add or remove a staff role)', value: 'staff' },
+            { name: 'Settings (show the ticket settings)', value: 'settings' },
             { name: 'Panel (post the Open Ticket button)', value: 'panel' },
             { name: 'Close (close this ticket)', value: 'close' },
             { name: 'Claim (take this ticket)', value: 'claim' },
@@ -239,7 +493,8 @@ export function createTicketCommand(services: BotServices): Command {
         },
         {
           name: 'channel',
-          description: 'Where to post the panel (default: this channel)',
+          description:
+            'Where to post the panel (default: this channel), or the transcript channel for setup',
           type: 'CHANNEL',
           required: false,
         },
@@ -263,6 +518,19 @@ export function createTicketCommand(services: BotServices): Command {
           type: 'USER',
           required: false,
         },
+        {
+          name: 'category',
+          description: 'The category that ticket channels are created under (for setup)',
+          type: 'CHANNEL',
+          required: false,
+        },
+        {
+          name: 'role',
+          description:
+            'The staff role to add, or remove if it is already staff (for setup and staff)',
+          type: 'ROLE',
+          required: false,
+        },
       ],
     },
     async execute(ctx: CommandContext): Promise<void> {
@@ -276,6 +544,11 @@ export function createTicketCommand(services: BotServices): Command {
       const action = request.action as TicketAction | null;
       if (!action || !TICKET_ACTIONS.includes(action)) {
         await say(ctx, USAGE);
+        return;
+      }
+
+      if (SETTINGS_ACTIONS.includes(action)) {
+        await configureTickets(ctx, services, member, action, request);
         return;
       }
 

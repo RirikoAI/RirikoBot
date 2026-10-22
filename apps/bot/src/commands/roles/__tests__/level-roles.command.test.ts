@@ -20,6 +20,7 @@ interface CtxOptions {
   action?: string | null;
   level?: number | null;
   slashRole?: { id: string } | null;
+  enabled?: boolean | null;
   perms?: bigint[];
   member?: unknown;
   guild?: unknown;
@@ -60,6 +61,7 @@ describe('/levelroles command (TASK-2005)', () => {
       options: {
         getString: vi.fn((name: string) => (name === 'action' ? (opts.action ?? null) : null)),
         getInteger: vi.fn(() => opts.level ?? null),
+        getBoolean: vi.fn(() => opts.enabled ?? null),
         getRawArgs: vi.fn().mockReturnValue(opts.args ?? []),
       },
       reply,
@@ -109,12 +111,14 @@ describe('/levelroles command (TASK-2005)', () => {
         ['action', 'STRING'],
         ['level', 'INTEGER'],
         ['role', 'ROLE'],
+        ['enabled', 'BOOLEAN'],
       ]);
       expect(metadata.options?.[0]?.choices?.map((c) => c.value)).toEqual([
         'list',
         'add',
         'remove',
         'sync',
+        'stack',
       ]);
     });
   });
@@ -184,13 +188,16 @@ describe('/levelroles command (TASK-2005)', () => {
   });
 
   describe('permissions', () => {
-    it.each([['add'], ['remove'], ['sync']])('refuses %s without a staff permission', async (a) => {
-      const { ctx, reply } = makeCtx({ source: 'prefix', args: [a, '5', REGULAR] });
-      await command().execute(ctx);
-      expect(text(reply)).toContain('Manage Roles, Manage Server or Administrator');
-      expect(update).not.toHaveBeenCalled();
-      expect(syncGuild).not.toHaveBeenCalled();
-    });
+    it.each([['add'], ['remove'], ['sync'], ['stack']])(
+      'refuses %s without a staff permission',
+      async (a) => {
+        const { ctx, reply } = makeCtx({ source: 'prefix', args: [a, '5', REGULAR] });
+        await command().execute(ctx);
+        expect(text(reply)).toContain('Manage Roles, Manage Server or Administrator');
+        expect(update).not.toHaveBeenCalled();
+        expect(syncGuild).not.toHaveBeenCalled();
+      },
+    );
 
     it('refuses when the member cannot be read', async () => {
       const { ctx, reply } = makeCtx({ action: 'remove', level: 5, member: null });
@@ -539,6 +546,91 @@ describe('/levelroles command (TASK-2005)', () => {
       await expect(command().execute(ctx)).resolves.toBeUndefined();
       expect(spy).toHaveBeenCalledWith(expect.stringContaining('Could not report a sync'));
       spy.mockRestore();
+    });
+  });
+  describe('stack', () => {
+    it('shows the current setting when no value is given', async () => {
+      const { ctx, reply } = makeCtx({
+        source: 'prefix',
+        args: ['stack'],
+        perms: [PermissionFlagsBits.ManageRoles],
+      });
+      await command().execute(ctx);
+      expect(text(reply)).toContain('Stacking is **on**');
+      expect(update).not.toHaveBeenCalled();
+
+      stored.keepPreviousRoles = false;
+      const second = makeCtx({ action: 'stack', perms: [PermissionFlagsBits.ManageGuild] });
+      await command().execute(second.ctx);
+      expect(text(second.reply)).toContain('Stacking is **off**');
+    });
+
+    it.each([
+      ['off', false],
+      ['No', false],
+      ['disable', false],
+      ['on', true],
+      ['TRUE', true],
+    ])('sets keepPreviousRoles from the prefix word %s', async (word, expected) => {
+      stored.keepPreviousRoles = !expected;
+      const { ctx, reply } = makeCtx({
+        source: 'prefix',
+        args: ['stack', word],
+        perms: [PermissionFlagsBits.Administrator],
+      });
+      await command().execute(ctx);
+      expect(update).toHaveBeenCalledWith(
+        GUILD_ID,
+        'levelroles',
+        { keepPreviousRoles: expected },
+        { userId: USER_ID, source: 'discord' },
+      );
+      expect(stored.keepPreviousRoles).toBe(expected);
+      expect(text(reply)).toContain(`Stacking is now **${expected ? 'on' : 'off'}**`);
+      expect(reply.mock.calls[0]?.[0].ephemeral).toBe(false);
+      expect(reply.mock.calls[0]?.[0].allowedMentions).toEqual({ parse: [] });
+    });
+
+    it('sets keepPreviousRoles from the slash option', async () => {
+      const { ctx, reply } = makeCtx({
+        action: 'stack',
+        enabled: false,
+        perms: [PermissionFlagsBits.ManageGuild],
+      });
+      await command().execute(ctx);
+      expect(update).toHaveBeenCalledWith(
+        GUILD_ID,
+        'levelroles',
+        { keepPreviousRoles: false },
+        { userId: USER_ID, source: 'discord' },
+      );
+      expect(stored.keepPreviousRoles).toBe(false);
+      expect(text(reply)).toContain('Stacking is now **off**');
+    });
+
+    it('asks for on or off when the word is not one of them', async () => {
+      const { ctx, reply } = makeCtx({
+        source: 'prefix',
+        args: ['stack', 'maybe'],
+        perms: [PermissionFlagsBits.ManageRoles],
+      });
+      await command().execute(ctx);
+      expect(text(reply)).toContain('Say `on` or `off`');
+      expect(update).not.toHaveBeenCalled();
+    });
+
+    it('answers a validation error with its message and saves nothing', async () => {
+      update.mockRejectedValueOnce(
+        new GuildConfigValidationError({ keepPreviousRoles: ['Choose on or off.'] }),
+      );
+      const { ctx, reply } = makeCtx({
+        source: 'prefix',
+        args: ['stack', 'off'],
+        perms: [PermissionFlagsBits.ManageRoles],
+      });
+      await command().execute(ctx);
+      expect(text(reply)).toBe('Choose on or off.');
+      expect(stored.keepPreviousRoles).toBe(true);
     });
   });
 });

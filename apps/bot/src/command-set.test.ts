@@ -48,6 +48,8 @@ const GUILD_SCOPED = [
   'setup-stream-notification',
   'giveaway',
   'ticket',
+  'starboard',
+  'eventlogs',
   'tcg-admin',
 ];
 
