@@ -40,7 +40,7 @@ export interface GuildChildEntry {
 /** The column every inventoried table keeps the server id in. */
 export const GUILD_ID_COLUMN = 'guild_id';
 
-/** Every table with a `guild_id` column (41 tables, both dialects). Sorted by table name. */
+/** Every table with a `guild_id` column (43 tables, both dialects). Sorted by table name. */
 export const GUILD_DATA_INVENTORY: readonly GuildDataEntry[] = [
   { table: 'adventure_sessions', action: 'delete' },
   { table: 'adventure_settings', action: 'delete' },
@@ -65,6 +65,7 @@ export const GUILD_DATA_INVENTORY: readonly GuildDataEntry[] = [
     action: 'detach',
     note: 'The ledger of a user balance. Deleting rows would stop it adding up to economy_balances, so only the server link is removed.',
   },
+  { table: 'event_log_settings', action: 'delete' },
   { table: 'free_game_announcements', action: 'delete' },
   { table: 'free_game_channels', action: 'delete' },
   { table: 'game_sessions', action: 'delete' },
@@ -83,6 +84,7 @@ export const GUILD_DATA_INVENTORY: readonly GuildDataEntry[] = [
     note: 'guild_id is null for DMs, which stay. Prompts made in the server go with it.',
   },
   { table: 'leaderboard_snapshots', action: 'delete' },
+  { table: 'level_role_settings', action: 'delete' },
   { table: 'moderation_cases', action: 'delete' },
   { table: 'moderation_notes', action: 'delete' },
   { table: 'moderation_rules', action: 'delete' },
@@ -101,9 +103,17 @@ export const GUILD_DATA_INVENTORY: readonly GuildDataEntry[] = [
     action: 'detach',
     note: "A user's reminder. It is sent by DM first, so it still works after the bot leaves; only the server link (used for the time zone) is removed.",
   },
+  { table: 'starboard_posts', action: 'delete' },
+  { table: 'starboard_settings', action: 'delete' },
   { table: 'stream_announcements', action: 'delete' },
   { table: 'stream_subscriptions', action: 'delete' },
   { table: 'temporary_roles', action: 'delete' },
+  { table: 'ticket_settings', action: 'delete' },
+  {
+    table: 'tickets',
+    action: 'delete',
+    note: 'Ticket metadata only. Transcripts are posted to a channel in the server and are never stored.',
+  },
   {
     table: 'waifu_guild_members',
     action: 'exclude',

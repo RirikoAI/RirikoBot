@@ -1,10 +1,16 @@
 import type { Metadata } from 'next';
-import { MAX_XP_RATE_PERCENT } from '@ririko/core';
-import { ChannelListField, ChannelSelectField, RoleListField } from '@/components/guild-pickers';
+import { MAX_LEVEL_ROLE_REWARDS, MAX_REWARD_LEVEL, MAX_XP_RATE_PERCENT } from '@ririko/core';
+import {
+  assignableRoleOptions,
+  ChannelListField,
+  ChannelSelectField,
+  RoleListField,
+} from '@/components/guild-pickers';
 import { NumberField, SettingsForm, ToggleField } from '@/components/settings-form';
 import { requireGuildAccess } from '@/lib/server/guilds/require-guild-access';
 import { getWebServices } from '@/lib/server/services';
-import { saveXpSettings } from './actions';
+import { saveLevelRoleSettings, saveXpSettings } from './actions';
+import { LevelRewardsField } from './level-rewards-field';
 
 export const metadata: Metadata = { title: 'XP & Ranking · Ririko Dashboard' };
 
@@ -12,7 +18,14 @@ export default async function XpSettingsPage({ params }: { params: Promise<{ gui
   const { guildId } = await params;
   await requireGuildAccess(guildId);
   const { guildConfig } = await getWebServices();
-  const values = await guildConfig.get(guildId, 'xp');
+  const [values, levelRoles] = await Promise.all([
+    guildConfig.get(guildId, 'xp'),
+    guildConfig.get(guildId, 'levelroles'),
+  ]);
+  const roles = await assignableRoleOptions(
+    guildId,
+    levelRoles.rewards.map((reward) => reward.roleId),
+  );
 
   return (
     <section className="flex flex-col gap-6">
@@ -66,6 +79,28 @@ export default async function XpSettingsPage({ params }: { params: Promise<{ gui
           label="Voice rewards"
           description="Members earn 35 credits and 40 XP (at the rate above) for each minute in a voice channel with at least one other member who is not muted or deafened. The server's AFK channel never counts."
           defaultValue={values.voiceXpEnabled}
+        />
+      </SettingsForm>
+      <header>
+        <h2 className="text-xl font-bold">Level role rewards</h2>
+        <p className="mt-1 text-sm text-zinc-400">
+          Give members a role when they reach a level. Ririko needs Manage Roles and a role above
+          the reward roles. Rewards apply from the next level-up; to give them to members who
+          already have the level, run <code>/levelroles sync</code>.
+        </p>
+      </header>
+      <SettingsForm action={saveLevelRoleSettings.bind(null, guildId)}>
+        <LevelRewardsField
+          defaultValue={levelRoles.rewards}
+          roles={roles}
+          maxRewards={MAX_LEVEL_ROLE_REWARDS}
+          maxLevel={MAX_REWARD_LEVEL}
+        />
+        <ToggleField
+          name="keepPreviousRoles"
+          label="Keep lower reward roles"
+          description="On: a member keeps the reward roles of every level they have reached. Off: a member holds only the role of their highest reward, and Ririko removes their other reward roles. Roles that are not rewards are never removed."
+          defaultValue={levelRoles.keepPreviousRoles}
         />
       </SettingsForm>
     </section>

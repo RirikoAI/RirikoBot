@@ -210,5 +210,44 @@ export const SQLITE_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "3133edeed29c29272f0c590cae128169c8e046cc5b18405dd112a50d05eb3c87",
     "contract": false
+  },
+  {
+    "id": "0006_strong_ares",
+    "statements": [
+      "CREATE TABLE `ticket_settings` (\n\t`guild_id` text PRIMARY KEY NOT NULL,\n\t`is_enabled` integer DEFAULT false NOT NULL,\n\t`category_id` text,\n\t`staff_role_ids` text DEFAULT '[]' NOT NULL,\n\t`transcript_channel_id` text,\n\t`max_open_per_user` integer DEFAULT 1 NOT NULL,\n\t`welcome_message` text,\n\t`next_number` integer DEFAULT 1 NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
+      "CREATE TABLE `tickets` (\n\t`id` text PRIMARY KEY NOT NULL,\n\t`guild_id` text NOT NULL,\n\t`number` integer NOT NULL,\n\t`channel_id` text NOT NULL,\n\t`opener_id` text NOT NULL,\n\t`subject` text,\n\t`status` text DEFAULT 'open' NOT NULL,\n\t`claimed_by` text,\n\t`closed_by` text,\n\t`close_reason` text,\n\t`created_at` integer NOT NULL,\n\t`closed_at` integer\n);",
+      "CREATE UNIQUE INDEX `uq_tickets_guild_number` ON `tickets` (`guild_id`,`number`);",
+      "CREATE UNIQUE INDEX `uq_tickets_channel` ON `tickets` (`channel_id`);",
+      "CREATE INDEX `idx_tickets_guild_opener_status` ON `tickets` (`guild_id`,`opener_id`,`status`);"
+    ],
+    "checksum": "80e8f607b72d782e7ce8fb83fd1823e75fbcab971c9e1b83340a218dd4e36260",
+    "contract": false
+  },
+  {
+    "id": "0007_busy_proteus",
+    "statements": [
+      "CREATE TABLE `event_log_settings` (\n\t`guild_id` text PRIMARY KEY NOT NULL,\n\t`message_channel_id` text,\n\t`member_channel_id` text,\n\t`server_channel_id` text,\n\t`voice_channel_id` text,\n\t`ignored_channel_ids` text DEFAULT '[]' NOT NULL,\n\t`ignore_bots` integer DEFAULT true NOT NULL,\n\t`updated_at` integer NOT NULL\n);"
+    ],
+    "checksum": "47d1fb6f164862c6641d36239397ebdd9ecfda93a7c3576a8a73d1c42ed1b2b1",
+    "contract": false
+  },
+  {
+    "id": "0008_spicy_menace",
+    "statements": [
+      "CREATE TABLE `level_role_settings` (\n\t`guild_id` text PRIMARY KEY NOT NULL,\n\t`rewards` text DEFAULT '[]' NOT NULL,\n\t`keep_previous_roles` integer DEFAULT true NOT NULL,\n\t`updated_at` integer NOT NULL\n);"
+    ],
+    "checksum": "37c2f951aa954f3849da662749901c129513b915f82384b793627c9a2517bbff",
+    "contract": false
+  },
+  {
+    "id": "0009_slippery_donald_blake",
+    "statements": [
+      "CREATE TABLE `starboard_posts` (\n\t`message_id` text PRIMARY KEY NOT NULL,\n\t`guild_id` text NOT NULL,\n\t`channel_id` text NOT NULL,\n\t`author_id` text NOT NULL,\n\t`starboard_message_id` text,\n\t`star_count` integer DEFAULT 0 NOT NULL,\n\t`removed` integer DEFAULT false NOT NULL,\n\t`created_at` integer NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
+      "CREATE INDEX `idx_starboard_posts_guild` ON `starboard_posts` (`guild_id`);",
+      "CREATE UNIQUE INDEX `uq_starboard_posts_starboard_message` ON `starboard_posts` (`starboard_message_id`);",
+      "CREATE TABLE `starboard_settings` (\n\t`guild_id` text PRIMARY KEY NOT NULL,\n\t`channel_id` text,\n\t`emoji` text DEFAULT '⭐' NOT NULL,\n\t`threshold` integer DEFAULT 3 NOT NULL,\n\t`allow_self_star` integer DEFAULT false NOT NULL,\n\t`ignored_channel_ids` text DEFAULT '[]' NOT NULL,\n\t`updated_at` integer NOT NULL\n);"
+    ],
+    "checksum": "0b66aacec62dc4db73f3ded3af81e0e6daebec95274903e6ea8cffc87af99fb0",
+    "contract": false
   }
 ];

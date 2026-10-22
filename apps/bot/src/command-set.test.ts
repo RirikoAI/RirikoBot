@@ -33,6 +33,7 @@ const GUILD_SCOPED = [
   'farewell',
   'autorole',
   'temprole',
+  'levelroles',
   'create-reaction-role',
   'reaction-roles',
   'autovoice',
@@ -46,6 +47,9 @@ const GUILD_SCOPED = [
   'stream',
   'setup-stream-notification',
   'giveaway',
+  'ticket',
+  'starboard',
+  'eventlogs',
   'tcg-admin',
 ];
 

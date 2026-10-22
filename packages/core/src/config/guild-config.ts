@@ -3,6 +3,12 @@ import { canonicalTimeZone } from '../time/time-zone.js';
 import { AUTOMOD_ACTIONS, EscalationPolicySchema } from './moderation-settings.js';
 import { CommandOverridesSchema } from './command-overrides.js';
 import { AutoVoiceHubsSchema } from './auto-voice.js';
+import { LevelRoleRewardsSchema } from './level-roles.js';
+import {
+  MAX_STARBOARD_IGNORED_CHANNELS,
+  MAX_STARBOARD_THRESHOLD,
+  StarboardEmojiSetting,
+} from './starboard.js';
 import { GameRulesSchema, MAX_GAME_WAGER_LIMIT } from './games.js';
 import {
   AI_MODEL_CHOICES,
@@ -209,6 +215,14 @@ const AutoModActionSetting = z.enum(AUTOMOD_ACTIONS, {
 });
 const MAX_EXEMPTIONS = 25;
 const MAX_JOIN_ROLES = 10;
+/** Most staff roles a server can give access to its support tickets. */
+export const MAX_TICKET_STAFF_ROLES = 10;
+/** Most tickets one member may have open at once. */
+export const MAX_TICKETS_PER_USER = 5;
+/** Longest welcome message posted in a new ticket channel. */
+export const MAX_TICKET_WELCOME_MESSAGE_LENGTH = 1000;
+/** Most channels a server can exclude from its event logs. */
+export const MAX_EVENT_LOG_IGNORED_CHANNELS = 25;
 const MAX_NO_XP_CHANNELS = 50;
 /** Highest per-guild XP rate. Levels also raise the global bank capacity, so the rate is capped. */
 export const MAX_XP_RATE_PERCENT = 300;
@@ -298,6 +312,28 @@ export const GuildConfigSchemas = {
       ),
     })
     .strict(),
+  eventlogs: z
+    .object({
+      messageChannelId: OptionalSnowflakeSetting.describe(
+        'Channel for the message log (edited, deleted and bulk deleted messages); empty turns it off',
+      ),
+      memberChannelId: OptionalSnowflakeSetting.describe(
+        'Channel for the member log (joins, leaves, nicknames, roles, timeouts, bans); empty turns it off',
+      ),
+      serverChannelId: OptionalSnowflakeSetting.describe(
+        'Channel for the server log (channels and roles created, deleted or renamed); empty turns it off',
+      ),
+      voiceChannelId: OptionalSnowflakeSetting.describe(
+        'Channel for the voice log (members joining, leaving and moving between voice channels); empty turns it off',
+      ),
+      ignoredChannelIds: SnowflakeListSetting(MAX_EVENT_LOG_IGNORED_CHANNELS).describe(
+        `Channel IDs whose messages the event logs skip, threads under them included, comma separated (at most ${MAX_EVENT_LOG_IGNORED_CHANNELS}); member, server and voice events are always logged`,
+      ),
+      ignoreBots: FlagSetting.describe(
+        "Leave out bots' messages and voice activity; member events for bots (joins, leaves, bans, roles) are always logged",
+      ),
+    })
+    .strict(),
   commands: z
     .object({
       overrides: JsonSetting(CommandOverridesSchema).describe(
@@ -316,6 +352,26 @@ export const GuildConfigSchemas = {
       ),
       verificationRoleId: OptionalSnowflakeSetting.describe(
         'Role given by the verification button (/autorole send-verify); empty for none',
+      ),
+    })
+    .strict(),
+  tickets: z
+    .object({
+      enabled: FlagSetting.describe('Let members open support tickets with the Open Ticket button'),
+      categoryId: OptionalSnowflakeSetting.describe(
+        'Category channel ID that new ticket channels are created under; empty for no category',
+      ),
+      staffRoleIds: SnowflakeListSetting(MAX_TICKET_STAFF_ROLES).describe(
+        `Role IDs of the staff who can see and handle every ticket, comma separated (at most ${MAX_TICKET_STAFF_ROLES})`,
+      ),
+      transcriptChannelId: OptionalSnowflakeSetting.describe(
+        'Channel that receives the transcript of a closed ticket; empty to use the log channel',
+      ),
+      maxOpenPerUser: IntSetting(1, MAX_TICKETS_PER_USER).describe(
+        `Tickets one member may have open at the same time (1 to ${MAX_TICKETS_PER_USER})`,
+      ),
+      welcomeMessage: OptionalTextSetting(MAX_TICKET_WELCOME_MESSAGE_LENGTH).describe(
+        `Message posted in a new ticket, up to ${MAX_TICKET_WELCOME_MESSAGE_LENGTH} characters; empty for the default welcome`,
       ),
     })
     .strict(),
@@ -343,6 +399,35 @@ export const GuildConfigSchemas = {
       ),
       voiceXpEnabled: FlagSetting.describe(
         'Voice rewards on or off (credits and XP for time in voice with another unmuted member)',
+      ),
+    })
+    .strict(),
+  levelroles: z
+    .object({
+      rewards: JsonSetting(LevelRoleRewardsSchema).describe(
+        'Roles given at chosen levels as JSON, e.g. [{"level":5,"roleId":"123..."},{"level":20,"roleId":"456..."}] (at most 25, each level and role once)',
+      ),
+      keepPreviousRoles: FlagSetting.describe(
+        'Keep the reward roles of lower levels on (stack them) or off (a member holds only the reward of their highest level)',
+      ),
+    })
+    .strict(),
+  starboard: z
+    .object({
+      channelId: OptionalSnowflakeSetting.describe(
+        'Channel where popular messages are reposted; empty turns the starboard off',
+      ),
+      emoji: StarboardEmojiSetting.describe(
+        'Emoji members react with: one Unicode emoji such as ⭐, or one custom server emoji written as <:name:id> or <a:name:id>',
+      ),
+      threshold: IntSetting(1, MAX_STARBOARD_THRESHOLD).describe(
+        `Reactions a message needs to reach the starboard (1 to ${MAX_STARBOARD_THRESHOLD})`,
+      ),
+      allowSelfStar: FlagSetting.describe(
+        "Count the message author's own reaction on or off (off by default)",
+      ),
+      ignoredChannelIds: SnowflakeListSetting(MAX_STARBOARD_IGNORED_CHANNELS).describe(
+        `Channel IDs whose messages never reach the starboard, comma separated (at most ${MAX_STARBOARD_IGNORED_CHANNELS})`,
       ),
     })
     .strict(),

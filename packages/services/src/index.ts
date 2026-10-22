@@ -22,3 +22,7 @@ export * from './activity/index.js';
 export * from './privacy/index.js';
 export * from './owner/index.js';
 export * from './maintenance/index.js';
+export * from './tickets/index.js';
+export * from './event-logs/index.js';
+export * from './level-roles/index.js';
+export * from './starboard/index.js';

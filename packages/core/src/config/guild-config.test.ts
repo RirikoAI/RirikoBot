@@ -154,16 +154,278 @@ describe('EscalationPolicySchema', () => {
 });
 
 describe('GuildConfigSchemas', () => {
+  describe('tickets (TASK-1982)', () => {
+    const roles = (count: number) =>
+      Array.from({ length: count }, (_, i) => `30000000000000${String(i).padStart(4, '0')}`);
+    const valid = {
+      enabled: true,
+      categoryId: '100000000000000001',
+      staffRoleIds: roles(2),
+      transcriptChannelId: '100000000000000002',
+      maxOpenPerUser: 3,
+      welcomeMessage: 'Staff will be with you soon.',
+    };
+
+    it('accepts typed values and plain CLI strings', () => {
+      expect(GuildConfigSchemas.tickets.safeParse(valid).data).toEqual(valid);
+      const fromCli = GuildConfigSchemas.tickets.safeParse({
+        enabled: 'on',
+        categoryId: 'none',
+        staffRoleIds: roles(2).join(','),
+        transcriptChannelId: '',
+        maxOpenPerUser: '5',
+        welcomeMessage: '  Hello  ',
+      });
+      expect(fromCli.data).toEqual({
+        enabled: true,
+        categoryId: null,
+        staffRoleIds: roles(2),
+        transcriptChannelId: null,
+        maxOpenPerUser: 5,
+        welcomeMessage: 'Hello',
+      });
+    });
+
+    it('accepts the limits: 1 and 5 open tickets, 10 staff roles, 1000 characters', () => {
+      const edge = {
+        ...valid,
+        maxOpenPerUser: 1,
+        staffRoleIds: roles(10),
+        welcomeMessage: 'a'.repeat(1000),
+      };
+      expect(GuildConfigSchemas.tickets.safeParse(edge).success).toBe(true);
+      expect(GuildConfigSchemas.tickets.safeParse({ ...edge, maxOpenPerUser: 5 }).success).toBe(
+        true,
+      );
+    });
+
+    it('rejects 0 and 6 open tickets per member', () => {
+      for (const maxOpenPerUser of [0, 6]) {
+        const result = GuildConfigSchemas.tickets.safeParse({ ...valid, maxOpenPerUser });
+        expect(result.error?.issues[0]?.message).toBe('Enter a whole number from 1 to 5.');
+      }
+    });
+
+    it('rejects 11 staff roles', () => {
+      const result = GuildConfigSchemas.tickets.safeParse({ ...valid, staffRoleIds: roles(11) });
+      expect(result.error?.issues[0]?.message).toBe('Choose at most 10.');
+    });
+
+    it('rejects a 1001-character welcome message and unknown keys', () => {
+      const result = GuildConfigSchemas.tickets.safeParse({
+        ...valid,
+        welcomeMessage: 'a'.repeat(1001),
+      });
+      expect(result.error?.issues[0]?.message).toBe('Use at most 1000 characters.');
+      expect(GuildConfigSchemas.tickets.safeParse({ ...valid, nextNumber: 9 }).success).toBe(false);
+    });
+
+    it('describes every field for a server admin', () => {
+      for (const field of Object.values(GuildConfigSchemas.tickets.shape)) {
+        expect(field.description?.length).toBeGreaterThan(20);
+      }
+    });
+  });
+
+  describe('eventlogs (TASK-1992)', () => {
+    const channels = (count: number) =>
+      Array.from({ length: count }, (_, i) => `40000000000000${String(i).padStart(4, '0')}`);
+    const valid = {
+      messageChannelId: '100000000000000001',
+      memberChannelId: '100000000000000002',
+      serverChannelId: '100000000000000003',
+      voiceChannelId: '100000000000000004',
+      ignoredChannelIds: channels(2),
+      ignoreBots: false,
+    };
+
+    it('accepts typed values and plain CLI strings', () => {
+      expect(GuildConfigSchemas.eventlogs.safeParse(valid).data).toEqual(valid);
+      const fromCli = GuildConfigSchemas.eventlogs.safeParse({
+        messageChannelId: 'none',
+        memberChannelId: '',
+        serverChannelId: '100000000000000003',
+        voiceChannelId: 'none',
+        ignoredChannelIds: channels(2).join(','),
+        ignoreBots: 'off',
+      });
+      expect(fromCli.data).toEqual({
+        messageChannelId: null,
+        memberChannelId: null,
+        serverChannelId: '100000000000000003',
+        voiceChannelId: null,
+        ignoredChannelIds: channels(2),
+        ignoreBots: false,
+      });
+    });
+
+    it('says ignoreBots covers messages and voice only, and member events for bots are logged', () => {
+      const text = GuildConfigSchemas.eventlogs.shape.ignoreBots.description;
+      expect(text).toContain('messages and voice');
+      expect(text).toContain('member events for bots');
+      expect(text).toContain('always logged');
+    });
+
+    it('accepts 25 ignored channels and rejects 26', () => {
+      expect(
+        GuildConfigSchemas.eventlogs.safeParse({ ...valid, ignoredChannelIds: channels(25) })
+          .success,
+      ).toBe(true);
+      const result = GuildConfigSchemas.eventlogs.safeParse({
+        ...valid,
+        ignoredChannelIds: channels(26),
+      });
+      expect(result.error?.issues[0]?.message).toBe('Choose at most 25.');
+    });
+
+    it('rejects a bad channel ID and unknown keys', () => {
+      const result = GuildConfigSchemas.eventlogs.safeParse({ ...valid, voiceChannelId: 'abc' });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.path).toEqual(['voiceChannelId']);
+      expect(GuildConfigSchemas.eventlogs.safeParse({ ...valid, extra: 1 }).success).toBe(false);
+    });
+
+    it('describes every field for a server admin', () => {
+      for (const field of Object.values(GuildConfigSchemas.eventlogs.shape)) {
+        expect(field.description?.length).toBeGreaterThan(20);
+      }
+    });
+  });
+
+  describe('levelroles (TASK-2002)', () => {
+    const REGULAR = '100000000000000001';
+    const VETERAN = '100000000000000002';
+
+    it('sorts the rewards and accepts a flag word from the CLI', () => {
+      const result = GuildConfigSchemas.levelroles.safeParse({
+        rewards: [
+          { level: 20, roleId: VETERAN },
+          { level: 5, roleId: REGULAR },
+        ],
+        keepPreviousRoles: false,
+      });
+      expect(result.data).toEqual({
+        rewards: [
+          { level: 5, roleId: REGULAR },
+          { level: 20, roleId: VETERAN },
+        ],
+        keepPreviousRoles: false,
+      });
+      const fromCli = GuildConfigSchemas.levelroles.safeParse({
+        rewards: JSON.stringify([{ level: 5, roleId: REGULAR }]),
+        keepPreviousRoles: 'off',
+      });
+      expect(fromCli.data).toEqual({
+        rewards: [{ level: 5, roleId: REGULAR }],
+        keepPreviousRoles: false,
+      });
+    });
+
+    it('reports a bad row with its path, and rejects unknown keys', () => {
+      const bad = GuildConfigSchemas.levelroles.safeParse({
+        rewards: [{ level: 0, roleId: REGULAR }],
+        keepPreviousRoles: true,
+      });
+      expect(bad.error?.issues[0]?.path).toEqual(['rewards', 0, 'level']);
+      expect(
+        GuildConfigSchemas.levelroles.safeParse({ rewards: [], keepPreviousRoles: 'maybe' })
+          .success,
+      ).toBe(false);
+      expect(
+        GuildConfigSchemas.levelroles.safeParse({ rewards: [], keepPreviousRoles: true, extra: 1 })
+          .success,
+      ).toBe(false);
+    });
+
+    it('describes every field for a server admin', () => {
+      for (const field of Object.values(GuildConfigSchemas.levelroles.shape)) {
+        expect(field.description?.length).toBeGreaterThan(20);
+      }
+    });
+  });
+
+  describe('starboard (TASK-2012)', () => {
+    const channels = (count: number) =>
+      Array.from({ length: count }, (_, i) => `50000000000000${String(i).padStart(4, '0')}`);
+    const valid = {
+      channelId: '100000000000000001',
+      emoji: '⭐',
+      threshold: 3,
+      allowSelfStar: false,
+      ignoredChannelIds: channels(2),
+    };
+
+    it('accepts typed values and plain CLI strings', () => {
+      expect(GuildConfigSchemas.starboard.safeParse(valid).data).toEqual(valid);
+      const fromCli = GuildConfigSchemas.starboard.safeParse({
+        channelId: 'none',
+        emoji: '  <a:party:123456789012345678>  ',
+        threshold: '10',
+        allowSelfStar: 'yes',
+        ignoredChannelIds: channels(2).join(' '),
+      });
+      expect(fromCli.data).toEqual({
+        channelId: null,
+        emoji: '<a:party:123456789012345678>',
+        threshold: 10,
+        allowSelfStar: true,
+        ignoredChannelIds: channels(2),
+      });
+    });
+
+    it('accepts thresholds 1 and 100 and rejects 0 and 101', () => {
+      for (const threshold of [1, 100]) {
+        expect(GuildConfigSchemas.starboard.safeParse({ ...valid, threshold }).success).toBe(true);
+      }
+      for (const threshold of [0, 101, 2.5]) {
+        const result = GuildConfigSchemas.starboard.safeParse({ ...valid, threshold });
+        expect(result.error?.issues[0]?.path).toEqual(['threshold']);
+        expect(result.error?.issues[0]?.message).toBe('Enter a whole number from 1 to 100.');
+      }
+    });
+
+    it('accepts 25 ignored channels and rejects 26', () => {
+      expect(
+        GuildConfigSchemas.starboard.safeParse({ ...valid, ignoredChannelIds: channels(25) })
+          .success,
+      ).toBe(true);
+      const result = GuildConfigSchemas.starboard.safeParse({
+        ...valid,
+        ignoredChannelIds: channels(26),
+      });
+      expect(result.error?.issues[0]?.message).toBe('Choose at most 25.');
+    });
+
+    it('rejects a bad channel ID, a bad flag and unknown keys', () => {
+      const result = GuildConfigSchemas.starboard.safeParse({ ...valid, channelId: 'abc' });
+      expect(result.error?.issues[0]?.path).toEqual(['channelId']);
+      expect(
+        GuildConfigSchemas.starboard.safeParse({ ...valid, allowSelfStar: 'maybe' }).success,
+      ).toBe(false);
+      expect(GuildConfigSchemas.starboard.safeParse({ ...valid, extra: 1 }).success).toBe(false);
+    });
+
+    it('describes every field for a server admin', () => {
+      for (const field of Object.values(GuildConfigSchemas.starboard.shape)) {
+        expect(field.description?.length).toBeGreaterThan(20);
+      }
+    });
+  });
+
   it('lists the modules with only keys the bot reads', () => {
     expect(GUILD_CONFIG_MODULES).toEqual([
       'general',
       'moderation',
       'automod',
       'logging',
+      'eventlogs',
       'commands',
       'autoroles',
+      'tickets',
       'autovoice',
       'xp',
+      'levelroles',
+      'starboard',
       'games',
       'music',
       'ai',
@@ -187,6 +449,14 @@ describe('GuildConfigSchemas', () => {
       ]);
     }
     expect(Object.keys(GuildConfigSchemas.logging.shape)).toEqual(['logChannelId']);
+    expect(Object.keys(GuildConfigSchemas.eventlogs.shape)).toEqual([
+      'messageChannelId',
+      'memberChannelId',
+      'serverChannelId',
+      'voiceChannelId',
+      'ignoredChannelIds',
+      'ignoreBots',
+    ]);
     expect(Object.keys(GuildConfigSchemas.moderation.shape)).toEqual(['escalationSteps']);
     expect(Object.keys(GuildConfigSchemas.commands.shape)).toEqual(['overrides']);
     expect(Object.keys(GuildConfigSchemas.autoroles.shape)).toEqual([
@@ -194,6 +464,14 @@ describe('GuildConfigSchemas', () => {
       'humanRoleIds',
       'botRoleIds',
       'verificationRoleId',
+    ]);
+    expect(Object.keys(GuildConfigSchemas.tickets.shape)).toEqual([
+      'enabled',
+      'categoryId',
+      'staffRoleIds',
+      'transcriptChannelId',
+      'maxOpenPerUser',
+      'welcomeMessage',
     ]);
     expect(Object.keys(GuildConfigSchemas.autovoice.shape)).toEqual(['hubs']);
     expect(Object.keys(GuildConfigSchemas.xp.shape)).toEqual([
@@ -203,6 +481,17 @@ describe('GuildConfigSchemas', () => {
       'noXpChannelIds',
       'noXpRoleIds',
       'voiceXpEnabled',
+    ]);
+    expect(Object.keys(GuildConfigSchemas.levelroles.shape)).toEqual([
+      'rewards',
+      'keepPreviousRoles',
+    ]);
+    expect(Object.keys(GuildConfigSchemas.starboard.shape)).toEqual([
+      'channelId',
+      'emoji',
+      'threshold',
+      'allowSelfStar',
+      'ignoredChannelIds',
     ]);
     expect(Object.keys(GuildConfigSchemas.games.shape)).toEqual(['maxWager', 'rules']);
     expect(isGuildConfigModule('general')).toBe(true);

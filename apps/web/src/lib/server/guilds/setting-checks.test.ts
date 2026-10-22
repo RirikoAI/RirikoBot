@@ -3,6 +3,7 @@ import {
   checkAssignableRoles,
   checkAutoVoiceHubs,
   checkConfiguredProvider,
+  checkLevelRoleRewards,
   checkMessageChannel,
   checkMusicSettings,
 } from './setting-checks';
@@ -46,6 +47,44 @@ describe('checkAssignableRoles (TASK-1641)', () => {
     const directory = resources();
     expect(
       await checkAssignableRoles(directory, GUILD, { humanRoleIds: [], verificationRoleId: '' }),
+    ).toEqual({});
+    expect(directory.assignableRoles).not.toHaveBeenCalled();
+  });
+});
+
+describe('checkLevelRoleRewards (TASK-2006)', () => {
+  it('names a role Ririko cannot give and a role that no longer exists, once each', async () => {
+    const rewards = JSON.stringify([
+      { level: 5, roleId: MEMBER },
+      { level: 10, roleId: ADMIN },
+      { level: 15, roleId: ADMIN },
+      { level: 20, roleId: GONE },
+    ]);
+    expect(await checkLevelRoleRewards(resources(), GUILD, rewards)).toEqual({
+      rewards: [
+        'Ririko cannot give @Admin: it is managed by an integration or is not below Ririko’s highest role.',
+        `Role ${GONE} no longer exists.`,
+      ],
+    });
+  });
+
+  it('accepts roles Ririko can give, parsed rows too', async () => {
+    expect(await checkLevelRoleRewards(resources(), GUILD, [{ level: 5, roleId: MEMBER }])).toEqual(
+      {},
+    );
+  });
+
+  it('leaves malformed input to the schema without asking Discord', async () => {
+    const directory = resources();
+    expect(await checkLevelRoleRewards(directory, GUILD, '{nope')).toEqual({});
+    expect(await checkLevelRoleRewards(directory, GUILD, '{"level":5}')).toEqual({});
+    expect(
+      await checkLevelRoleRewards(directory, GUILD, [
+        null,
+        { level: 1 },
+        { level: 2, roleId: 'abc' },
+        { level: 3, roleId: 7 },
+      ]),
     ).toEqual({});
     expect(directory.assignableRoles).not.toHaveBeenCalled();
   });

@@ -8,6 +8,8 @@ Moderation commands work as soon as the bot is in your server. Follow these step
 
 1. **Give Ririko the permissions it needs.** Each command needs a Discord permission (see section 2). Ririko needs the same permission. Move the Ririko role above the roles of the members you want to moderate.
 2. **Pick a log channel.** Open the dashboard **Logging** page and pick a channel. Ririko needs View Channel, Send Messages and Embed Links there. The log channel receives cases, raid alerts and notices of dashboard changes.
+
+   The log channel is not the same as the event logs. The log channel is the record of moderation: cases, raid alerts and notices. Event logs record what members do: edited and deleted messages, joins and leaves, nickname and role changes, bans, channel and role changes, and voice activity. They go to their own channels and are off until you pick them. You can pick them on [the Logging page](dashboard.md#44-logging), or in Discord with `/eventlogs`, for example `/eventlogs action:set type:all channel:#logs`.
 3. **Check AutoMod.** Open the dashboard **AutoMod** page. See section 5.
 4. **Check the warning policy.** Open the dashboard **Moderation** page. See section 4.
 
@@ -33,6 +35,7 @@ For each command, the person who runs it needs the permission in the table. A me
 | `/history` | `modlogs`, `cases` | Timeout Members | `user` (required) |
 | `/note` | | Timeout Members | `action` (required: `add` or `view`), `user` (required), `content` (needed for `add`) |
 | `/automod` | | Manage Server | `action` (required: `status`, `enable` or `disable`), `rule` |
+| `/eventlogs` | `eventlog`, `event-logs` | Manage Server or Administrator | `action` (`set`, `off`, `ignore`, `bots` or `settings`; default `settings`), `type` (`message`, `member`, `server`, `voice` or `all`; for `set` and `off`), `channel` (for `set` and `ignore`), `enabled` (for `bots`) |
 
 Notes:
 
@@ -42,6 +45,7 @@ Notes:
 - `/purge` scans the last `count` messages in the channel and deletes the ones that match the filters.
 - `/lock` stops `@everyone` from sending messages in the channel. `/unlock` gives the permission back.
 - The `rule` option of `/automod` is `INVITE_FILTER`, `PHISHING_SHIELD`, `MENTION_SPAM` or `BURST_SPAM`.
+- `/eventlogs` sets up the event logs from Discord. `set` turns a log on in a text or announcement channel (`type:all` sets all four to that channel). `off` turns a log off and keeps the other settings. `ignore` adds a channel to the ignored channels of the message log, or removes it if it is already there. `bots` sets whether bots' messages and voice activity are left out. `settings` shows what is set. `set`, `off` and `ignore` also work on the prefix form, such as `!eventlogs set message #message-log`, `!eventlogs off voice` and `!eventlogs ignore #bot-spam`. If Ririko cannot post in the channel, the reply warns you but still saves. See [dashboard.md](dashboard.md#44-logging) for what each log holds.
 
 This is the reply to `/warn`. It shows the case number, the member, the moderator, the severity, the active warnings and whether the direct message arrived:
 

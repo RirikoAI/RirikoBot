@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { AutoVoiceHubSchema } from '@ririko/core';
 import type { GuildResourceDirectory } from './guild-resources';
 
+const SNOWFLAKE = /^\d{17,20}$/;
+
 type Resources = Pick<
   GuildResourceDirectory,
   'assignableRoles' | 'memberRoles' | 'voiceChannels' | 'maxBitrate'
@@ -64,6 +66,32 @@ export async function checkAssignableRoles(
     }
   }
   return errors;
+}
+
+/**
+ * Errors for level role rewards (a JSON list or its parsed rows) whose role does not exist or
+ * Ririko cannot give, under `rewards`. Rows the schema rejects (no role, a bad ID) are left to it.
+ */
+export async function checkLevelRoleRewards(
+  resources: Resources,
+  guildId: string,
+  rewards: unknown,
+): Promise<Record<string, string[]>> {
+  let rows: unknown = rewards;
+  if (typeof rewards === 'string') {
+    try {
+      rows = JSON.parse(rewards);
+    } catch {
+      return {};
+    }
+  }
+  if (!Array.isArray(rows)) return {};
+  const roleIds = new Set<string>();
+  for (const row of rows as unknown[]) {
+    const roleId = (row as { roleId?: unknown } | null)?.roleId;
+    if (typeof roleId === 'string' && SNOWFLAKE.test(roleId)) roleIds.add(roleId);
+  }
+  return checkAssignableRoles(resources, guildId, { rewards: [...roleIds] });
 }
 
 /** An error for `field` when it names a channel that is not a text channel of the guild. */

@@ -58,17 +58,19 @@ The sidebar groups the pages. This table tells you what each page does and where
 | Server | Integrations | Shows which outside services the host has set up. | Section 4.3 |
 | Moderation | Moderation | Sets the warning policy. | [moderation.md](moderation.md) |
 | Moderation | AutoMod | Sets the AutoMod rules. | [moderation.md](moderation.md) |
-| Moderation | Logging | Picks the log channel. | Section 4.4 |
+| Moderation | Logging | Picks the log channel and sets the event logs. | Section 4.4 |
 | Moderation | Case Log | Lists moderation cases. | [moderation.md](moderation.md) |
 | Moderation | Audit Log | Lists changes made on the dashboard. | Section 4.5 |
 | Members | Auto Roles | Gives roles to new members and bots. | [modules.md](modules.md) |
 | Members | Reaction Roles | Builds role buttons and menus. | [modules.md](modules.md) |
+| Members | Tickets | Turns support tickets on and sets the category, staff roles and transcript channel. You can also do this in Discord with `/ticket action:setup`. | [modules.md](modules.md) |
 | Members | Auto Voice | Sets up "Join to Create" channels. | [modules.md](modules.md) |
 | Members | Welcome Card | Sets the welcome card. | [modules.md](modules.md) |
 | Members | Farewell Card | Sets the farewell card. | [modules.md](modules.md) |
-| Engagement | XP & Ranking | Sets XP rules and level-up messages. | [economy.md](economy.md) |
+| Engagement | XP & Ranking | Sets XP rules, level-up messages and level role rewards. | Section 4.7 and [economy.md](economy.md) |
 | Engagement | Games | Sets wager limits, game switches and cooldowns. | [modules.md](modules.md) |
 | Engagement | Giveaways | Ends giveaways and rerolls winners. | [modules.md](modules.md) |
+| Engagement | Starboard | Picks the channel where popular messages are reposted, the emoji and the stars needed. | Section 4.8 and [modules.md](modules.md) |
 | Waifu TCG | Waifu TCG | Sets card drops and the TCG Manager Role. | [waifu-tcg.md](waifu-tcg.md) |
 | Waifu TCG | TCG Achievements | Shows how many members unlocked each achievement. | [waifu-tcg.md](waifu-tcg.md) |
 | Features | Music | Sets the default volume, music channel and DJ role. | [music.md](music.md) |
@@ -107,9 +109,42 @@ This page is read only. It lists the outside services (Discord, AI, images, stre
 
 ### 4.4. Logging
 
-Pick the log channel. Ririko posts moderation cases, raid alerts and notices of dashboard changes there. Ririko needs View Channel, Send Messages and Embed Links in the channel.
+The Logging page has two forms.
 
-Ririko writes no message, voice or role logs. The log channel is the only logging setting.
+**Log channel.** Pick the log channel. Ririko posts moderation cases, raid alerts and notices of dashboard changes there. Ririko needs View Channel, Send Messages and Embed Links in the channel.
+
+**Event logs.** Event logs record what happens in your server, one embed for each event. They are different from the log channel: the log channel holds moderation cases, raid alerts and notices, and event logs hold what members and bots do in the server. Every event log is off until you pick a channel for it, so a server that upgrades sees no new posts.
+
+Pick a channel for each kind of event you want. Leave the picker on **Off** to skip that kind. You can use one channel for all four or a different channel for each.
+
+| Log | What Ririko posts |
+|---|---|
+| Message log | A message that was edited (the text before and after, and a link to the message), a message that was deleted (its text and the names of its attachments), and a bulk delete (the count, and a text file with the messages Ririko still had). |
+| Member log | A member joined (how old the account is, and the member count), a member left (when they joined and their roles), a nickname change, roles added or removed, a timeout set or lifted, and a ban or unban (with the reason). |
+| Server log | A channel or role created, deleted or renamed. Other changes, such as permissions, are not logged. |
+| Voice log | A member joined, left or moved between voice channels. Mute, deafen, camera and stream changes are not logged. |
+
+Each embed shows the member or channel (a mention and the ID) and the time. Mentions inside logged text never ping anyone. The colour tells the kind of event: green for created, joined or lifted, red for deleted or left, amber for a change.
+
+Rules that decide what is logged:
+
+- **Ignored channels.** Messages in the channels you pick are not logged, such as a staff chat. This includes the threads under them and the text chat of a voice channel you pick. Member, server and voice events are always logged. Pick up to 25 channels.
+- **Ignore bots' messages and voice activity.** On by default. Messages and voice activity of bots are not logged, so a music bot does not fill the voice log. Member events for bots, such as a bot that joins, are always logged, because a new bot can be a risk.
+- Messages inside the message log channel itself are not logged, so the log does not feed on itself.
+- An edit that did not change the text (a link preview that loaded) is not logged.
+
+What to know:
+
+- Ririko needs View Channel, Send Messages, Embed Links and Attach Files in each event log channel. Attach Files is for the text file of a bulk delete. If Ririko cannot post, it skips the event and writes a note in the host's console. It never retries later.
+- Ririko does not store the posts. The text of a deleted or edited message comes from the messages that Ririko saw in about the last hour. The memory is swept every 30 minutes and starts empty when the bot restarts. For an older message, the post says "Content unknown".
+- Ririko does not show who deleted a message or who banned a member. That needs the Discord audit log, and Ririko does not read it for event logs. Look in the Discord audit log for that.
+- A change on this page takes effect at once. Ririko reads the settings again within 5 minutes at the latest.
+- Ban and unban events need the **Guild Moderation** gateway intent. It is not a privileged intent, so the host does not change anything in the Developer Portal. It takes effect after the bot restarts on a version that has it. Until then, the other events work and bans are not logged.
+- What Ririko posts and keeps is described in the [privacy policy](legal/privacy.md), section 3.17.
+
+**Set it up with a command.** You can set the event logs in Discord instead of this page. A member with **Manage Server** or **Administrator** runs `/eventlogs`. For example, `/eventlogs action:set type:message channel:#message-log` turns on the message log, `/eventlogs action:set type:all channel:#logs` uses one channel for all four logs, and `/eventlogs action:off type:voice` turns the voice log off. `/eventlogs action:ignore channel:#bot-spam` adds a channel to the ignored channels, or removes it if it is already there. `/eventlogs action:bots enabled:false` sets the bots switch, and `/eventlogs action:settings` shows what is set now. The prefix form is `!eventlogs set message #message-log`. The command saves the same settings as this page, and the Audit Log shows the change. See [moderation.md](moderation.md#2-commands).
+
+With the command line, the keys are `eventlogs.messageChannelId`, `eventlogs.memberChannelId`, `eventlogs.serverChannelId`, `eventlogs.voiceChannelId`, `eventlogs.ignoredChannelIds` and `eventlogs.ignoreBots`. Dashboard changes show in the Audit Log as "Event Logs settings changed".
 
 ### 4.5. Audit Log
 
@@ -118,6 +153,48 @@ The Audit Log lists the changes made to the server's settings, newest first, 25 
 ### 4.6. Change Notices
 
 When someone changes a setting on the dashboard, Ririko posts a notice in the log channel. The notice says who changed which module and which fields. Text that members typed is shown as plain code and never pings anyone.
+
+### 4.7. XP & Ranking
+
+The XP & Ranking page has two forms. You need the **Manage Server** permission.
+
+**XP settings.** The first form sets level-up messages, the XP rate, the channels and roles that earn no XP, and voice rewards. Each setting is in [economy.md](economy.md), section 7.
+
+**Level role rewards.** The second form gives members a role when they reach a level.
+
+- Each row has a level (1 to 1000) and a role. Choose **Add reward** for a new row and **Remove** to delete one. A server can have up to 25 rewards. **Add reward** is greyed out at 25.
+- The role picker lists the roles that Ririko can give. A role that another row already uses is not shown again. A saved role that Ririko can no longer give is marked, so you can replace it.
+- **Keep lower reward roles** is on by default. On, a member keeps the reward roles of every level they reached. Off, a member holds only the role of their highest reward.
+- Ririko does not save a role that was deleted or that it cannot give, and it does not save a level or a role that is used twice. It shows an error and saves nothing.
+- Save the form to apply it. The new rewards are given at the next level-up. To give them to members who already have the level, run `/levelroles action:sync` in Discord.
+
+The XP form and the rewards form save on their own. A save on the rewards form shows in the Audit Log as "Level Roles settings changed". Ririko needs the **Manage Roles** permission and a role above the reward roles. See [economy.md](economy.md), section 8, for when roles are given, the keep switch, sync and the permissions.
+
+You can also set the rewards in Discord with `/levelroles`, and switch **Keep lower reward roles** with `/levelroles action:stack enabled:false`. See [economy.md](economy.md), section 8.
+
+With the command line, the keys are `levelroles.rewards` (a JSON list, for example `[{"level":5,"roleId":"123456789012345678"}]`) and `levelroles.keepPreviousRoles`.
+
+### 4.8. Starboard
+
+The Starboard page has one form. When a message gets enough stars, Ririko posts a copy of it in the starboard channel. How stars are counted, and when a copy is posted, updated and removed, is in [modules.md](modules.md), section 13.
+
+| Setting | What it does |
+|---|---|
+| Starboard channel | Where the copies go. Choose **Off** to turn the starboard off. Copies already posted stay. Ririko needs View Channel, Send Messages, Embed Links and Read Message History there. |
+| Emoji | The reaction that counts as a star. One emoji, such as ⭐ (the default), or a custom server emoji written as `<:name:id>` or `<a:name:id>`. |
+| Stars needed | How many stars a message needs before it is posted, from 1 to 100. The default is 3. |
+| Count the author's own star | Off by default. Bots' stars never count. |
+| Ignored channels | Messages in these channels, and in the threads under them, are never posted. Up to 25 channels. |
+
+- The starboard channel must be a text channel of this server. If it is not, Ririko shows an error and saves nothing.
+- A message from an age-restricted channel is posted only when the starboard channel is age-restricted too.
+- Ririko shows an error under a field if the emoji or the number is not valid, and it saves nothing.
+- A change takes effect at once. Ririko reads the settings again within 5 minutes at the latest. A save shows in the Audit Log as "Starboard settings changed".
+- What Ririko posts and keeps is described in the [privacy policy](legal/privacy.md), section 3.18.
+
+You can also set up the starboard in Discord. A member with **Manage Server** or **Administrator** runs, for example, `/starboard action:setup channel:#starboard emoji:⭐ threshold:3`. See [modules.md](modules.md), section 13.
+
+With the command line, the keys are `starboard.channelId`, `starboard.emoji`, `starboard.threshold`, `starboard.allowSelfStar` and `starboard.ignoredChannelIds`.
 
 ## 5. Command Line
 

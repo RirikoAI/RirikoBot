@@ -159,7 +159,7 @@ Other owner console pages:
 
 ## 6. Daily Reset
 
-Energy, the energy potion limit and the town shop use the daily reset time. The default is 00:00 in GMT+8. The host can change it. See section 9 of [economy.md](economy.md).
+Energy, the energy potion limit and the town shop use the daily reset time. The default is 00:00 in GMT+8. The host can change it. See section 10 of [economy.md](economy.md).
 
 ## 7. Image Credit and Removal
 

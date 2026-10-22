@@ -10,7 +10,7 @@ import type { DiscordClientConfig } from './types.js';
 
 /**
  * Standard Gateway intents required for Ririko AI 2.0.0.
- * Covers Guilds, Members, Messages (including content for prefix commands), Reactions, and Voice.
+ * Covers Guilds, Members, Messages (including content for prefix commands), Reactions, Voice, and Moderation (ban and unban events; not a privileged intent).
  */
 export const DEFAULT_GATEWAY_INTENTS: GatewayIntentBits[] = [
   GatewayIntentBits.Guilds,
@@ -18,6 +18,7 @@ export const DEFAULT_GATEWAY_INTENTS: GatewayIntentBits[] = [
   GatewayIntentBits.GuildMessages,
   GatewayIntentBits.GuildMessageReactions,
   GatewayIntentBits.GuildVoiceStates,
+  GatewayIntentBits.GuildModeration,
   GatewayIntentBits.MessageContent,
 ];
 

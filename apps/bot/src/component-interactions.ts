@@ -2,7 +2,13 @@ import { handleHelpInteraction, type CommandRegistry, type HelpOptions } from '@
 import { describeErrorForLog } from '@ririko/core';
 import type { Client, GuildMember } from 'discord.js';
 import type { CommandControllers } from './command-set.js';
-import { handleGiveawayButtonInteraction, handleImagineButtonInteraction } from './index.js';
+import {
+  handleGiveawayButtonInteraction,
+  handleImagineButtonInteraction,
+  handleTicketButton,
+  handleTicketModal,
+  isTicketCustomId,
+} from './index.js';
 import { handleAiConsentButton } from './privacy/ai-consent.js';
 import type { BotServices } from './services.js';
 
@@ -14,8 +20,8 @@ export interface ComponentInteractionOptions {
 }
 
 /**
- * Routes button and select menu interactions that commands leave behind (adventure, music
- * controller, AI consent, imagine, giveaways, reaction roles, verification, help center) by custom id.
+ * Routes button, select menu and modal submit interactions that commands leave behind (adventure, music
+ * controller, AI consent, imagine, giveaways, reaction roles, verification, tickets, help center) by custom id.
  * Slash commands reach the command router instead.
  */
 export function registerComponentInteractions(
@@ -46,6 +52,10 @@ export function registerComponentInteractions(
           await handleGiveawayButtonInteraction(interaction, services);
           return;
         }
+        if (isTicketCustomId(interaction.customId)) {
+          await handleTicketButton(interaction, services);
+          return;
+        }
         if (interaction.customId.startsWith('rr:btn:')) {
           await services.reactionRoleService.handleButtonInteraction(interaction);
           return;
@@ -69,6 +79,13 @@ export function registerComponentInteractions(
           await services.reactionRoleService.handleSelectMenuInteraction(interaction);
           return;
         }
+      }
+
+      if (interaction.isModalSubmit()) {
+        if (isTicketCustomId(interaction.customId)) {
+          await handleTicketModal(interaction, services);
+        }
+        return;
       }
 
       await handleHelpInteraction(interaction, registry, helpOptions);

@@ -7,13 +7,17 @@ import {
   CommandCatalogRepository,
   CommandSettingsRepository,
   createDatabaseClient,
+  EventLogSettingsRepository,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
+  LevelRoleSettingsRepository,
   ModerationRepository,
   MusicRepository,
   AiRepository,
   ImageRepository,
   FreeGameRepository,
+  StarboardRepository,
+  TicketRepository,
   WelcomerRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
@@ -41,6 +45,10 @@ describe('GuildConfigService (TASK-1111)', () => {
   let commandCatalog: CommandCatalogRepository;
   let autoRoles: AutoRoleRepository;
   let autoVoice: AutoVoiceRepository;
+  let tickets: TicketRepository;
+  let eventLogs: EventLogSettingsRepository;
+  let levelRoles: LevelRoleSettingsRepository;
+  let starboard: StarboardRepository;
   let service: GuildConfigService;
 
   beforeEach(async () => {
@@ -57,6 +65,10 @@ describe('GuildConfigService (TASK-1111)', () => {
     commandCatalog = new CommandCatalogRepository(db);
     autoRoles = new AutoRoleRepository(db);
     autoVoice = new AutoVoiceRepository(db);
+    tickets = new TicketRepository(db);
+    eventLogs = new EventLogSettingsRepository(db);
+    levelRoles = new LevelRoleSettingsRepository(db);
+    starboard = new StarboardRepository(db);
     service = new GuildConfigService({
       db,
       guildSettings: new GuildSettingsRepository(db),
@@ -70,6 +82,10 @@ describe('GuildConfigService (TASK-1111)', () => {
       images: new ImageRepository(db),
       freeGames: new FreeGameRepository(db),
       welcomer: new WelcomerRepository(db),
+      tickets: new TicketRepository(db),
+      eventLogs: new EventLogSettingsRepository(db),
+      levelRoles,
+      starboard,
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -730,6 +746,402 @@ describe('GuildConfigService (TASK-1111)', () => {
     });
   });
 
+  describe('eventlogs (TASK-1992)', () => {
+    const MESSAGES = '700000000000000001';
+    const MEMBERS = '700000000000000002';
+    const SERVER = '700000000000000003';
+    const VOICE = '700000000000000004';
+    const STAFF_CHAT = '700000000000000005';
+    const DEFAULTS = {
+      messageChannelId: null,
+      memberChannelId: null,
+      serverChannelId: null,
+      voiceChannelId: null,
+      ignoredChannelIds: [],
+      ignoreBots: true,
+    };
+
+    it('reads defaults for a guild without a settings row', async () => {
+      expect(await eventLogs.get('g1')).toBeNull();
+      expect(await service.get('g1', 'eventlogs')).toEqual(DEFAULTS);
+    });
+
+    it('writes settings, reads them back and audits the field diff', async () => {
+      const { changes } = await service.update(
+        'g1',
+        'eventlogs',
+        {
+          messageChannelId: MESSAGES,
+          memberChannelId: MEMBERS,
+          serverChannelId: SERVER,
+          voiceChannelId: VOICE,
+          ignoredChannelIds: [STAFF_CHAT, STAFF_CHAT],
+          ignoreBots: false,
+        },
+        dashboardActor,
+      );
+      expect(changes.map((change) => change.field)).toEqual([
+        'messageChannelId',
+        'memberChannelId',
+        'serverChannelId',
+        'voiceChannelId',
+        'ignoredChannelIds',
+        'ignoreBots',
+      ]);
+      const saved = {
+        messageChannelId: MESSAGES,
+        memberChannelId: MEMBERS,
+        serverChannelId: SERVER,
+        voiceChannelId: VOICE,
+        ignoredChannelIds: [STAFF_CHAT],
+        ignoreBots: false,
+      };
+      expect(await service.get('g1', 'eventlogs')).toEqual(saved);
+      expect(await eventLogs.get('g1')).toMatchObject({
+        messageChannelId: MESSAGES,
+        ignoredChannelIds: [STAFF_CHAT],
+        ignoreBots: false,
+      });
+      expect(await service.get('g2', 'eventlogs')).toEqual(DEFAULTS);
+      expect(auditRows().map((audit) => audit.action)).toEqual(['guild_config.eventlogs.update']);
+
+      await service.update(
+        'g1',
+        'eventlogs',
+        { messageChannelId: 'none', voiceChannelId: '', ignoredChannelIds: '' },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'eventlogs')).toEqual({
+        ...saved,
+        messageChannelId: null,
+        voiceChannelId: null,
+        ignoredChannelIds: [],
+      });
+    });
+
+    it('rejects 26 ignored channels and a bad channel ID without saving', async () => {
+      const ids = Array.from({ length: 26 }, (_, i) => `7000000000000001${10 + i}`);
+      await expect(
+        service.update('g1', 'eventlogs', { ignoredChannelIds: ids }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { ignoredChannelIds: ['Choose at most 25.'] } });
+      await expect(
+        service.update('g1', 'eventlogs', { messageChannelId: 'general' }, dashboardActor),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      expect(await eventLogs.get('g1')).toBeNull();
+    });
+  });
+
+  describe('levelroles (TASK-2002)', () => {
+    const REGULAR = '800000000000000001';
+    const VETERAN = '800000000000000002';
+    const LEGEND = '800000000000000003';
+    const DEFAULTS = { rewards: [], keepPreviousRoles: true };
+
+    it('reads defaults for a guild without a settings row', async () => {
+      expect(await levelRoles.get('g1')).toBeNull();
+      expect(await service.get('g1', 'levelroles')).toEqual(DEFAULTS);
+    });
+
+    it('writes rewards sorted by level, reads them back and audits the diff', async () => {
+      const { changes } = await service.update(
+        'g1',
+        'levelroles',
+        {
+          rewards: [
+            { level: 20, roleId: VETERAN },
+            { level: 5, roleId: REGULAR },
+          ],
+          keepPreviousRoles: false,
+        },
+        dashboardActor,
+      );
+      expect(changes.map((change) => change.field)).toEqual(['rewards', 'keepPreviousRoles']);
+      const saved = {
+        rewards: [
+          { level: 5, roleId: REGULAR },
+          { level: 20, roleId: VETERAN },
+        ],
+        keepPreviousRoles: false,
+      };
+      expect(await service.get('g1', 'levelroles')).toEqual(saved);
+      expect(await levelRoles.get('g1')).toMatchObject(saved);
+      expect(await service.get('g2', 'levelroles')).toEqual(DEFAULTS);
+      expect(auditRows().map((audit) => audit.action)).toEqual(['guild_config.levelroles.update']);
+    });
+
+    it('accepts JSON text and plain words from the CLI, and keeps the other field', async () => {
+      await service.update(
+        'g1',
+        'levelroles',
+        { rewards: JSON.stringify([{ level: 10, roleId: LEGEND }]), keepPreviousRoles: 'off' },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'levelroles')).toEqual({
+        rewards: [{ level: 10, roleId: LEGEND }],
+        keepPreviousRoles: false,
+      });
+      await service.update('g1', 'levelroles', { rewards: '[]' }, { userId: 'cli', source: 'cli' });
+      expect(await service.get('g1', 'levelroles')).toEqual({
+        rewards: [],
+        keepPreviousRoles: false,
+      });
+    });
+
+    it('rejects a repeated level, a bad role and level 1001 without saving', async () => {
+      await expect(
+        service.update(
+          'g1',
+          'levelroles',
+          {
+            rewards: [
+              { level: 5, roleId: REGULAR },
+              { level: 5, roleId: VETERAN },
+            ],
+          },
+          dashboardActor,
+        ),
+      ).rejects.toMatchObject({
+        fieldErrors: { rewards: ['Row 2: This level already has a reward.'] },
+      });
+      await expect(
+        service.update(
+          'g1',
+          'levelroles',
+          { rewards: [{ level: 1001, roleId: REGULAR }] },
+          dashboardActor,
+        ),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      await expect(
+        service.update(
+          'g1',
+          'levelroles',
+          { rewards: [{ level: 3, roleId: 'Regular' }] },
+          dashboardActor,
+        ),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      expect(await levelRoles.get('g1')).toBeNull();
+      expect(auditRows()).toEqual([]);
+    });
+  });
+
+  describe('starboard (TASK-2012)', () => {
+    const CHANNEL = '900000000000000001';
+    const MEME_CHANNEL = '900000000000000002';
+    const DEFAULTS = {
+      channelId: null,
+      emoji: '⭐',
+      threshold: 3,
+      allowSelfStar: false,
+      ignoredChannelIds: [],
+    };
+
+    it('reads defaults for a guild without a settings row', async () => {
+      expect(await starboard.getSettings('g1')).toBeNull();
+      expect(await service.get('g1', 'starboard')).toEqual(DEFAULTS);
+    });
+
+    it('writes settings, reads them back and audits the field diff', async () => {
+      const { changes } = await service.update(
+        'g1',
+        'starboard',
+        {
+          channelId: CHANNEL,
+          emoji: '<:pog:123456789012345678>',
+          threshold: 5,
+          allowSelfStar: true,
+          ignoredChannelIds: [MEME_CHANNEL, MEME_CHANNEL],
+        },
+        dashboardActor,
+      );
+      expect(changes.map((change) => change.field)).toEqual([
+        'channelId',
+        'emoji',
+        'threshold',
+        'allowSelfStar',
+        'ignoredChannelIds',
+      ]);
+      const saved = {
+        channelId: CHANNEL,
+        emoji: '<:pog:123456789012345678>',
+        threshold: 5,
+        allowSelfStar: true,
+        ignoredChannelIds: [MEME_CHANNEL],
+      };
+      expect(await service.get('g1', 'starboard')).toEqual(saved);
+      expect(await starboard.getSettings('g1')).toMatchObject(saved);
+      expect(await service.get('g2', 'starboard')).toEqual(DEFAULTS);
+      expect(auditRows().map((audit) => audit.action)).toEqual(['guild_config.starboard.update']);
+    });
+
+    it('accepts plain words from the CLI, trims the emoji and keeps the other fields', async () => {
+      await service.update(
+        'g1',
+        'starboard',
+        { channelId: CHANNEL, emoji: ' 🌟 ', threshold: '10', allowSelfStar: 'on' },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'starboard')).toEqual({
+        ...DEFAULTS,
+        channelId: CHANNEL,
+        emoji: '🌟',
+        threshold: 10,
+        allowSelfStar: true,
+      });
+      await service.update(
+        'g1',
+        'starboard',
+        { channelId: 'none', ignoredChannelIds: '' },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'starboard')).toMatchObject({
+        channelId: null,
+        emoji: '🌟',
+        threshold: 10,
+      });
+    });
+
+    it('rejects a bad emoji, a threshold of 0 or 101 and 26 ignored channels without saving', async () => {
+      await expect(
+        service.update('g1', 'starboard', { emoji: 'star' }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { emoji: [expect.stringContaining('one emoji')] } });
+      await expect(
+        service.update('g1', 'starboard', { threshold: 0 }, dashboardActor),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      await expect(
+        service.update('g1', 'starboard', { threshold: 101 }, dashboardActor),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      const ids = Array.from({ length: 26 }, (_, i) => `9000000000000001${10 + i}`);
+      await expect(
+        service.update('g1', 'starboard', { ignoredChannelIds: ids }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { ignoredChannelIds: ['Choose at most 25.'] } });
+      expect(await starboard.getSettings('g1')).toBeNull();
+      expect(auditRows()).toEqual([]);
+    });
+  });
+
+  describe('tickets (TASK-1982)', () => {
+    const CATEGORY = '600000000000000001';
+    const STAFF = '600000000000000002';
+    const STAFF_2 = '600000000000000003';
+    const TRANSCRIPTS = '600000000000000004';
+    const DEFAULTS = {
+      enabled: false,
+      categoryId: null,
+      staffRoleIds: [],
+      transcriptChannelId: null,
+      maxOpenPerUser: 1,
+      welcomeMessage: null,
+    };
+
+    it('reads defaults for a guild without a settings row', async () => {
+      expect(await tickets.getSettings('g1')).toBeNull();
+      expect(await service.get('g1', 'tickets')).toEqual(DEFAULTS);
+    });
+
+    it('writes settings, reads them back and audits the field diff', async () => {
+      const { changes } = await service.update(
+        'g1',
+        'tickets',
+        {
+          enabled: true,
+          categoryId: CATEGORY,
+          staffRoleIds: [STAFF, STAFF_2, STAFF],
+          transcriptChannelId: TRANSCRIPTS,
+          maxOpenPerUser: '3',
+          welcomeMessage: ' Tell us what you need. ',
+        },
+        dashboardActor,
+      );
+      expect(changes.map((change) => change.field)).toEqual([
+        'enabled',
+        'categoryId',
+        'staffRoleIds',
+        'transcriptChannelId',
+        'maxOpenPerUser',
+        'welcomeMessage',
+      ]);
+      const saved = {
+        enabled: true,
+        categoryId: CATEGORY,
+        staffRoleIds: [STAFF, STAFF_2],
+        transcriptChannelId: TRANSCRIPTS,
+        maxOpenPerUser: 3,
+        welcomeMessage: 'Tell us what you need.',
+      };
+      expect(await service.get('g1', 'tickets')).toEqual(saved);
+      expect(await tickets.getSettings('g1')).toMatchObject({
+        isEnabled: true,
+        categoryId: CATEGORY,
+        staffRoleIds: [STAFF, STAFF_2],
+        maxOpenPerUser: 3,
+      });
+      expect(await service.get('g2', 'tickets')).toEqual(DEFAULTS);
+      expect(auditRows().map((audit) => audit.action)).toEqual(['guild_config.tickets.update']);
+
+      await service.update(
+        'g1',
+        'tickets',
+        { categoryId: 'none', transcriptChannelId: '', welcomeMessage: 'none' },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'tickets')).toEqual({
+        ...saved,
+        categoryId: null,
+        transcriptChannelId: null,
+        welcomeMessage: null,
+      });
+    });
+
+    it('never changes next_number, with or without tickets already opened', async () => {
+      await service.update('g1', 'tickets', { enabled: true }, dashboardActor);
+      expect(await tickets.getSettings('g1')).toMatchObject({ nextNumber: 1 });
+
+      await tickets.openTicket({ guildId: 'g1', channelId: 'c1', openerId: 'u1' });
+      await tickets.openTicket({ guildId: 'g1', channelId: 'c2', openerId: 'u2' });
+      await service.update(
+        'g1',
+        'tickets',
+        { maxOpenPerUser: 2, staffRoleIds: STAFF, enabled: false },
+        dashboardActor,
+      );
+      expect(await tickets.getSettings('g1')).toMatchObject({
+        nextNumber: 3,
+        maxOpenPerUser: 2,
+        isEnabled: false,
+      });
+      const next = await tickets.openTicket({ guildId: 'g1', channelId: 'c3', openerId: 'u1' });
+      expect(next.number).toBe(3);
+    });
+
+    it('keeps the counter when a first save comes after tickets were opened', async () => {
+      await tickets.openTicket({ guildId: 'g1', channelId: 'c1', openerId: 'u1' });
+      await service.update('g1', 'tickets', { maxOpenPerUser: 4 }, dashboardActor);
+      expect(await tickets.getSettings('g1')).toMatchObject({ nextNumber: 2, maxOpenPerUser: 4 });
+    });
+
+    it('rejects out-of-range values and saves nothing', async () => {
+      await expect(
+        service.update('g1', 'tickets', { maxOpenPerUser: 6 }, dashboardActor),
+      ).rejects.toMatchObject({
+        fieldErrors: { maxOpenPerUser: ['Enter a whole number from 1 to 5.'] },
+      });
+      await expect(
+        service.update('g1', 'tickets', { maxOpenPerUser: 0 }, dashboardActor),
+      ).rejects.toBeInstanceOf(GuildConfigValidationError);
+      const ids = Array.from({ length: 11 }, (_, i) => `6000000000000001${10 + i}`);
+      await expect(
+        service.update('g1', 'tickets', { staffRoleIds: ids }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { staffRoleIds: ['Choose at most 10.'] } });
+      await expect(
+        service.update('g1', 'tickets', { welcomeMessage: 'a'.repeat(1001) }, dashboardActor),
+      ).rejects.toMatchObject({
+        fieldErrors: { welcomeMessage: ['Use at most 1000 characters.'] },
+      });
+      expect(await tickets.getSettings('g1')).toBeNull();
+      expect(auditRows()).toEqual([]);
+    });
+  });
+
   describe('autovoice (TASK-1641)', () => {
     const HUB_A = '500000000000000001';
     const HUB_B = '500000000000000002';
@@ -1093,6 +1505,10 @@ describe('GuildConfigService ai (TASK-1162)', () => {
       images: new ImageRepository(db),
       freeGames: new FreeGameRepository(db),
       welcomer: new WelcomerRepository(db),
+      tickets: new TicketRepository(db),
+      eventLogs: new EventLogSettingsRepository(db),
+      levelRoles: new LevelRoleSettingsRepository(db),
+      starboard: new StarboardRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -1201,6 +1617,10 @@ describe('GuildConfigService images (TASK-1163)', () => {
       images,
       freeGames: new FreeGameRepository(db),
       welcomer: new WelcomerRepository(db),
+      tickets: new TicketRepository(db),
+      eventLogs: new EventLogSettingsRepository(db),
+      levelRoles: new LevelRoleSettingsRepository(db),
+      starboard: new StarboardRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',

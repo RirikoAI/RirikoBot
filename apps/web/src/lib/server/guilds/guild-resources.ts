@@ -49,6 +49,7 @@ const MESSAGE_CHANNEL_TYPES = new Set<ChannelType>([
   ChannelType.GuildAnnouncement,
 ]);
 const VOICE_CHANNEL_TYPES = new Set<ChannelType>([ChannelType.GuildVoice]);
+const CATEGORY_TYPES = new Set<ChannelType>([ChannelType.GuildCategory]);
 
 /**
  * Channels, roles and member counts for dashboard pages, read with the bot token. Callers must
@@ -100,6 +101,11 @@ export class GuildResourceDirectory {
   /** Voice channels in Discord's sidebar order. */
   async voiceChannels(guildId: string): Promise<ChannelOption[]> {
     return this.channelOptions(guildId, VOICE_CHANNEL_TYPES);
+  }
+
+  /** Channel categories in Discord's sidebar order (their `category` is always null). */
+  async categories(guildId: string): Promise<ChannelOption[]> {
+    return this.channelOptions(guildId, CATEGORY_TYPES);
   }
 
   /**

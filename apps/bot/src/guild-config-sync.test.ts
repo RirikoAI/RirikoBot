@@ -1,10 +1,13 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   CommandSettingsRepository,
+  EventLogSettingsRepository,
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
+  LevelRoleSettingsRepository,
   ModerationRepository,
+  StarboardRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import { createBotServices } from './services.js';
@@ -102,5 +105,145 @@ describe('guild config changes from other processes (CHORE-1101)', () => {
     expect(await services.dropManager.resolveGuildConfig('guild-1')).toMatchObject({
       timezone: 'Asia/Tokyo',
     });
+  });
+
+  it('drops the cached event log settings once the change feed reports an eventlogs write (TASK-1994)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    const send = vi.fn().mockResolvedValue(undefined);
+    const guild = {
+      id: 'guild-1',
+      memberCount: 3,
+      channels: { cache: new Map([['log-1', { id: 'log-1', isSendable: () => true, send }]]) },
+    };
+    const joined = () =>
+      services.eventLogService.memberJoined({
+        id: 'user-1',
+        guild,
+        user: { id: 'user-1', tag: 'user#1', createdTimestamp: Date.now() },
+      } as never);
+    await joined();
+    expect(send).not.toHaveBeenCalled();
+
+    // What the dashboard does: save the member log channel and bump the feed.
+    await new EventLogSettingsRepository(db).upsert('guild-1', { memberChannelId: 'log-1' });
+    await new GuildConfigVersionRepository(db).bump('guild-1', 'eventlogs', new Date());
+
+    await joined();
+    expect(send).not.toHaveBeenCalled();
+    await services.guildConfigWatcher.tick();
+    await joined();
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the event log cache when another module changes (TASK-1994)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    const invalidate = vi.spyOn(services.eventLogService, 'invalidate');
+
+    await new GuildConfigVersionRepository(db).bump('guild-1', 'general', new Date());
+    await services.guildConfigWatcher.tick();
+
+    expect(invalidate).not.toHaveBeenCalled();
+  });
+
+  it('drops the cached level role settings once the change feed reports a levelroles write (TASK-2004)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    const add = vi.fn().mockResolvedValue(undefined);
+    const member = {
+      guild: {
+        id: 'guild-1',
+        roles: {
+          everyone: { id: 'guild-1' },
+          cache: new Map([['role-1', { id: 'role-1', managed: false, position: 1 }]]),
+        },
+        members: { me: { permissions: { has: () => true }, roles: { highest: { position: 10 } } } },
+      },
+      roles: { cache: new Map(), add },
+    };
+    await services.levelRoleService.applyForMember(member as never, 5);
+    expect(add).not.toHaveBeenCalled();
+
+    // What the dashboard does: save a reward and bump the feed.
+    await new LevelRoleSettingsRepository(db).upsert('guild-1', {
+      rewards: [{ level: 5, roleId: 'role-1' }],
+    });
+    await new GuildConfigVersionRepository(db).bump('guild-1', 'levelroles', new Date());
+
+    await services.levelRoleService.applyForMember(member as never, 5);
+    expect(add).not.toHaveBeenCalled();
+    await services.guildConfigWatcher.tick();
+    await services.levelRoleService.applyForMember(member as never, 5);
+    expect(add).toHaveBeenCalledWith(['role-1'], 'Level 5 reward');
+  });
+
+  it('keeps the level role cache when another module changes (TASK-2004)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    const invalidate = vi.spyOn(services.levelRoleService, 'invalidate');
+
+    await new GuildConfigVersionRepository(db).bump('guild-1', 'general', new Date());
+    await services.guildConfigWatcher.tick();
+
+    expect(invalidate).not.toHaveBeenCalled();
+  });
+
+  it('drops the cached starboard settings once the change feed reports a starboard write (TASK-2014)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    // The starboard channel is looked up only once the server has the starboard switched on.
+    const getChannel = vi.fn().mockReturnValue(undefined);
+    const message = {
+      id: 'message-1',
+      guildId: 'guild-1',
+      guild: { id: 'guild-1', channels: { cache: { get: getChannel } } },
+      channelId: 'channel-1',
+      channel: { isThread: () => false },
+      webhookId: null,
+      system: false,
+    };
+    await services.starboardService.reactionChanged(message as never);
+    expect(getChannel).not.toHaveBeenCalled();
+
+    // What the dashboard does: save the starboard channel and bump the feed.
+    await new StarboardRepository(db).upsertSettings('guild-1', { channelId: 'star-1' });
+    await new GuildConfigVersionRepository(db).bump('guild-1', 'starboard', new Date());
+
+    await services.starboardService.reactionChanged(message as never);
+    expect(getChannel).not.toHaveBeenCalled();
+    await services.guildConfigWatcher.tick();
+    await services.starboardService.reactionChanged(message as never);
+    expect(getChannel).toHaveBeenCalledWith('star-1');
+  });
+
+  it('keeps the starboard cache when another module changes (TASK-2014)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    const invalidate = vi.spyOn(services.starboardService, 'invalidate');
+
+    await new GuildConfigVersionRepository(db).bump('guild-1', 'general', new Date());
+    await services.guildConfigWatcher.tick();
+
+    expect(invalidate).not.toHaveBeenCalled();
+  });
+
+  it('looks the server up on the Discord client when one is supplied (TASK-2014)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const get = vi.fn().mockReturnValue(undefined);
+    const services = await createBotServices(db, { guilds: { cache: { get } } } as never);
+
+    await new StarboardRepository(db).insertPost({
+      messageId: 'message-1',
+      guildId: 'guild-1',
+      channelId: 'channel-1',
+      authorId: 'user-1',
+      starboardMessageId: 'copy-1',
+      starCount: 3,
+    });
+    await new StarboardRepository(db).upsertSettings('guild-1', { channelId: 'star-1' });
+    await services.starboardService.messageDeleted('guild-1', 'message-1');
+
+    expect(get).toHaveBeenCalledWith('guild-1');
   });
 });

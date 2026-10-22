@@ -33,10 +33,32 @@ export async function ChannelSelectField({ guildId, defaultValue, ...field }: Pi
 }
 
 /**
+ * Picker for a channel category (such as where new ticket channels go), in the server's
+ * sidebar order. A saved category that was deleted stays selectable, labelled as such, so a
+ * save does not clear it silently. Render only on pages that have already called
+ * `requireGuildAccess(guildId)`.
+ */
+export async function CategorySelectField({ guildId, defaultValue, ...field }: PickerProps) {
+  const { guildResources } = await getWebServices();
+  const categories = await guildResources.categories(guildId);
+  const options: SelectOption[] = categories.map((category) => ({
+    value: category.id,
+    label: category.name,
+  }));
+  if (defaultValue && !categories.some((category) => category.id === defaultValue)) {
+    options.unshift({ value: defaultValue, label: `Deleted category (${defaultValue})` });
+  }
+  return <SelectField {...field} defaultValue={defaultValue ?? ''} options={options} />;
+}
+
+/**
  * Options for roles Ririko can give, plus any saved role it cannot give (any more), labelled
  * as such. Without them a saved role would vanish from the form and be cleared on the next save.
  */
-async function assignableRoleOptions(guildId: string, saved: string[]): Promise<SelectOption[]> {
+export async function assignableRoleOptions(
+  guildId: string,
+  saved: string[],
+): Promise<SelectOption[]> {
   const { guildResources } = await getWebServices();
   const roles = await guildResources.assignableRoles(guildId);
   const options = roles.map((role) => ({ value: role.id, label: `@${role.name}` }));

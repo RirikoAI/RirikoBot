@@ -43,6 +43,34 @@
       "when": 1792587001997,
       "tag": "0005_brown_leper_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792598787536,
+      "tag": "0006_cool_stranger",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792634063429,
+      "tag": "0007_tan_excalibur",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792642988722,
+      "tag": "0008_nervous_photon",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792648832750,
+      "tag": "0009_mixed_living_lightning",
+      "breakpoints": true
     }
   ]
 }

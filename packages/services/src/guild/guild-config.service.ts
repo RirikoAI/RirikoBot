@@ -4,6 +4,7 @@ import {
   compareCommandOverrides,
   DEFAULT_ESCALATION_STEPS,
   DEFAULT_MUSIC_VOLUME,
+  DEFAULT_STARBOARD_EMOJI,
   AI_SPEAKING_STYLES,
   AI_TOOL_NAMES,
   allowedAiTools,
@@ -42,12 +43,16 @@ import {
   AutoVoiceRepository,
   CommandCatalogRepository,
   CommandSettingsRepository,
+  EventLogSettingsRepository,
   FreeGameRepository,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   ImageRepository,
+  LevelRoleSettingsRepository,
   ModerationRepository,
   MusicRepository,
+  StarboardRepository,
+  TicketRepository,
   WelcomerRepository,
   withTransaction,
   type AutoVoiceConfig,
@@ -317,6 +322,10 @@ export interface GuildConfigServiceDeps {
   images: ImageRepository;
   freeGames: FreeGameRepository;
   welcomer: WelcomerRepository;
+  tickets: TicketRepository;
+  eventLogs: EventLogSettingsRepository;
+  levelRoles: LevelRoleSettingsRepository;
+  starboard: StarboardRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -438,6 +447,102 @@ export class GuildConfigService {
               humanRoleIds: values.humanRoleIds,
               botRoleIds: values.botRoleIds,
               verificationRoleId: values.verificationRoleId,
+            },
+            tx,
+          );
+        },
+      },
+      tickets: {
+        read: async (guildId, tx) => {
+          const row = await deps.tickets.getSettings(guildId, tx);
+          return {
+            enabled: row?.isEnabled ?? false,
+            categoryId: row?.categoryId ?? null,
+            staffRoleIds: row?.staffRoleIds ?? [],
+            transcriptChannelId: row?.transcriptChannelId ?? null,
+            maxOpenPerUser: row?.maxOpenPerUser ?? 1,
+            welcomeMessage: row?.welcomeMessage ?? null,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          // next_number belongs to the ticket service; the patch type cannot carry it.
+          await deps.tickets.upsertSettings(
+            guildId,
+            {
+              isEnabled: values.enabled,
+              categoryId: values.categoryId,
+              staffRoleIds: values.staffRoleIds,
+              transcriptChannelId: values.transcriptChannelId,
+              maxOpenPerUser: values.maxOpenPerUser,
+              welcomeMessage: values.welcomeMessage,
+            },
+            tx,
+          );
+        },
+      },
+      eventlogs: {
+        read: async (guildId, tx) => {
+          const row = await deps.eventLogs.get(guildId, tx);
+          return {
+            messageChannelId: row?.messageChannelId ?? null,
+            memberChannelId: row?.memberChannelId ?? null,
+            serverChannelId: row?.serverChannelId ?? null,
+            voiceChannelId: row?.voiceChannelId ?? null,
+            ignoredChannelIds: row?.ignoredChannelIds ?? [],
+            ignoreBots: row?.ignoreBots ?? true,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.eventLogs.upsert(
+            guildId,
+            {
+              messageChannelId: values.messageChannelId,
+              memberChannelId: values.memberChannelId,
+              serverChannelId: values.serverChannelId,
+              voiceChannelId: values.voiceChannelId,
+              ignoredChannelIds: values.ignoredChannelIds,
+              ignoreBots: values.ignoreBots,
+            },
+            tx,
+          );
+        },
+      },
+      levelroles: {
+        read: async (guildId, tx) => {
+          const row = await deps.levelRoles.get(guildId, tx);
+          return {
+            rewards: row?.rewards ?? [],
+            keepPreviousRoles: row?.keepPreviousRoles ?? true,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.levelRoles.upsert(
+            guildId,
+            { rewards: values.rewards, keepPreviousRoles: values.keepPreviousRoles },
+            tx,
+          );
+        },
+      },
+      starboard: {
+        read: async (guildId, tx) => {
+          const row = await deps.starboard.getSettings(guildId, tx);
+          return {
+            channelId: row?.channelId ?? null,
+            emoji: row?.emoji ?? DEFAULT_STARBOARD_EMOJI,
+            threshold: row?.threshold ?? 3,
+            allowSelfStar: row?.allowSelfStar ?? false,
+            ignoredChannelIds: row?.ignoredChannelIds ?? [],
+          };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.starboard.upsertSettings(
+            guildId,
+            {
+              channelId: values.channelId,
+              emoji: values.emoji,
+              threshold: values.threshold,
+              allowSelfStar: values.allowSelfStar,
+              ignoredChannelIds: values.ignoredChannelIds,
             },
             tx,
           );
@@ -726,6 +831,10 @@ export function createGuildConfigService(
     images: new ImageRepository(db),
     freeGames: new FreeGameRepository(db),
     welcomer: new WelcomerRepository(db),
+    tickets: new TicketRepository(db),
+    eventLogs: new EventLogSettingsRepository(db),
+    levelRoles: new LevelRoleSettingsRepository(db),
+    starboard: new StarboardRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit: new AuditLogRepository(db),
     ...options,

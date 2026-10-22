@@ -497,6 +497,24 @@
       ],
       "blocks": [],
       "description": "Ship Ririko 2.0.0 as the public release on master and make the project easy to find, install, use and contribute to. Covers a privacy audit before going public, a docs cleanup (archive development-only docs, rewrite user docs as deterministic, current steps), a Docusaurus site on ririko.ai that replaces the GitHub wiki and reuses the old website, a guided setup wizard (the 1.x installer rebuilt as `ririko setup`), a new README and CONTRIBUTING with all-contributors and CodeFactor, the master release and production launch, and the launch cleanups found during EPIC-019."
+    },
+    {
+      "id": "EPIC-021",
+      "title": "Essential Server Tools",
+      "points": 21,
+      "status": "TODO",
+      "children": [
+        "STORY-198",
+        "STORY-199",
+        "BUG-0052",
+        "STORY-200",
+        "STORY-201",
+        "STORY-202",
+        "CHORE-2011"
+      ],
+      "requires": [],
+      "blocks": [],
+      "description": "Maintainer (2026-10-21): features most Discord servers expect that Ririko does not have yet. A gap review of develop found no support tickets, no message, member or role event logs, no level role rewards and no starboard. The maintainer chose support tickets first (STORY-198). More stories are added here when the maintainer picks the next gap."
     }
   ],
   "stories": [
@@ -3136,6 +3154,310 @@
         "TASK-1971 is DONE."
       ],
       "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [
+        "TASK-1981",
+        "TASK-1982",
+        "TASK-1983",
+        "TASK-1984",
+        "TASK-1985",
+        "TASK-1986"
+      ],
+      "requires": [],
+      "model": "large",
+      "handovers": [
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "STORY-198",
+      "parent": "EPIC-021",
+      "title": "Support Tickets: Open-Ticket Panel, Private Ticket Channels, Claim and Close with Transcripts",
+      "points": 21,
+      "status": "DONE",
+      "description": "Members press an Open Ticket button on a panel, give a short subject, and get a private channel under a ticket category that only they, the staff roles and Ririko can see. Staff can claim the ticket; the opener or staff close it with an optional reason, and Ririko posts a plain-text transcript to the transcript channel (or the log channel) before it deletes the ticket channel. Settings live on a new Tickets dashboard page and in a new `tickets` guild config module; the panel is posted with /ticket action:panel.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/",
+          "packages/database/src/repositories/",
+          "packages/core/src/config/guild-config.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/tickets/",
+          "apps/bot/src/commands/tickets/",
+          "apps/bot/src/component-interactions.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/main.ts",
+          "apps/web/src/app/dashboard/[guildId]/tickets/",
+          "apps/web/src/lib/dashboard-nav.ts",
+          "docs/modules.md",
+          "docs/commands.md",
+          "docs/dashboard.md",
+          "docs/legal/privacy.md"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "registerComponentInteractions",
+          "createAutoRoleCommand",
+          "GiveawayRepository",
+          "ReactionRoleService"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas GuildConfigService stores autoroles logging",
+          "registerComponentInteractions handleGiveawayButtonInteraction verify:btn",
+          "createAutoRoleCommand send-verify verify:btn:verify"
+        ]
+      },
+      "acceptance": [
+        "TASK-1981 to TASK-1986 are DONE."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm test:coverage"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [
+        "TASK-1991",
+        "TASK-1992",
+        "TASK-1993",
+        "TASK-1994",
+        "TASK-1995",
+        "TASK-1996"
+      ],
+      "requires": [
+        "STORY-198"
+      ],
+      "model": "large",
+      "handovers": [
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "STORY-199",
+      "parent": "EPIC-021",
+      "title": "Server Event Logs: Message, Member, Server and Voice Logs to Chosen Channels",
+      "points": 21,
+      "status": "DONE",
+      "description": "Maintainer (2026-10-22): the next essential feature after tickets. Today the log channel only receives moderation cases, anti-raid alerts and dashboard notices. Ririko posts an embed for each server event to the channel picked for its category: messages (edited, deleted, bulk deleted), members (joined, left, nickname, roles, timeout, ban, unban), server (channels and roles created, deleted or renamed) and voice (joined, left, moved). Each category is off until a channel is picked. Admins can ignore channels and bots. Settings live in a new `eventlogs` guild config module, edited on the Logging dashboard page.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/",
+          "packages/database/src/repositories/",
+          "packages/core/src/config/guild-config.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/event-logs/",
+          "packages/discord/src/client/factory.ts",
+          "apps/bot/src/listeners/",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/main.ts",
+          "apps/web/src/app/dashboard/[guildId]/logging/",
+          "docs/"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "CommandOverrideService",
+          "DEFAULT_GATEWAY_INTENTS",
+          "registerMemberListener",
+          "ModerationLogService"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas logging GuildConfigService stores logging",
+          "CommandOverrideService cache invalidate guild:configChanged",
+          "DEFAULT_GATEWAY_INTENTS DEFAULT_SWEEPERS createDiscordClient"
+        ]
+      },
+      "acceptance": [
+        "TASK-1991 to TASK-1996 are DONE."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm test:coverage"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [
+        "TASK-2001",
+        "TASK-2002",
+        "TASK-2003",
+        "TASK-2004",
+        "TASK-2005",
+        "TASK-2006",
+        "TASK-2007"
+      ],
+      "requires": [
+        "STORY-199"
+      ],
+      "model": "large",
+      "handovers": [
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "STORY-200",
+      "parent": "EPIC-021",
+      "title": "Level Role Rewards: Roles Given Automatically at Chosen Levels",
+      "points": 21,
+      "status": "DONE",
+      "description": "Maintainer (2026-10-22): the next essential feature after event logs. Admins pick roles that members get when they reach a level (for example level 5 gets @Regular, level 20 gets @Veteran). Ririko gives the roles on every level-up from chat, voice or items, gives them back when a member rejoins, and can sync existing members on request. A server chooses whether members keep lower reward roles or only hold the highest one. Settings live in a new `levelroles` guild config module, edited on the XP & Ranking dashboard page and with the /levelroles command.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/",
+          "packages/database/src/repositories/",
+          "packages/core/src/config/guild-config.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/level-roles/",
+          "packages/services/src/economy/leveling.service.ts",
+          "packages/services/src/roles/autorole.service.ts",
+          "apps/bot/src/listeners/",
+          "apps/bot/src/commands/roles/",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/main.ts",
+          "apps/web/src/app/dashboard/[guildId]/xp/",
+          "docs/"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "LevelingService.addExperience",
+          "leveling:levelUp",
+          "AutoRoleService",
+          "XpRepository",
+          "checkAssignableRoles"
+        ],
+        "codegraph_queries": [
+          "LevelingService addExperience leveling:levelUp LevelUpEvent",
+          "GuildConfigSchemas xp autoroles GuildConfigService stores",
+          "AutoRoleService validateRole managed highest position"
+        ]
+      },
+      "acceptance": [
+        "TASK-2001 to TASK-2007 are DONE."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm test:coverage"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [
+        "TASK-2011",
+        "TASK-2012",
+        "TASK-2013",
+        "TASK-2014",
+        "TASK-2015",
+        "TASK-2016"
+      ],
+      "requires": [
+        "STORY-200"
+      ],
+      "model": "large",
+      "handovers": [
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "STORY-201",
+      "parent": "EPIC-021",
+      "title": "Starboard: Repost Popular Messages to a Highlights Channel",
+      "points": 21,
+      "status": "DONE",
+      "description": "Maintainer (2026-10-22): the last essential feature of the day. When a message gets enough of the chosen reaction (⭐ by default), Ririko posts a copy to the starboard channel with the star count and a jump link, keeps the count up to date, and removes the copy when the original is deleted or drops below the threshold. Settings live in a new `starboard` guild config module, edited on a new Starboard dashboard page.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/",
+          "packages/database/src/repositories/",
+          "packages/core/src/config/guild-config.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/starboard/",
+          "apps/bot/src/listeners/",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/main.ts",
+          "apps/web/src/app/dashboard/[guildId]/starboard/",
+          "apps/web/src/lib/dashboard-nav.ts",
+          "docs/"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "EventLogService",
+          "registerReactionListener",
+          "DEFAULT_PARTIALS",
+          "GUILD_NAV_ITEMS"
+        ],
+        "codegraph_queries": [
+          "registerReactionListener messageReactionAdd partial fetch",
+          "EventLogService settings cache invalidate",
+          "GuildConfigSchemas eventlogs GuildConfigService stores"
+        ]
+      },
+      "acceptance": [
+        "TASK-2011 to TASK-2016 are DONE."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm docs:build && pnpm test:coverage"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [
+        "TASK-2021",
+        "TASK-2022",
+        "TASK-2023",
+        "TASK-2024",
+        "TASK-2025"
+      ],
+      "requires": [],
+      "model": "large",
+      "handovers": [
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "STORY-202",
+      "parent": "EPIC-021",
+      "title": "Set Up Tickets, Starboard, Event Logs and Level Role Stacking with Commands",
+      "points": 21,
+      "status": "DONE",
+      "description": "Maintainer (2026-10-22): \"lets allow server owners to enable the features using commands\". Tickets, the starboard and event logs can only be turned on and configured on the dashboard, and the level role stacking switch is dashboard-only too. Add dual-dispatch (slash and prefix) setup actions for all four, for members with Manage Server or Administrator, saving through GuildConfigService like the dashboard. No new features and no schema change.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/shared/",
+          "apps/bot/src/commands/tickets/",
+          "apps/bot/src/commands/roles/level-roles.command.ts",
+          "apps/bot/src/commands/utility/",
+          "apps/bot/src/commands/moderation/",
+          "apps/bot/src/command-set.ts",
+          "docs/"
+        ],
+        "symbols": [
+          "GuildConfigService",
+          "GuildConfigSchemas",
+          "createTicketCommand",
+          "createLevelRolesCommand",
+          "registerBotCommands",
+          "GuildConfigWatcher"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas tickets starboard eventlogs levelroles",
+          "createTicketCommand createLevelRolesCommand saveRewards"
+        ]
+      },
+      "acceptance": [
+        "TASK-2021 to TASK-2025 are DONE."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm docs:build && pnpm test:coverage"
     }
   ],
   "tasks": [
@@ -10867,6 +11189,1789 @@
         "docs/commands.md section 7.8 lists /energy; docs/tcg-player-guide.md section 4 names /energy and explains bonus energy (+5 at each reset, kept up to 50, refilled with the pool, owner-configurable)."
       ],
       "verify_cmd": "pnpm vitest run apps/bot/src/commands/tcg packages/services/src/waifu-tcg apps/bot/src/command-set.test.ts && pnpm --filter @ririko/services typecheck && pnpm --filter @ririko/bot typecheck && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-1981",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1981",
+      "parent": "STORY-198",
+      "points": 5,
+      "status": "DONE",
+      "title": "Ticket Schema, Migrations and TicketRepository on Both Dialects",
+      "description": "Two new tables, their migrations for SQLite and PostgreSQL, a repository, and entries in the guild and user data inventories. No Discord code.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/tickets.ts",
+          "packages/database/src/schema/pg/tickets.ts",
+          "packages/database/src/schema/sqlite/index.ts",
+          "packages/database/src/schema/pg/index.ts",
+          "packages/database/src/schema/types/index.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/migrations/",
+          "packages/database/src/migrations/",
+          "packages/database/src/repositories/ticket.repository.ts",
+          "packages/database/src/repositories/ticket.repository.behaviour.test.ts",
+          "packages/database/src/repositories/index.ts",
+          "packages/database/src/repositories/guild-data-inventory.ts",
+          "packages/database/src/repositories/user-data-inventory.ts",
+          "packages/database/src/schema/sqlite/giveaways.ts",
+          "packages/database/src/schema/pg/giveaways.ts",
+          "packages/database/src/repositories/giveaway.repository.ts",
+          "packages/database/src/repositories/autorole.repository.ts"
+        ],
+        "symbols": [
+          "GiveawayRepository",
+          "AutoRoleRepository.upsertGuildAutoRoles",
+          "BaseRepository.getClient",
+          "withTransaction",
+          "GUILD_DATA_INVENTORY",
+          "USER_DATA_INVENTORY"
+        ],
+        "entry_points": [
+          "packages/database/src/repositories/index.ts"
+        ],
+        "codegraph_queries": [
+          "GiveawayRepository findById isSqlite sqliteSchema.giveaways",
+          "AutoRoleRepository upsertGuildAutoRoles guildAutoRoles onConflictDoUpdate",
+          "guild-data-inventory GuildDataEntry giveaways",
+          "user-data-inventory UserDataEntry tombstone clear moderation_cases"
+        ]
+      },
+      "acceptance": [
+        "New table `ticket_settings` on both dialects: guild_id (primary key), is_enabled (boolean, default false), category_id (nullable), staff_role_ids (JSON string array, default []), transcript_channel_id (nullable), max_open_per_user (integer, default 1), welcome_message (nullable text), next_number (integer, default 1), updated_at.",
+        "New table `tickets` on both dialects: id (text primary key, UUID), guild_id, number (integer), channel_id, opener_id, subject (nullable text), status (`open` or `closed`), claimed_by (nullable), closed_by (nullable), close_reason (nullable), created_at, closed_at (nullable). Unique index on (guild_id, number), unique index on channel_id, and an index on (guild_id, opener_id, status).",
+        "`pnpm db:generate` output is committed for both dialects (SQL migration, embedded modules and DDL files). The migration is additive only, with no `-- ririko:contract` line, and `pnpm db:check` passes.",
+        "TicketRepository (exported from @ririko/database) has getSettings, upsertSettings, openTicket, findByChannelId, countOpenForUser, listOpen, setClaimedBy and close. openTicket takes the next number from ticket_settings.next_number and increments it inside the same transaction as the insert, so two tickets in one server never share a number.",
+        "close only changes a ticket whose status is `open` and returns whether it did, so a second close (button pressed twice, or the channel deleted after closing) is a no-op.",
+        "A behaviour test runs every TicketRepository method on SQLite (and on PostgreSQL in the test-postgres job, the same way giveaway.repository.behaviour.test.ts does), including numbering across two tickets, the per-user open count and the double close.",
+        "guild-data-inventory.ts lists ticket_settings and tickets with action `delete`. user-data-inventory.ts lists tickets.opener_id as `tombstone` with clear [`subject`], and tickets.claimed_by and tickets.closed_by as `tombstone`, each with a note. Both inventory tests pass."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src/repositories/ticket.repository.behaviour.test.ts packages/database/src/repositories/guild-data-inventory.test.ts packages/database/src/repositories/user-data-inventory.test.ts packages/database/src/schema && pnpm --filter @ririko/database typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1981"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1982",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1982",
+      "parent": "STORY-198",
+      "points": 2,
+      "status": "DONE",
+      "title": "The `tickets` Guild Config Module for the Dashboard and the CLI",
+      "description": "Adds a `tickets` entry to GuildConfigSchemas and a matching store in GuildConfigService that reads and writes ticket_settings through TicketRepository.",
+      "context": {
+        "files": [
+          "packages/core/src/config/guild-config.ts",
+          "packages/core/src/config/guild-config.test.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/guild/__tests__/guild-config.service.test.ts",
+          "apps/bot/src/services.ts",
+          "apps/web/src/lib/server/services.ts",
+          "apps/cli/src/commands/guild-config.ts"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "GuildConfigServiceDeps",
+          "createGuildConfigService",
+          "OptionalSnowflakeSetting",
+          "SnowflakeListSetting",
+          "IntSetting",
+          "OptionalTextSetting",
+          "FlagSetting"
+        ],
+        "entry_points": [
+          "packages/core/src/config/guild-config.ts"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas autoroles logging OptionalSnowflakeSetting SnowflakeListSetting",
+          "GuildConfigService stores autoroles read write upsertGuildAutoRoles",
+          "createGuildConfigService GuildConfigServiceDeps autoRoles"
+        ]
+      },
+      "acceptance": [
+        "GuildConfigSchemas has a strict `tickets` module with: enabled (FlagSetting), categoryId (OptionalSnowflakeSetting), staffRoleIds (SnowflakeListSetting, at most 10), transcriptChannelId (OptionalSnowflakeSetting; empty means the log channel), maxOpenPerUser (IntSetting 1 to 5), welcomeMessage (OptionalTextSetting, at most 1000 characters). Each field has a describe() text a server admin understands, as the other modules do.",
+        "GuildConfigService reads `tickets` from TicketRepository.getSettings (defaults when there is no row: disabled, no category, no staff roles, no transcript channel, 1 open ticket per user, no welcome message) and writes it with upsertSettings in the same transaction as the audit entry, like the `autoroles` store. Writing never changes next_number.",
+        "Every construction of GuildConfigService (bot, web, CLI) passes the TicketRepository, and typecheck passes for all of them.",
+        "Tests cover the schema (valid values, 0 and 6 for maxOpenPerUser, 11 staff roles, a 1001-character message) and the store (read defaults, write then read back, next_number unchanged)."
+      ],
+      "verify_cmd": "pnpm vitest run packages/core/src/config/guild-config.test.ts packages/services/src/guild && pnpm typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1981",
+        "TASK-1982"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1983",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1983",
+      "parent": "STORY-198",
+      "points": 5,
+      "status": "DONE",
+      "title": "TicketService: Open, Claim, Add, Remove and Close with a Plain-Text Transcript",
+      "description": "The Discord-facing logic in packages/services/src/tickets, independent of commands and buttons, so TASK-1984 only routes interactions to it.",
+      "context": {
+        "files": [
+          "packages/services/src/tickets/ticket.service.ts",
+          "packages/services/src/tickets/transcript.ts",
+          "packages/services/src/tickets/messages.ts",
+          "packages/services/src/tickets/types.ts",
+          "packages/services/src/tickets/index.ts",
+          "packages/services/src/tickets/__tests__/",
+          "packages/services/src/index.ts",
+          "packages/services/src/roles/reaction-role.service.ts",
+          "packages/services/src/autovoice/service.ts",
+          "packages/services/src/moderation/moderation-log.service.ts",
+          "packages/database/src/repositories/ticket.repository.ts",
+          "packages/database/src/repositories/ticket.repository.behaviour.test.ts"
+        ],
+        "symbols": [
+          "ReactionRoleService.hasPermission",
+          "AutoVoiceService.handleVoiceStateUpdate",
+          "ModerationLogService",
+          "TicketRepository",
+          "GuildSettingsRepository.findById"
+        ],
+        "entry_points": [
+          "packages/services/src/tickets/index.ts"
+        ],
+        "codegraph_queries": [
+          "ReactionRoleService hasPermission isValidRole PermissionFlagsBits",
+          "AutoVoiceService handleVoiceStateUpdate guild.channels.create permissionOverwrites",
+          "TicketRepository openTicket countOpenForUser close",
+          "ModerationLogService logChannelId guild.channels.fetch"
+        ]
+      },
+      "acceptance": [
+        "open(member, subject) refuses with a clear message, and creates nothing, when tickets are disabled, no category is set or the category is gone, Ririko lacks Manage Channels, View Channel or Send Messages in the category, or the member already has maxOpenPerUser open tickets.",
+        "Otherwise it creates a text channel named `ticket-<number padded to 4>` under the category with overwrites: @everyone cannot view; the opener, each staff role and Ririko can view, send, attach files and read history. It then records the ticket and posts the welcome message (the setting, or a default) in an embed that names the opener and the subject, mentions the staff roles, and carries Claim and Close buttons (custom ids `ticket:claim` and `ticket:close`). If recording fails after the channel exists, the channel is deleted again.",
+        "claim(member, channel) is allowed for staff only (a staff role, Manage Channels or Administrator), records claimed_by and posts who is handling the ticket. Claiming an already claimed ticket says who has it.",
+        "add(member, channel, user) and remove(...) are staff only and change only that user's channel overwrite; the opener cannot be removed.",
+        "close(member, channel, reason) is allowed for the opener and staff. It builds a UTF-8 transcript file `ticket-<number>.txt`: a header (server, number, subject, opener, claimed by, closed by, reason, opened and closed times in UTC), then every message oldest first with time, author tag and ID, content, attachment URLs and embed titles. Messages are fetched 100 at a time, up to 5,000; a longer ticket notes the cut-off.",
+        "The transcript goes to transcriptChannelId, or the log channel when that is empty, as an embed with the ticket details and the file. Only after it is posted (or when neither channel is set) does the service mark the ticket closed and delete the channel. If the post fails, the ticket stays open, the channel stays, and the closer is told why.",
+        "handleChannelDeleted(channelId) marks an open ticket closed (closed_by null, reason \"Channel deleted\") without a transcript.",
+        "Transcript text and message content are never written to the database or the console log.",
+        "Unit tests with mocked Guild, channel and repository objects cover every refusal, the overwrites, the rollback when recording fails, staff and opener checks, transcript formatting and paging (including the 5,000 cap), the failed transcript post, and handleChannelDeleted."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/tickets && pnpm --filter @ririko/services typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1983"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1984",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1984",
+      "parent": "STORY-198",
+      "points": 5,
+      "status": "DONE",
+      "title": "/ticket Command (Slash and Prefix), Panel, Buttons, Modals and Bot Wiring",
+      "description": "Connects TicketService to Discord: the /ticket command, the panel button, the subject and close-reason modals, and the channelDelete hook.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/tickets/ticket.command.ts",
+          "apps/bot/src/commands/tickets/components.ts",
+          "apps/bot/src/commands/tickets/index.ts",
+          "apps/bot/src/commands/tickets/__tests__/",
+          "apps/bot/src/index.ts",
+          "apps/bot/src/component-interactions.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/command-set.test.ts",
+          "apps/bot/src/component-interactions.test.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/commands/roles/autorole.command.ts",
+          "apps/bot/src/commands/giveaway/giveaway.command.ts",
+          "apps/bot/src/commands/giveaway/components.ts"
+        ],
+        "symbols": [
+          "createAutoRoleCommand",
+          "createGiveawayCommand",
+          "handleGiveawayButtonInteraction",
+          "registerComponentInteractions",
+          "registerBotCommands",
+          "createBotServices",
+          "BotServices",
+          "CommandMetadata"
+        ],
+        "entry_points": [
+          "apps/bot/src/component-interactions.ts",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "createAutoRoleCommand send-verify verify:btn:verify ActionRowBuilder",
+          "registerComponentInteractions handleGiveawayButtonInteraction rr:btn",
+          "createBotServices BotServices giveawayRepo reactionRoleService",
+          "main.ts channelDelete autoVoiceService.handleChannelDelete"
+        ]
+      },
+      "acceptance": [
+        "/ticket (registrationScope `guild`, category UTILITY, guild only) with `action` choices panel, close, claim, add, remove, and options channel, message, reason, user. Every action also works as a prefix command (`!ticket panel #support Need help?`, `!ticket close spam`, `!ticket add @user`), as the other commands do.",
+        "action:panel needs Manage Server or Administrator. It posts an embed with the given message (or a default) and one Open Ticket button (custom id `ticket:open`) in the chosen channel (default: the current one), and refuses when tickets are disabled or have no category, pointing to the Tickets dashboard page.",
+        "Pressing `ticket:open` shows a modal with one Subject field (required, at most 200 characters). Submitting it calls TicketService.open and answers ephemerally with a link to the new channel or the refusal.",
+        "The Close button shows a modal with an optional Reason field (at most 500 characters); submitting it calls TicketService.close. The Claim button calls claim. /ticket close, claim, add and remove call the same service methods and refuse outside a ticket channel.",
+        "component-interactions.ts routes `ticket:` buttons and modal submits; the router handles modal submits without breaking the existing button and select routes.",
+        "BotServices builds TicketRepository and TicketService; main.ts calls handleChannelDeleted from the existing channelDelete listener, with its own try/catch.",
+        "GUILD_SCOPED in command-set.test.ts includes `ticket`, and the guild and global slash command counts stay under 100.",
+        "Tests cover each action (slash and prefix), the permission refusals, the panel message, the modal flows and the interaction routing."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/commands/tickets apps/bot/src/command-set.test.ts && pnpm --filter @ririko/bot typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1982"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1985",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1985",
+      "parent": "STORY-198",
+      "points": 3,
+      "status": "DONE",
+      "title": "Tickets Dashboard Page with a Category Picker",
+      "description": "A settings page for the `tickets` module, built like the Logging and Auto Roles pages, plus a picker for channel categories, which the dashboard does not have yet.",
+      "context": {
+        "files": [
+          "apps/web/src/app/dashboard/[guildId]/tickets/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/tickets/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/tickets/actions.test.ts",
+          "apps/web/src/app/dashboard/[guildId]/logging/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/autoroles/page.tsx",
+          "apps/web/src/components/guild-pickers.tsx",
+          "apps/web/src/components/guild-pickers.test.tsx",
+          "apps/web/src/lib/server/guilds/guild-resources.ts",
+          "apps/web/src/lib/server/guilds/guild-resources.test.ts",
+          "apps/web/src/lib/dashboard-nav.ts",
+          "apps/web/src/lib/server/authorization-coverage.test.ts",
+          "apps/web/src/lib/server/guilds/audit-log.ts",
+          "apps/web/src/lib/server/guilds/audit-log.test.ts"
+        ],
+        "symbols": [
+          "LoggingSettingsPage",
+          "saveLoggingSettings",
+          "saveGuildSettings",
+          "pickFormFields",
+          "ChannelSelectField",
+          "RoleListField",
+          "GuildResourceDirectory",
+          "GUILD_NAV_ITEMS"
+        ],
+        "entry_points": [
+          "apps/web/src/app/dashboard/[guildId]/tickets/page.tsx"
+        ],
+        "codegraph_queries": [
+          "LoggingSettingsPage saveLoggingSettings saveGuildSettings pickFormFields",
+          "ChannelSelectField RoleListField guild-pickers PickerProps",
+          "GuildResourceDirectory textChannels GuildCategory category",
+          "GUILD_NAV_ITEMS dashboard-nav authorization-coverage"
+        ]
+      },
+      "acceptance": [
+        "A Tickets page at /dashboard/<guildId>/tickets, listed in GUILD_NAV_ITEMS in the `members` group after Reaction Roles, edits every `tickets` field: an on/off switch, a category picker, a staff role list, a transcript channel picker (empty label \"Use the log channel\"), the open-ticket limit and the welcome message.",
+        "A new CategorySelectField in guild-pickers.tsx lists the server's channel categories (from a new GuildResourceDirectory method) with the saved one selected and an empty \"No category\" choice.",
+        "Each field's description says what Ririko needs: Manage Channels in the category, View Channel, Send Messages, Embed Links and Attach Files in the transcript channel. The page tells the admin to post the panel with `/ticket action:panel`.",
+        "The save action uses saveGuildSettings with pickFormFields, so it gets the request check, guild access, the audit entry and the change notice like the other settings pages; authorization-coverage.test.ts covers it.",
+        "Tests cover the action (valid save, invalid field errors), the category picker and the new directory method."
+      ],
+      "verify_cmd": "pnpm vitest run 'apps/web/src/app/dashboard/[guildId]/tickets' apps/web/src/components/guild-pickers.test.tsx apps/web/src/lib/server && pnpm --filter @ririko/web typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1984",
+        "TASK-1985"
+      ],
+      "model": "small",
+      "handovers": [
+        "TASK-1986",
+        "STORY-198",
+        "EPIC-021"
+      ],
+      "id": "TASK-1986",
+      "parent": "STORY-198",
+      "points": 1,
+      "status": "DONE",
+      "title": "Document Support Tickets for Server Admins and in the Privacy Policy",
+      "description": "User docs for the finished feature. Text only.",
+      "context": {
+        "files": [
+          "docs/modules.md",
+          "docs/commands.md",
+          "docs/dashboard.md",
+          "docs/legal/privacy.md",
+          "docs/after-installing.md",
+          "docs/legal/ms/privacy.md",
+          "packages/services/src/privacy/consent.service.ts",
+          "packages/services/src/privacy/consent.service.test.ts"
+        ],
+        "symbols": [
+          "LEGAL_DOCUMENTS_DATE",
+          "TERMS_VERSION",
+          "AI_CONSENT_VERSION"
+        ],
+        "codegraph_queries": [
+          "TicketService open close transcript createTicketCommand"
+        ]
+      },
+      "acceptance": [
+        "docs/modules.md has a Support Tickets section (numbered steps: turn tickets on and pick a category and staff roles on the Tickets page, post the panel with /ticket action:panel; then what members, staff and the opener can do, where transcripts go, and the permissions Ririko needs) and a row in the Overview table. Later sections are renumbered and links to them still work.",
+        "docs/commands.md lists /ticket in the Server Tools table with who can use each action, and in the list of guild-registered commands.",
+        "docs/dashboard.md lists the Tickets page in the Pages for Each Server table.",
+        "docs/legal/privacy.md says what tickets store (opener, staff who claimed or closed, subject, close reason, times), that transcripts are posted to a channel in the server and not kept by Ririko, and what server data deletion and user erasure do to tickets.",
+        "Every statement matches the code as merged in TASK-1981 to TASK-1985, and `pnpm docs:build` passes.",
+        "docs/legal/privacy.md and docs/legal/ms/privacy.md both carry the ticket changes and the date 2026-10-21.",
+        "LEGAL_DOCUMENTS_DATE (and so TERMS_VERSION) is 2026-10-21; AI_CONSENT_VERSION stays 2026-10-15 as its own constant; consent.service.test.ts asserts both."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm vitest run packages/services/src/privacy apps/bot/src/privacy apps/bot/src/terms-notice.test.ts && pnpm --filter @ririko/services typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-1991",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1991",
+      "parent": "STORY-199",
+      "points": 3,
+      "status": "DONE",
+      "title": "Event Log Settings Table, Migrations and EventLogSettingsRepository",
+      "description": "One per-server settings table on both dialects, its additive migration and a small repository. No Discord code.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/event-logs.ts",
+          "packages/database/src/schema/pg/event-logs.ts",
+          "packages/database/src/schema/sqlite/index.ts",
+          "packages/database/src/schema/pg/index.ts",
+          "packages/database/src/schema/types/index.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/migrations/",
+          "packages/database/src/migrations/",
+          "packages/database/src/repositories/event-log-settings.repository.ts",
+          "packages/database/src/repositories/event-log-settings.repository.behaviour.test.ts",
+          "packages/database/src/repositories/index.ts",
+          "packages/database/src/repositories/guild-data-inventory.ts",
+          "packages/database/src/schema/sqlite/tickets.ts",
+          "packages/database/src/schema/pg/tickets.ts",
+          "packages/database/src/repositories/ticket.repository.ts"
+        ],
+        "symbols": [
+          "TicketRepository.getSettings",
+          "TicketRepository.upsertSettings",
+          "ticketSettings",
+          "GUILD_DATA_INVENTORY"
+        ],
+        "entry_points": [
+          "packages/database/src/repositories/index.ts"
+        ],
+        "codegraph_queries": [
+          "TicketRepository getSettings upsertSettings ticketSettings onConflictDoUpdate",
+          "guild-data-inventory GuildDataEntry ticket_settings"
+        ]
+      },
+      "acceptance": [
+        "New table `event_log_settings` on both dialects: guild_id (primary key), message_channel_id, member_channel_id, server_channel_id, voice_channel_id (all nullable), ignored_channel_ids (JSON string array, default []), ignore_bots (boolean, default true), updated_at.",
+        "`pnpm db:generate` output is committed for both dialects; the migration only creates the table, and `pnpm db:check` passes.",
+        "EventLogSettingsRepository (exported from @ririko/database) has get(guildId) returning the row or null, and upsert(guildId, patch) that creates or changes the given fields, both taking an optional tx. Built like TicketRepository.getSettings and upsertSettings.",
+        "guild-data-inventory.ts lists event_log_settings with action `delete`, and its test passes. The table has no user ID column.",
+        "A behaviour test covers get on a missing row, upsert create, upsert of a partial patch keeping the other fields, and the JSON list, on SQLite (and PostgreSQL in test-postgres, the same way ticket.repository.behaviour.test.ts does)."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src/repositories/event-log-settings.repository.behaviour.test.ts packages/database/src/repositories/guild-data-inventory.test.ts packages/database/src/repositories/user-data-inventory.test.ts packages/database/src/schema && pnpm --filter @ririko/database typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1991"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1992",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1992",
+      "parent": "STORY-199",
+      "points": 2,
+      "status": "DONE",
+      "title": "The `eventlogs` Guild Config Module",
+      "description": "A new `eventlogs` entry in GuildConfigSchemas and a store in GuildConfigService that reads and writes event_log_settings, like the `tickets` module.",
+      "context": {
+        "files": [
+          "packages/core/src/config/guild-config.ts",
+          "packages/core/src/config/guild-config.test.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/guild/__tests__/guild-config.service.test.ts",
+          "apps/web/src/lib/server/services.ts"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "GuildConfigServiceDeps",
+          "createGuildConfigService",
+          "OptionalSnowflakeSetting",
+          "SnowflakeListSetting",
+          "FlagSetting"
+        ],
+        "entry_points": [
+          "packages/core/src/config/guild-config.ts"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas tickets logging OptionalSnowflakeSetting SnowflakeListSetting",
+          "GuildConfigService stores tickets read write upsertSettings",
+          "createGuildConfigService GuildConfigServiceDeps tickets"
+        ]
+      },
+      "acceptance": [
+        "GuildConfigSchemas has a strict `eventlogs` module: messageChannelId, memberChannelId, serverChannelId, voiceChannelId (OptionalSnowflakeSetting each; empty turns that category off), ignoredChannelIds (SnowflakeListSetting, at most 25), ignoreBots (FlagSetting). Each field has a describe() text.",
+        "GuildConfigService reads `eventlogs` from EventLogSettingsRepository.get (defaults: every channel null, no ignored channels, ignoreBots true) and writes with upsert inside the audit transaction, like the `tickets` store.",
+        "Every construction of GuildConfigService gets the repository (createGuildConfigService and the web services), and `pnpm typecheck` passes.",
+        "Tests cover the schema (valid values, 26 ignored channels, a bad ID) and the store (defaults, write then read back)."
+      ],
+      "verify_cmd": "pnpm vitest run packages/core/src/config/guild-config.test.ts packages/services/src/guild && pnpm typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1992"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1993",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1993",
+      "parent": "STORY-199",
+      "points": 5,
+      "status": "DONE",
+      "title": "EventLogService: Cached Settings, Ignore Rules and One Embed per Event",
+      "description": "The Discord-facing logic in packages/services/src/event-logs: it decides whether an event is logged, builds its embed and sends it. TASK-1994 only forwards gateway events to it.",
+      "context": {
+        "files": [
+          "packages/services/src/event-logs/event-log.service.ts",
+          "packages/services/src/event-logs/embeds.ts",
+          "packages/services/src/event-logs/types.ts",
+          "packages/services/src/event-logs/index.ts",
+          "packages/services/src/event-logs/__tests__/",
+          "packages/services/src/index.ts",
+          "packages/services/src/guild/command-override.service.ts",
+          "packages/services/src/moderation/moderation-log.service.ts",
+          "packages/services/src/tickets/transcript.ts",
+          "packages/core/src/config/guild-config.ts",
+          "packages/core/src/config/guild-config.test.ts"
+        ],
+        "symbols": [
+          "CommandOverrideService",
+          "ModerationLogService.buildCaseEmbed",
+          "EventLogSettingsRepository"
+        ],
+        "entry_points": [
+          "packages/services/src/event-logs/index.ts"
+        ],
+        "codegraph_queries": [
+          "CommandOverrideService list invalidate cacheTtlMs",
+          "ModerationLogService buildCaseEmbed MODERATION_COLORS EmbedBuilder",
+          "EventLogSettingsRepository get upsert"
+        ]
+      },
+      "acceptance": [
+        "EventLogService caches each server's settings for 5 minutes and has invalidate(guildId), like CommandOverrideService. A read error is logged and that event is skipped; it never throws to the gateway.",
+        "Methods, one per event, each taking discord.js objects: messageEdited(old, new), messageDeleted(message), messagesBulkDeleted(messages, channel), memberJoined, memberLeft, memberUpdated(old, new) (nickname, roles added or removed, timeout set or lifted), memberBanned(ban), memberUnbanned(ban), channelCreated, channelDeleted, channelUpdated (name only), roleCreated, roleDeleted, roleUpdated (name only), voiceStateChanged(old, new) (join, leave, move only; mute and deafen are ignored).",
+        "An event is logged only when its category channel is set and still exists. Message events are skipped in ignored channels (a thread follows its parent), from bots when ignoreBots is on, in DMs, and in the category channel itself. An edit whose content did not change (an embed or link preview update) is skipped.",
+        "Each embed names the event, the user or channel (mention plus ID), the time, and the details: old and new content for edits, content and attachment names for deletes (or \"Content unknown\" for a partial message), the count and a .txt file of cached messages for bulk deletes, account age for joins, roles added and removed, and so on. Content longer than an embed field is cut with an ellipsis. Colours match the event kind (green create or join, red delete or leave, amber change).",
+        "Mentions in logged content never ping: every send uses allowedMentions { parse: [] }.",
+        "Sending is best-effort: a missing permission or a deleted channel is logged with the guild and channel IDs only, never message content.",
+        "Unit tests cover each event method, every skip rule, content cutting, the bulk-delete file, the cache and invalidate, and a failed send.",
+        "ignoreBots skips bot messages and bot voice activity only; member events for bots are always logged, and the ignoreBots describe() text says so."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/event-logs && pnpm --filter @ririko/services typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1993"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1994",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1994",
+      "parent": "STORY-199",
+      "points": 5,
+      "status": "DONE",
+      "title": "Event Log Listener, the GuildModeration Intent and Bot Wiring",
+      "description": "Forwards gateway events to EventLogService and drops its cache on dashboard changes.",
+      "context": {
+        "files": [
+          "apps/bot/src/listeners/event-log.listener.ts",
+          "apps/bot/src/listeners/event-log.listener.test.ts",
+          "apps/bot/src/listeners/index.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/index.ts",
+          "packages/discord/src/client/factory.ts",
+          "packages/discord/src/client/client.test.ts",
+          "apps/bot/src/listeners/member.listener.ts",
+          "apps/bot/src/listeners/moderation-listeners.test.ts",
+          "apps/bot/src/guild-config-sync.test.ts",
+          "apps/bot/src/listeners/__tests__/event-log.listener.test.ts"
+        ],
+        "symbols": [
+          "registerMemberListener",
+          "registerVoiceListener",
+          "createBotServices",
+          "BotServices",
+          "DEFAULT_GATEWAY_INTENTS"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "registerMemberListener guildMemberAdd guildMemberRemove",
+          "main.ts registerVoiceListener registerMemberListener guild:configChanged",
+          "createBotServices eventBus.on guild:configChanged invalidate",
+          "DEFAULT_GATEWAY_INTENTS GatewayIntentBits"
+        ]
+      },
+      "acceptance": [
+        "A new registerEventLogListener(client, services) subscribes to messageUpdate, messageDelete, messageDeleteBulk, guildMemberAdd, guildMemberRemove, guildMemberUpdate, guildBanAdd, guildBanRemove, channelCreate, channelDelete, channelUpdate, roleCreate, roleDelete, roleUpdate and voiceStateUpdate, and forwards each to EventLogService. Each handler has its own try/catch, and DM channels are skipped before the service is called.",
+        "main.ts registers it next to the other listeners. The existing member, voice and channelDelete handlers are unchanged.",
+        "DEFAULT_GATEWAY_INTENTS adds GatewayIntentBits.GuildModeration (needed for ban events; it is not a privileged intent). The client test (packages/discord/src/client/client.test.ts) is updated.",
+        "BotServices builds EventLogSettingsRepository and EventLogService. services.ts invalidates the service's cache on guild:configChanged for the `eventlogs` module.",
+        "Tests check that every event is forwarded, that an error in one handler is caught and logged, and that the cache is dropped on a config change."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/listeners packages/discord/src/client && pnpm --filter @ririko/bot typecheck && pnpm --filter @ririko/discord typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1992"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1995",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1995",
+      "parent": "STORY-199",
+      "points": 3,
+      "status": "DONE",
+      "title": "Event Log Settings on the Logging Dashboard Page",
+      "description": "A second form on the Logging page for the `eventlogs` module. The existing log channel form stays as it is.",
+      "context": {
+        "files": [
+          "apps/web/src/app/dashboard/[guildId]/logging/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/logging/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/logging/actions.test.ts",
+          "apps/web/src/app/dashboard/[guildId]/tickets/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/tickets/actions.ts",
+          "apps/web/src/components/guild-pickers.tsx",
+          "apps/web/src/lib/server/guilds/audit-log.ts",
+          "apps/web/src/lib/server/guilds/audit-log.test.ts",
+          "apps/web/src/lib/server/authorization-coverage.test.ts"
+        ],
+        "symbols": [
+          "LoggingSettingsPage",
+          "saveLoggingSettings",
+          "saveTicketSettings",
+          "saveGuildSettings",
+          "readFormFields",
+          "checkMessageChannel",
+          "ChannelSelectField",
+          "ChannelListField",
+          "MODULE_LABELS"
+        ],
+        "entry_points": [
+          "apps/web/src/app/dashboard/[guildId]/logging/page.tsx"
+        ],
+        "codegraph_queries": [
+          "LoggingSettingsPage saveLoggingSettings",
+          "saveTicketSettings readFormFields checkMessageChannel",
+          "ChannelSelectField ChannelListField guild-pickers",
+          "MODULE_LABELS audit-log"
+        ]
+      },
+      "acceptance": [
+        "The Logging page keeps its log channel form and adds an \"Event logs\" form with four channel pickers (Message log, Member log, Server log, Voice log, each with the empty label \"Off\"), an ignored channels list and an \"Ignore bots\" switch. Each description says what is logged there and that Ririko needs View Channel, Send Messages, Embed Links and Attach Files.",
+        "The save action uses saveGuildSettings with readFormFields and checks that each picked channel is a message channel of this server (checkMessageChannel), as saveTicketSettings does. authorization-coverage.test.ts lists it.",
+        "MODULE_LABELS has `eventlogs: 'Event Logs'`.",
+        "Tests cover a valid save, an unknown channel, and the label."
+      ],
+      "verify_cmd": "pnpm vitest run 'apps/web/src/app/dashboard/[guildId]/logging' apps/web/src/lib/server && pnpm --filter @ririko/web typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1994",
+        "TASK-1995"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1996",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "id": "TASK-1996",
+      "parent": "STORY-199",
+      "points": 3,
+      "status": "DONE",
+      "title": "Document Event Logs for Server Admins and in the Privacy Policy",
+      "description": "User docs for event logs, and the privacy policy change (English and Malay) for content posted to log channels.",
+      "context": {
+        "files": [
+          "docs/dashboard.md",
+          "docs/moderation.md",
+          "docs/modules.md",
+          "docs/legal/privacy.md",
+          "docs/legal/ms/privacy.md",
+          "packages/services/src/privacy/consent.service.ts",
+          "packages/services/src/privacy/consent.service.test.ts"
+        ],
+        "symbols": [
+          "LEGAL_DOCUMENTS_DATE"
+        ],
+        "codegraph_queries": [
+          "EventLogService messageDeleted memberUpdated voiceStateChanged",
+          "LEGAL_DOCUMENTS_DATE TERMS_VERSION"
+        ]
+      },
+      "acceptance": [
+        "docs/dashboard.md section 4.4 (Logging) describes the event log form: the four categories, what each logs, the ignore rules and the permissions.",
+        "docs/moderation.md (or the docs page that covers the log channel today) explains how event logs differ from the moderation case log, with a link to the dashboard section.",
+        "The docs say that deleted message content is shown only for messages Ririko saw in the last hour (the message cache sweeps after one hour), and that the GuildModeration intent is needed for ban events (no portal change, it is not privileged).",
+        "docs/legal/privacy.md and docs/legal/ms/privacy.md say that when a server turns event logs on, Ririko posts message content, edits, member changes and voice activity to the server's chosen channels, and does not store them. Both files and LEGAL_DOCUMENTS_DATE are dated 2026-10-22; AI_CONSENT_VERSION stays 2026-10-15 (see the STORY-199 note), and consent.service.test.ts asserts it.",
+        "Every statement matches the merged code of TASK-1991 to TASK-1995, and `pnpm docs:build` passes."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm vitest run packages/services/src/privacy && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-2001",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2001",
+      "parent": "STORY-200",
+      "points": 3,
+      "status": "DONE",
+      "title": "Level Role Settings Table, Migrations, Repository and XP Accounts by Level",
+      "description": "One per-server settings table on both dialects, its additive migration, a small repository, and an XpRepository query for the members at or above a level. No Discord code.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/level-roles.ts",
+          "packages/database/src/schema/pg/level-roles.ts",
+          "packages/database/src/schema/sqlite/index.ts",
+          "packages/database/src/schema/pg/index.ts",
+          "packages/database/src/schema/types/index.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/migrations/",
+          "packages/database/src/migrations/",
+          "packages/database/src/repositories/level-role-settings.repository.ts",
+          "packages/database/src/repositories/level-role-settings.repository.behaviour.test.ts",
+          "packages/database/src/repositories/index.ts",
+          "packages/database/src/repositories/guild-data-inventory.ts",
+          "packages/database/src/repositories/xp.repository.ts",
+          "packages/database/src/repositories/xp.repository.behaviour.test.ts",
+          "packages/database/src/schema/sqlite/event-logs.ts",
+          "packages/database/src/schema/pg/event-logs.ts",
+          "packages/database/src/repositories/event-log-settings.repository.ts"
+        ],
+        "symbols": [
+          "EventLogSettingsRepository",
+          "eventLogSettings",
+          "XpRepository.getAllGuildAccounts",
+          "GUILD_DATA_INVENTORY"
+        ],
+        "entry_points": [
+          "packages/database/src/repositories/index.ts"
+        ],
+        "codegraph_queries": [
+          "EventLogSettingsRepository get upsert eventLogSettings",
+          "XpRepository getAllGuildAccounts getAccount level",
+          "guild-data-inventory GuildDataEntry event_log_settings"
+        ]
+      },
+      "acceptance": [
+        "New table `level_role_settings` on both dialects: guild_id (primary key), rewards (JSON list of { level, roleId }, default []), keep_previous_roles (boolean, default true), updated_at. Built like event_log_settings.",
+        "`pnpm db:generate` output is committed for both dialects; the new migration only creates the table, and `pnpm db:check` passes.",
+        "LevelRoleSettingsRepository (exported from @ririko/database) has get(guildId) returning the row or null, and upsert(guildId, patch) that creates or changes the given fields, both taking an optional tx.",
+        "XpRepository has listMembersAtLevel(guildId, minLevel, tx?) returning { userId, level } for every account of that guild with level >= minLevel, highest level first.",
+        "guild-data-inventory.ts lists level_role_settings with action `delete`, and its test passes. The table has no user ID column.",
+        "Behaviour tests cover the repository (missing row, create, partial patch, the JSON list) and listMembersAtLevel (other guilds and lower levels left out, order), on SQLite and on PostgreSQL in test-postgres, like event-log-settings.repository.behaviour.test.ts."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src/repositories/level-role-settings.repository.behaviour.test.ts packages/database/src/repositories/xp.repository.behaviour.test.ts packages/database/src/repositories/guild-data-inventory.test.ts packages/database/src/repositories/user-data-inventory.test.ts packages/database/src/schema && pnpm --filter @ririko/database typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2001"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2002",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2002",
+      "parent": "STORY-200",
+      "points": 2,
+      "status": "DONE",
+      "title": "The `levelroles` Guild Config Module and Its Rewards Schema",
+      "description": "A validated rewards list in @ririko/core, a new `levelroles` entry in GuildConfigSchemas, and a store in GuildConfigService that reads and writes level_role_settings.",
+      "context": {
+        "files": [
+          "packages/core/src/config/level-roles.ts",
+          "packages/core/src/config/auto-voice.ts",
+          "packages/core/src/config/guild-config.ts",
+          "packages/core/src/config/guild-config.test.ts",
+          "packages/core/src/index.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/guild/__tests__/guild-config.service.test.ts",
+          "apps/web/src/lib/server/services.ts"
+        ],
+        "symbols": [
+          "AutoVoiceHubsSchema",
+          "JsonSetting",
+          "FlagSetting",
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "createGuildConfigService"
+        ],
+        "entry_points": [
+          "packages/core/src/config/guild-config.ts"
+        ],
+        "codegraph_queries": [
+          "AutoVoiceHubsSchema JsonSetting autovoice hubs",
+          "GuildConfigSchemas eventlogs GuildConfigService stores eventlogs",
+          "createGuildConfigService GuildConfigServiceDeps eventLogs"
+        ]
+      },
+      "acceptance": [
+        "`packages/core/src/config/level-roles.ts` exports MAX_LEVEL_ROLE_REWARDS = 25, MAX_REWARD_LEVEL = 1000, a LevelRoleReward type and LevelRoleRewardsSchema: a list of { level (whole number 1 to 1000), roleId (snowflake) }, at most 25, no level twice, no role twice, sorted by level. Each error message is plain English, like AutoVoiceHubsSchema.",
+        "GuildConfigSchemas has a strict `levelroles` module: rewards (JsonSetting(LevelRoleRewardsSchema)) and keepPreviousRoles (FlagSetting). Each has a describe() text.",
+        "GuildConfigService reads `levelroles` from LevelRoleSettingsRepository.get (defaults: no rewards, keepPreviousRoles true) and writes with upsert inside the audit transaction, like the `eventlogs` store. Every construction gets the repository, and `pnpm typecheck` passes.",
+        "Tests cover the schema (valid list sorted, level 0 and 1001, a repeated level, a repeated role, 26 rewards, a bad ID) and the store (defaults, write then read back)."
+      ],
+      "verify_cmd": "pnpm vitest run packages/core/src/config packages/services/src/guild && pnpm typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2002"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2003",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2003",
+      "parent": "STORY-200",
+      "points": 5,
+      "status": "DONE",
+      "title": "LevelRoleService: Cached Settings, the Roles for a Level, Safe Assignment and Server Sync",
+      "description": "The Discord-facing logic in packages/services/src/level-roles. It works out which reward roles a member should hold at a level, gives and removes them safely, and syncs a whole server. TASK-2004 and TASK-2005 only call it.",
+      "context": {
+        "files": [
+          "packages/services/src/level-roles/level-role.service.ts",
+          "packages/services/src/level-roles/types.ts",
+          "packages/services/src/level-roles/index.ts",
+          "packages/services/src/level-roles/__tests__/",
+          "packages/services/src/index.ts",
+          "packages/services/src/event-logs/event-log.service.ts",
+          "packages/services/src/roles/autorole.service.ts"
+        ],
+        "symbols": [
+          "EventLogService",
+          "AutoRoleService.validateRole",
+          "LevelRoleSettingsRepository",
+          "XpRepository.listMembersAtLevel"
+        ],
+        "entry_points": [
+          "packages/services/src/level-roles/index.ts"
+        ],
+        "codegraph_queries": [
+          "EventLogService settings cache invalidate cacheTtlMs now",
+          "AutoRoleService validateRole managed highest position",
+          "LevelRoleSettingsRepository get XpRepository listMembersAtLevel"
+        ]
+      },
+      "acceptance": [
+        "A pure rolesForLevel(rewards, level, keepPreviousRoles) returns { keep, remove }: with keepPreviousRoles, every reward role at or below the level; without it, only the role of the highest reward at or below the level, and every other reward role goes in remove. Level 0 or no rewards gives empty lists.",
+        "LevelRoleService caches each server's settings for 5 minutes and has invalidate(guildId), like EventLogService.",
+        "applyForMember(member, level) adds the missing roles and (without keepPreviousRoles) removes the other reward roles the member holds, with the audit log reason \"Level <n> reward\". It skips a role that no longer exists, @everyone, a managed role, and a role at or above Ririko's highest role, and does nothing when Ririko lacks Manage Roles. It never removes a role that is not a reward. It returns { added, removed, skipped } and never throws: a Discord error is logged with the guild and role IDs.",
+        "syncGuild(guild) walks XpRepository.listMembersAtLevel from the lowest reward level, fetches members in batches of 100, skips users who left, and applies each one in turn. Only one sync per server runs at a time (a second call returns { busy: true }). It returns the number of members checked and the roles added and removed.",
+        "Unit tests cover rolesForLevel (both modes, gaps, skipped levels from a multi-level jump), each skip rule, the remove rule, a failed role call, the cache, sync batching, members who left, and the one-sync-at-a-time rule."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/level-roles && pnpm --filter @ririko/services typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2003"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2004",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2004",
+      "parent": "STORY-200",
+      "points": 3,
+      "status": "DONE",
+      "title": "Give Reward Roles on Level-Up and Rejoin, and Bot Wiring",
+      "description": "Hooks LevelRoleService into the bot: the `leveling:levelUp` event (chat, voice and items all emit it), guildMemberAdd for members who come back, and cache invalidation on dashboard changes.",
+      "context": {
+        "files": [
+          "apps/bot/src/listeners/level-roles.listener.ts",
+          "apps/bot/src/listeners/__tests__/level-roles.listener.test.ts",
+          "apps/bot/src/listeners/index.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/guild-config-sync.test.ts",
+          "apps/bot/src/listeners/event-log.listener.ts",
+          "packages/services/src/economy/leveling.service.ts",
+          "packages/core/src/events/types.ts"
+        ],
+        "symbols": [
+          "registerEventLogListener",
+          "createBotServices",
+          "BotServices",
+          "leveling:levelUp",
+          "XpRepository.getAccount"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "registerEventLogListener guildMemberAdd main.ts",
+          "createBotServices eventBus.on guild:configChanged eventlogs invalidate",
+          "LevelingService addExperience eventBus emit leveling:levelUp"
+        ]
+      },
+      "acceptance": [
+        "registerLevelRolesListener(client, services) handles `leveling:levelUp` on the event bus: it fetches the guild and member (skipping a guild Ririko left or a member who left) and calls applyForMember with the new level. It runs whatever the announcement settings say.",
+        "On guildMemberAdd for a human member, it reads the member's XP account for that guild and calls applyForMember when the level is above 0 and the server has rewards. Bots are skipped.",
+        "Each handler has its own try/catch and logs errors; nothing reaches the gateway or the event bus as an unhandled rejection.",
+        "BotServices builds LevelRoleSettingsRepository and LevelRoleService. services.ts invalidates the service's cache on guild:configChanged for the `levelroles` module, and guild-config-sync.test.ts covers it.",
+        "main.ts registers the listener next to the other listeners.",
+        "Tests check the level-up path, a member who left, the rejoin path (level 0, no rewards, bot), error handling, and the cache drop."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/listeners apps/bot/src/guild-config-sync.test.ts && pnpm --filter @ririko/bot typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2003"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2005",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2005",
+      "parent": "STORY-200",
+      "points": 3,
+      "status": "DONE",
+      "title": "The /levelroles Command: List, Add, Remove and Sync",
+      "description": "One command with slash and prefix forms for server staff. Changes go through GuildConfigService so they are validated, audited and reach the dashboard.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/roles/level-roles.command.ts",
+          "apps/bot/src/commands/roles/__tests__/",
+          "apps/bot/src/commands/roles/index.ts",
+          "apps/bot/src/commands/roles/autorole.command.ts",
+          "apps/bot/src/commands/tickets/ticket.command.ts",
+          "docs/commands.md",
+          "apps/bot/src/command-set.test.ts"
+        ],
+        "symbols": [
+          "createAutoRoleCommand",
+          "createTicketCommand",
+          "Command",
+          "CommandContext",
+          "GuildConfigService.set"
+        ],
+        "entry_points": [
+          "apps/bot/src/commands/roles/index.ts"
+        ],
+        "codegraph_queries": [
+          "createTicketCommand subcommand guildConfig set audit",
+          "createAutoRoleCommand resolveRole hasAdminPermission",
+          "roles command index registration"
+        ]
+      },
+      "acceptance": [
+        "`/levelroles` (prefix `!levelroles`) has actions list, add <level> <role>, remove <level> and sync. Slash and prefix forms behave the same, like /autorole.",
+        "list shows every reward (level and role mention) and whether lower roles are kept; mentions never ping.",
+        "add and remove change the `levelroles` module through GuildConfigService, so the schema rules apply (25 rewards, level 1 to 1000, no repeats) and the change is in the audit log as the member. add also refuses a role Ririko cannot give (managed, @everyone, at or above Ririko's highest role) with a plain reason. Adding a level that has a reward replaces its role.",
+        "sync runs LevelRoleService.syncGuild, replies first that it started, and then reports how many members were checked and roles added or removed, or that a sync is already running.",
+        "Only members with Manage Roles or Manage Server (or Administrator) can use add, remove and sync; list is open to everyone.",
+        "The command is registered and appears in the command list tests and docs/commands.md.",
+        "Tests cover each action, permissions, a refused role, a schema error, and the busy sync."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/commands && pnpm --filter @ririko/bot typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2002"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2006",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2006",
+      "parent": "STORY-200",
+      "points": 3,
+      "status": "DONE",
+      "title": "Level Role Rewards on the XP & Ranking Dashboard Page",
+      "description": "A second form on the XP & Ranking page for the `levelroles` module, with a row editor for level and role. The existing XP form stays as it is.",
+      "context": {
+        "files": [
+          "apps/web/src/app/dashboard/[guildId]/xp/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/xp/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/xp/actions.test.ts",
+          "apps/web/src/app/dashboard/[guildId]/xp/level-rewards-field.tsx",
+          "apps/web/src/app/dashboard/[guildId]/xp/level-rewards-field.test.tsx",
+          "apps/web/src/app/dashboard/[guildId]/autovoice/auto-voice-hubs-field.tsx",
+          "apps/web/src/app/dashboard/[guildId]/autovoice/actions.ts",
+          "apps/web/src/lib/server/guilds/setting-checks.ts",
+          "apps/web/src/lib/server/guilds/audit-log.ts",
+          "apps/web/src/lib/server/guilds/audit-log.test.ts",
+          "apps/web/src/lib/server/authorization-coverage.test.ts",
+          "apps/web/src/components/guild-pickers.tsx",
+          "apps/web/src/app/dashboard/[guildId]/xp/page.test.tsx",
+          "apps/web/src/lib/server/guilds/setting-checks.test.ts"
+        ],
+        "symbols": [
+          "XpSettingsPage",
+          "saveXpSettings",
+          "AutoVoiceHubsField",
+          "checkAutoVoiceHubs",
+          "checkAssignableRoles",
+          "saveGuildSettings",
+          "MODULE_LABELS"
+        ],
+        "entry_points": [
+          "apps/web/src/app/dashboard/[guildId]/xp/page.tsx"
+        ],
+        "codegraph_queries": [
+          "XpSettingsPage saveXpSettings",
+          "AutoVoiceHubsField useSettingsField rows",
+          "checkAssignableRoles checkAutoVoiceHubs setting-checks",
+          "MODULE_LABELS audit-log"
+        ]
+      },
+      "acceptance": [
+        "The XP & Ranking page keeps its form and adds a \"Level role rewards\" form: rows of level (number 1 to 1000) and role (picker of this server's roles), add and remove row buttons (at most 25), and a \"Keep lower reward roles\" switch. The descriptions say that Ririko needs Manage Roles and a role above the reward roles, that rewards apply from the next level-up, and that /levelroles sync gives them to members who already have the level.",
+        "The save action uses saveGuildSettings and checks with checkAssignableRoles that every role exists in this server and Ririko can give it, like the autoroles page. authorization-coverage.test.ts lists it.",
+        "MODULE_LABELS has `levelroles: 'Level Roles'`.",
+        "Tests cover the row editor (add, remove, limit), a valid save, a role Ririko cannot give, a schema error, and the label."
+      ],
+      "verify_cmd": "pnpm vitest run 'apps/web/src/app/dashboard/[guildId]/xp' apps/web/src/lib/server && pnpm --filter @ririko/web typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2004",
+        "TASK-2005",
+        "TASK-2006"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2007",
+        "STORY-200",
+        "EPIC-021"
+      ],
+      "id": "TASK-2007",
+      "parent": "STORY-200",
+      "points": 2,
+      "status": "DONE",
+      "title": "Document Level Role Rewards for Server Admins",
+      "description": "User docs for level role rewards in the economy, dashboard and commands pages.",
+      "context": {
+        "files": [
+          "docs/economy.md",
+          "docs/dashboard.md",
+          "docs/commands.md",
+          "docs/legal/privacy.md",
+          "docs/waifu-tcg.md"
+        ],
+        "symbols": [
+          "rolesForLevel",
+          "LevelRoleService.syncGuild"
+        ],
+        "codegraph_queries": [
+          "LevelRoleService applyForMember syncGuild rolesForLevel"
+        ]
+      },
+      "acceptance": [
+        "docs/economy.md has a Level Role Rewards section: how to set rewards (dashboard and /levelroles), when roles are given (every level-up from chat, voice or items, and on rejoin), the keep-lower-roles choice, sync, what happens when a reward is removed (members keep the role), and the permissions and role order Ririko needs.",
+        "docs/dashboard.md describes the new form on the XP & Ranking page, and docs/commands.md lists /levelroles.",
+        "The privacy policy is checked: level role rewards store only role IDs and levels per server and use XP that the policy already covers. If no change is needed, the PROGRESS entry says so and the legal docs are untouched.",
+        "Every statement matches the merged code of TASK-2001 to TASK-2006, and `pnpm docs:build` passes."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-2011",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2011",
+      "parent": "STORY-201",
+      "points": 3,
+      "status": "DONE",
+      "title": "Starboard Settings and Posts Tables, Migrations and Repositories",
+      "description": "Two tables on both dialects (per-server settings, and one row per starred message), their additive migration, two small repositories and the data inventories. No Discord code.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/starboard.ts",
+          "packages/database/src/schema/pg/starboard.ts",
+          "packages/database/src/schema/sqlite/index.ts",
+          "packages/database/src/schema/pg/index.ts",
+          "packages/database/src/schema/types/index.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/migrations/",
+          "packages/database/src/migrations/",
+          "packages/database/src/repositories/starboard.repository.ts",
+          "packages/database/src/repositories/starboard.repository.behaviour.test.ts",
+          "packages/database/src/repositories/index.ts",
+          "packages/database/src/repositories/guild-data-inventory.ts",
+          "packages/database/src/repositories/user-data-inventory.ts",
+          "packages/database/src/schema/sqlite/level-roles.ts",
+          "packages/database/src/repositories/level-role-settings.repository.ts",
+          "packages/database/src/schema/sqlite/tickets.ts",
+          "packages/database/src/repositories/ticket.repository.ts"
+        ],
+        "symbols": [
+          "LevelRoleSettingsRepository",
+          "TicketRepository",
+          "GUILD_DATA_INVENTORY",
+          "USER_DATA_INVENTORY"
+        ],
+        "entry_points": [
+          "packages/database/src/repositories/index.ts"
+        ],
+        "codegraph_queries": [
+          "LevelRoleSettingsRepository get upsert levelRoleSettings",
+          "TicketRepository tickets uniqueIndex create find",
+          "USER_DATA_INVENTORY UserDataEntry tickets opener_id"
+        ]
+      },
+      "acceptance": [
+        "Table `starboard_settings` on both dialects: guild_id (primary key), channel_id (nullable; null is off), emoji (text, default ⭐), threshold (integer, default 3), allow_self_star (boolean, default false), ignored_channel_ids (JSON string list, default []), updated_at.",
+        "Table `starboard_posts` on both dialects: message_id (primary key), guild_id, channel_id (the original channel), author_id, starboard_message_id (nullable), star_count (integer), removed (boolean, default false: true when staff deleted the starboard copy, so it is never posted again), created_at, updated_at. Indexes on (guild_id) and a unique index on starboard_message_id.",
+        "`pnpm db:generate` output is committed for both dialects; the new migration only creates the two tables and their indexes, and `pnpm db:check` passes.",
+        "StarboardRepository (exported from @ririko/database) has getSettings(guildId) and upsertSettings(guildId, patch) like LevelRoleSettingsRepository, and for posts: findByMessage(messageId), findByStarboardMessage(starboardMessageId), insertPost (returns false instead of throwing on a duplicate message_id), updatePost(messageId, patch) and deletePost(messageId). Every method takes an optional tx.",
+        "guild-data-inventory.ts lists both tables with `delete`. user-data-inventory.ts lists starboard_posts.author_id with `delete`. Both inventory tests pass.",
+        "A behaviour test covers each method on SQLite and on PostgreSQL in test-postgres, including the duplicate insert."
+      ],
+      "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src/repositories/starboard.repository.behaviour.test.ts packages/database/src/repositories/guild-data-inventory.test.ts packages/database/src/repositories/user-data-inventory.test.ts packages/database/src/schema && pnpm --filter @ririko/database typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2011"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2012",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2012",
+      "parent": "STORY-201",
+      "points": 2,
+      "status": "DONE",
+      "title": "The `starboard` Guild Config Module",
+      "description": "A new `starboard` entry in GuildConfigSchemas with an emoji setting, and a store in GuildConfigService that reads and writes starboard_settings.",
+      "context": {
+        "files": [
+          "packages/core/src/config/starboard.ts",
+          "packages/core/src/config/guild-config.ts",
+          "packages/core/src/config/guild-config.test.ts",
+          "packages/core/src/config/index.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/guild/__tests__/guild-config.service.test.ts",
+          "apps/web/src/lib/server/services.ts"
+        ],
+        "symbols": [
+          "GuildConfigSchemas",
+          "GuildConfigService",
+          "createGuildConfigService",
+          "OptionalSnowflakeSetting",
+          "SnowflakeListSetting",
+          "IntSetting",
+          "FlagSetting"
+        ],
+        "entry_points": [
+          "packages/core/src/config/guild-config.ts"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas levelroles eventlogs IntSetting",
+          "GuildConfigService stores levelroles read write"
+        ]
+      },
+      "acceptance": [
+        "`packages/core/src/config/starboard.ts` exports DEFAULT_STARBOARD_EMOJI (⭐), MAX_STARBOARD_THRESHOLD (100), MAX_STARBOARD_IGNORED_CHANNELS (25), a StarboardEmojiSetting that accepts one Unicode emoji or one custom emoji written as `<:name:id>` or `<a:name:id>` (trimmed; anything else is refused with a plain message), and parseStarboardEmoji(value) returning { id: string | null; name: string } for matching reactions.",
+        "GuildConfigSchemas has a strict `starboard` module: channelId (OptionalSnowflakeSetting; empty turns the starboard off), emoji, threshold (1 to 100), allowSelfStar (FlagSetting), ignoredChannelIds (at most 25). Each field has a describe() text.",
+        "GuildConfigService reads `starboard` from StarboardRepository.getSettings (defaults: off, ⭐, 3, false, []) and writes with upsertSettings inside the audit transaction. Every construction gets the repository, and `pnpm typecheck` passes.",
+        "Tests cover the emoji setting (Unicode, Unicode with a variation selector, static and animated custom emoji, text, two emoji), parseStarboardEmoji, the module (bounds) and the store (defaults, write then read back)."
+      ],
+      "verify_cmd": "pnpm vitest run packages/core/src/config packages/services/src/guild && pnpm typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2012"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2013",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2013",
+      "parent": "STORY-201",
+      "points": 5,
+      "status": "DONE",
+      "title": "StarboardService: Count Stars, Post, Update and Remove Starboard Copies",
+      "description": "The Discord-facing logic in packages/services/src/starboard. TASK-2014 only forwards gateway events to it.",
+      "context": {
+        "files": [
+          "packages/services/src/starboard/starboard.service.ts",
+          "packages/services/src/starboard/embeds.ts",
+          "packages/services/src/starboard/types.ts",
+          "packages/services/src/starboard/index.ts",
+          "packages/services/src/starboard/__tests__/",
+          "packages/services/src/index.ts",
+          "packages/services/src/event-logs/event-log.service.ts",
+          "packages/services/src/event-logs/embeds.ts",
+          "packages/services/src/level-roles/level-role.service.ts"
+        ],
+        "symbols": [
+          "EventLogService",
+          "LevelRoleService",
+          "StarboardRepository",
+          "parseStarboardEmoji"
+        ],
+        "entry_points": [
+          "packages/services/src/starboard/index.ts"
+        ],
+        "codegraph_queries": [
+          "EventLogService settings cache invalidate embeds cut",
+          "StarboardRepository findByMessage insertPost updatePost",
+          "parseStarboardEmoji starboard config"
+        ]
+      },
+      "acceptance": [
+        "StarboardService caches each server's settings for 5 minutes with invalidate(guildId), like EventLogService. No method throws; errors are logged with guild, channel and message IDs only, never content.",
+        "reactionChanged(message) handles add, remove, remove-all and remove-emoji alike: it reads the matching reaction on the (fetched) message, counts it, and subtracts the author's own reaction when allowSelfStar is off (it checks the reactors only when the count could reach the threshold). Bot reactions are not counted.",
+        "A message is skipped when the starboard is off, the message is in the starboard channel itself or an ignored channel (a thread follows its parent), it is from a webhook or a system message, or its channel is NSFW and the starboard channel is not.",
+        "At or above the threshold with no post: it sends the copy and saves the row. With a post: it edits the count on the copy. Below the threshold: it deletes the copy and the row. A row marked removed is never posted again. Work for one message runs one at a time (an in-memory queue per message ID), so a burst of reactions posts once.",
+        "messageDeleted(messageId) deletes the copy and the row when an original is deleted, and marks the row removed when the copy itself is deleted (by staff).",
+        "The copy is an embed: author name and avatar, content cut to fit, the first image attachment or image embed as the image, other attachment names, the source channel and a jump link; the message content line is \"<emoji> <count> | <#channel>\". Mentions never ping (allowedMentions { parse: [] }).",
+        "Unit tests cover counting (self-star, bots), each skip rule, post, edit, remove below threshold, removed rows, the per-message queue, original and copy deletion, a failed send, and the embed."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/starboard && pnpm --filter @ririko/services typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2013"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2014",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2014",
+      "parent": "STORY-201",
+      "points": 5,
+      "status": "DONE",
+      "title": "Starboard Listener and Bot Wiring",
+      "description": "Forwards reaction and delete events to StarboardService, resolving partials, and drops its cache on dashboard changes.",
+      "context": {
+        "files": [
+          "apps/bot/src/listeners/starboard.listener.ts",
+          "apps/bot/src/listeners/__tests__/starboard.listener.test.ts",
+          "apps/bot/src/listeners/index.ts",
+          "apps/bot/src/listeners/reaction.listener.ts",
+          "apps/bot/src/listeners/event-log.listener.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/guild-config-sync.test.ts"
+        ],
+        "symbols": [
+          "registerReactionListener",
+          "registerEventLogListener",
+          "createBotServices",
+          "BotServices"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "registerReactionListener messageReactionAdd partial fetch",
+          "registerEventLogListener messageDelete messageDeleteBulk guarded",
+          "createBotServices guild:configChanged levelroles invalidate"
+        ]
+      },
+      "acceptance": [
+        "registerStarboardListener(client, services) subscribes to messageReactionAdd, messageReactionRemove, messageReactionRemoveAll, messageReactionRemoveEmoji, messageDelete and messageDeleteBulk. Reaction events fetch a partial message before calling reactionChanged; DMs are skipped. Delete events call messageDeleted for each message ID. Each handler has its own try/catch.",
+        "The existing reaction role and event log listeners are unchanged.",
+        "BotServices builds StarboardRepository and StarboardService. services.ts invalidates the cache on guild:configChanged for the `starboard` module, and guild-config-sync.test.ts covers it. main.ts registers the listener.",
+        "Tests check every event is forwarded, partial fetch (and a failed fetch), DM skip, error handling and the cache drop."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/listeners apps/bot/src/guild-config-sync.test.ts && pnpm --filter @ririko/bot typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2012"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2015",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2015",
+      "parent": "STORY-201",
+      "points": 3,
+      "status": "DONE",
+      "title": "Starboard Dashboard Page",
+      "description": "A new Starboard page in the Engagement group of the dashboard for the `starboard` module.",
+      "context": {
+        "files": [
+          "apps/web/src/app/dashboard/[guildId]/starboard/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/starboard/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/starboard/actions.test.ts",
+          "apps/web/src/app/dashboard/[guildId]/xp/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/logging/actions.ts",
+          "apps/web/src/lib/dashboard-nav.ts",
+          "apps/web/src/components/guild-nav.test.tsx",
+          "apps/web/src/lib/server/guilds/audit-log.ts",
+          "apps/web/src/lib/server/guilds/audit-log.test.ts",
+          "apps/web/src/lib/server/authorization-coverage.test.ts"
+        ],
+        "symbols": [
+          "GUILD_NAV_ITEMS",
+          "saveEventLogSettings",
+          "checkMessageChannel",
+          "saveGuildSettings",
+          "readFormFields",
+          "MODULE_LABELS"
+        ],
+        "entry_points": [
+          "apps/web/src/app/dashboard/[guildId]/starboard/page.tsx"
+        ],
+        "codegraph_queries": [
+          "GUILD_NAV_ITEMS dashboard-nav engagement",
+          "saveEventLogSettings readFormFields checkMessageChannel",
+          "MODULE_LABELS audit-log"
+        ]
+      },
+      "acceptance": [
+        "GUILD_NAV_ITEMS has `{ slug: 'starboard', label: 'Starboard', group: 'engagement' }` after Giveaways, and the nav test passes.",
+        "The page has: Starboard channel (picker, empty label \"Off\"), Emoji (text, with a hint for custom emoji), Stars needed (1 to 100), \"Count the author's own star\" switch, Ignored channels. The descriptions say what is posted, that a copy is removed when the original is deleted or falls below the threshold, and that Ririko needs View Channel, Send Messages, Embed Links and Read Message History.",
+        "The save action uses saveGuildSettings with readFormFields and checks the starboard channel with checkMessageChannel. authorization-coverage.test.ts lists it. MODULE_LABELS has `starboard: 'Starboard'`.",
+        "Tests cover a valid save, an unknown channel, a bad emoji, the nav item and the label."
+      ],
+      "verify_cmd": "pnpm vitest run 'apps/web/src/app/dashboard/[guildId]/starboard' apps/web/src/lib apps/web/src/components/guild-nav.test.tsx && pnpm --filter @ririko/web typecheck && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2014",
+        "TASK-2015"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2016",
+        "STORY-201",
+        "EPIC-021"
+      ],
+      "id": "TASK-2016",
+      "parent": "STORY-201",
+      "points": 3,
+      "status": "DONE",
+      "title": "Document the Starboard and Update the Privacy Policy",
+      "description": "User docs for the starboard, and the privacy policy rows (English and Malay) for reposted messages and the stored post records.",
+      "context": {
+        "files": [
+          "docs/modules.md",
+          "docs/dashboard.md",
+          "docs/legal/privacy.md",
+          "docs/legal/ms/privacy.md",
+          "packages/services/src/privacy/consent.service.ts"
+        ],
+        "symbols": [
+          "StarboardService",
+          "LEGAL_DOCUMENTS_DATE"
+        ],
+        "codegraph_queries": [
+          "StarboardService reactionChanged messageDeleted"
+        ]
+      },
+      "acceptance": [
+        "docs/modules.md has a Starboard section: setup, how stars are counted (own star, bots), when a copy is posted, updated and removed, the skip rules (starboard channel, ignored channels, NSFW), what staff deleting a copy does, and the permissions. docs/dashboard.md describes the new page and lists it in the page table.",
+        "docs/legal/privacy.md and docs/legal/ms/privacy.md describe the starboard: Ririko reposts the content, author name and avatar of starred messages to the server's starboard channel, and stores the message, channel, author and copy IDs and the star count, deleted with the original, with the server's data, and on a user data deletion request. The policy date stays 2026-10-22 (it has not been released since STORY-199 set it), so LEGAL_DOCUMENTS_DATE does not change; say so in the PROGRESS entry.",
+        "Every statement matches the merged code of TASK-2011 to TASK-2015, and `pnpm docs:build` passes."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm vitest run packages/services/src/privacy && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-2021",
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "TASK-2021",
+      "parent": "STORY-202",
+      "points": 3,
+      "status": "DONE",
+      "title": "Shared Guild Config Command Helper and the /levelroles Stack Switch",
+      "description": "A small helper in apps/bot/src/commands/shared for commands that change guild config modules (manager check, save with validation reply, on/off parsing), and a new `stack` action on /levelroles that sets keepPreviousRoles, which today is only on the dashboard.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/shared/guild-config-command.ts",
+          "apps/bot/src/commands/shared/__tests__/",
+          "apps/bot/src/commands/roles/level-roles.command.ts",
+          "apps/bot/src/commands/roles/__tests__/level-roles.command.test.ts"
+        ],
+        "symbols": [
+          "createLevelRolesCommand",
+          "saveRewards",
+          "describeValidationError",
+          "canManage",
+          "GuildConfigService.update",
+          "GuildConfigValidationError",
+          "GuildConfigSchemas.levelroles"
+        ],
+        "entry_points": [
+          "/levelroles",
+          "prefix levelroles"
+        ],
+        "codegraph_queries": [
+          "createLevelRolesCommand saveRewards describeValidationError readRequest listRewards",
+          "GuildConfigService update GuildConfigValidationError fieldErrorsOf GuildConfigActor"
+        ]
+      },
+      "acceptance": [
+        "apps/bot/src/commands/shared/guild-config-command.ts exports: canManageServer(member) (Administrator or Manage Server), saveGuildConfig(ctx, services, module, patch) that calls guildConfigService.update with { userId: ctx.user.id, source: 'discord' }, replies with the validation message and returns null on GuildConfigValidationError (other errors are rethrown), and returns the saved values otherwise, and parseToggle(text) that reads on/off, true/false, yes/no and enable/disable (any case) and returns null for anything else. It has its own unit tests.",
+        "/levelroles has a new `stack` action: `/levelroles action:stack enabled:<true|false>` and `$levelroles stack on|off` set keepPreviousRoles; with no value it shows the current setting. It uses the existing levelroles permission rule (Manage Roles, Manage Server or Administrator). The usage text, examples and action choices include it.",
+        "saveRewards in level-roles.command.ts uses saveGuildConfig instead of its own try/catch; list, add, remove and sync behave as before and their existing tests still pass unchanged.",
+        "Every action works as a slash command and as a prefix command with the same result (dual dispatch), and the command is guild-only with registrationScope 'guild'.",
+        "Saving goes through services.guildConfigService.update with the actor { userId, source: 'discord' }, so the change is audited like a dashboard save and reaches the running bot through the GuildConfigWatcher (about 5 seconds). A GuildConfigValidationError is answered with its readable message and nothing is saved."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm vitest run apps/bot/src/commands/shared apps/bot/src/commands/roles"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2021"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2022",
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "TASK-2022",
+      "parent": "STORY-202",
+      "points": 5,
+      "status": "DONE",
+      "title": "Ticket Setup Actions: Setup, Enable, Disable, Staff and Settings",
+      "description": "Extend /ticket so a server manager can turn tickets on and set the category, staff roles and transcript channel from Discord, which today needs the dashboard Tickets page.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/tickets/ticket.command.ts",
+          "apps/bot/src/commands/tickets/__tests__/ticket.command.test.ts",
+          "apps/bot/src/commands/shared/guild-config-command.ts"
+        ],
+        "symbols": [
+          "createTicketCommand",
+          "readRequest",
+          "postPanel",
+          "isManager",
+          "TICKET_ACTIONS",
+          "GuildConfigSchemas.tickets",
+          "MAX_TICKET_STAFF_ROLES"
+        ],
+        "entry_points": [
+          "/ticket",
+          "prefix ticket"
+        ],
+        "codegraph_queries": [
+          "createTicketCommand readRequest postPanel isManager TICKET_ACTIONS",
+          "GuildConfigSchemas tickets categoryId staffRoleIds transcriptChannelId MAX_TICKET_STAFF_ROLES"
+        ]
+      },
+      "acceptance": [
+        "New actions on /ticket, all limited to Manage Server or Administrator (canManageServer): `setup` takes a category (required), an optional staff role and an optional transcript channel, saves categoryId, adds the role to staffRoleIds (no duplicates), sets transcriptChannelId when given and sets enabled true; `enable` sets enabled true but refuses with a clear message when no category is set; `disable` sets enabled false; `staff` adds the given role to staffRoleIds or removes it when it is already there; `settings` shows enabled, category, staff roles, transcript channel and max open tickets per member.",
+        "Slash: new options `category` (CHANNEL) and `role` (ROLE); `setup` reuses `channel` for the transcript channel. Prefix: `$ticket setup <category> [@role] [#channel]` where the category is an ID, a channel mention or an exact category name; `$ticket staff @role`; `$ticket enable|disable|settings`. A category that is not a category channel, or a transcript channel that is not a text channel, is refused.",
+        "After setup or enable, the reply warns (without refusing) when Ririko lacks Manage Channels on the category, and tells the manager to post the panel with `/ticket action:panel`. The existing panel, close, claim, add and remove actions and their tests are unchanged; USAGE, usage, examples and the action choices list the new actions.",
+        "Every action works as a slash command and as a prefix command with the same result (dual dispatch), and the command is guild-only with registrationScope 'guild'.",
+        "Saving goes through services.guildConfigService.update with the actor { userId, source: 'discord' }, so the change is audited like a dashboard save and reaches the running bot through the GuildConfigWatcher (about 5 seconds). A GuildConfigValidationError is answered with its readable message and nothing is saved.",
+        "Replies to a slash command are ephemeral; each change reply names the new value and mentions the dashboard page as the other place to edit it."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm vitest run apps/bot/src/commands/tickets"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2021"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2023",
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "TASK-2023",
+      "parent": "STORY-202",
+      "points": 5,
+      "status": "DONE",
+      "title": "New /starboard Command: Setup, Off, Self-Star, Ignore and Settings",
+      "description": "A new guild command so a server manager can turn the starboard on and change its settings from Discord, which today needs the dashboard Starboard page.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/utility/starboard.command.ts",
+          "apps/bot/src/commands/utility/__tests__/starboard.command.test.ts",
+          "apps/bot/src/commands/utility/index.ts",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/commands/shared/guild-config-command.ts",
+          "apps/bot/src/command-set.test.ts"
+        ],
+        "symbols": [
+          "GuildConfigSchemas.starboard",
+          "StarboardEmojiSetting",
+          "MAX_STARBOARD_THRESHOLD",
+          "MAX_STARBOARD_IGNORED_CHANNELS",
+          "registerBotCommands",
+          "createLevelRolesCommand"
+        ],
+        "entry_points": [
+          "/starboard",
+          "prefix starboard"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas starboard StarboardEmojiSetting MAX_STARBOARD_THRESHOLD MAX_STARBOARD_IGNORED_CHANNELS",
+          "registerBotCommands command-set.ts createUtilityCommands",
+          "createLevelRolesCommand readRequest say canManage"
+        ]
+      },
+      "acceptance": [
+        "A new `starboard` command (aliases `star-board`, `stars`; registrationScope guild; guild-only) registered with the other bot commands. Every action needs Manage Server or Administrator (canManageServer).",
+        "Actions: `setup` takes a channel (required), an optional emoji and an optional threshold, and saves channelId plus the given emoji and threshold (unset ones keep their current values); `off` clears channelId, which turns the starboard off; `selfstar` sets allowSelfStar on or off (no value shows it); `ignore` adds a channel to ignoredChannelIds or removes it when it is already there; `settings` shows channel (or off), emoji, threshold, self-star and ignored channels. Prefix: `$starboard setup #channel [emoji] [threshold]`, `$starboard off`, `$starboard selfstar on|off`, `$starboard ignore #channel`, `$starboard settings`; no action shows the settings.",
+        "setup refuses a channel that is not a text or announcement channel, and warns (without refusing) when Ririko cannot view, send messages or embed links there. Emoji and threshold values are checked by the starboard schema, and its message is shown when they are invalid.",
+        "Any test that lists every command name or counts the registered commands is updated for the new command.",
+        "Every action works as a slash command and as a prefix command with the same result (dual dispatch), and the command is guild-only with registrationScope 'guild'.",
+        "Saving goes through services.guildConfigService.update with the actor { userId, source: 'discord' }, so the change is audited like a dashboard save and reaches the running bot through the GuildConfigWatcher (about 5 seconds). A GuildConfigValidationError is answered with its readable message and nothing is saved.",
+        "Replies to a slash command are ephemeral; each change reply names the new value and mentions the dashboard page as the other place to edit it."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm vitest run apps/bot/src/commands/utility apps/bot/src/__tests__ apps/bot/test/integration/command-sync.test.ts"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2021"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2024",
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "TASK-2024",
+      "parent": "STORY-202",
+      "points": 5,
+      "status": "DONE",
+      "title": "New /eventlogs Command: Set, Off, Ignore, Bots and Settings",
+      "description": "A new guild command so a server manager can turn the four event logs on and change their settings from Discord, which today needs the dashboard Logging page.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/moderation/eventlogs.command.ts",
+          "apps/bot/src/commands/moderation/__tests__/eventlogs.command.test.ts",
+          "apps/bot/src/commands/moderation/index.ts",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/commands/shared/guild-config-command.ts",
+          "apps/bot/src/command-set.test.ts"
+        ],
+        "symbols": [
+          "GuildConfigSchemas.eventlogs",
+          "MAX_EVENT_LOG_IGNORED_CHANNELS",
+          "EventLogService",
+          "registerBotCommands"
+        ],
+        "entry_points": [
+          "/eventlogs",
+          "prefix eventlogs"
+        ],
+        "codegraph_queries": [
+          "GuildConfigSchemas eventlogs messageChannelId memberChannelId serverChannelId voiceChannelId ignoredChannelIds ignoreBots",
+          "registerBotCommands command-set.ts moderation commands index",
+          "EventLogService target messageAllowed"
+        ]
+      },
+      "acceptance": [
+        "A new `eventlogs` command (aliases `eventlog`, `event-logs`; registrationScope guild; guild-only) registered with the other bot commands. Every action needs Manage Server or Administrator (canManageServer). It must not take the name `logs` or any name or alias another command already uses.",
+        "Actions: `set` takes a log type (message, member, server, voice or all) and a channel and saves the matching *ChannelId field(s); `off` takes a log type (or all) and clears the matching field(s); `ignore` adds a channel to ignoredChannelIds or removes it when it is already there; `bots` sets ignoreBots on or off (no value shows it); `settings` shows the four channels (or off), ignored channels and ignore-bots. Prefix: `$eventlogs set <type> #channel`, `$eventlogs off <type>`, `$eventlogs ignore #channel`, `$eventlogs bots on|off`, `$eventlogs settings`; no action shows the settings. The reply for `ignore` says it affects the message log only.",
+        "set refuses a channel that is not a text or announcement channel, and warns (without refusing) when Ririko cannot view, send messages or embed links there.",
+        "Any test that lists every command name or counts the registered commands is updated for the new command.",
+        "Every action works as a slash command and as a prefix command with the same result (dual dispatch), and the command is guild-only with registrationScope 'guild'.",
+        "Saving goes through services.guildConfigService.update with the actor { userId, source: 'discord' }, so the change is audited like a dashboard save and reaches the running bot through the GuildConfigWatcher (about 5 seconds). A GuildConfigValidationError is answered with its readable message and nothing is saved.",
+        "Replies to a slash command are ephemeral; each change reply names the new value and mentions the dashboard page as the other place to edit it."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm vitest run apps/bot/src/commands/moderation apps/bot/src/__tests__ apps/bot/test/integration/command-sync.test.ts apps/bot/src/command-set.test.ts"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-2022",
+        "TASK-2023",
+        "TASK-2024"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-2025",
+        "STORY-202",
+        "EPIC-021"
+      ],
+      "id": "TASK-2025",
+      "parent": "STORY-202",
+      "points": 3,
+      "status": "DONE",
+      "title": "Document the Setup Commands for Tickets, Starboard, Event Logs and Level Roles",
+      "description": "User docs for the new setup commands, next to the dashboard instructions that exist today.",
+      "context": {
+        "files": [
+          "docs/commands.md",
+          "docs/modules.md",
+          "docs/moderation.md",
+          "docs/economy.md",
+          "docs/dashboard.md",
+          "website/",
+          "website/src/data/commands.json"
+        ],
+        "symbols": [
+          "createTicketCommand",
+          "createLevelRolesCommand"
+        ],
+        "codegraph_queries": [
+          "createTicketCommand createLevelRolesCommand starboard eventlogs command metadata usage examples"
+        ]
+      },
+      "acceptance": [
+        "docs/commands.md lists /starboard and /eventlogs and the new /ticket and /levelroles actions with their permission (Manage Server or Administrator; levelroles keeps Manage Roles too), in the same format as the existing entries.",
+        "The Tickets and Starboard sections (docs/modules.md), the event logs section (wherever STORY-199 documented it) and the level role rewards section (docs/economy.md section 8) each say the feature can be set up with the command as well as the dashboard, with one short example. docs/dashboard.md notes the command alternative on the Tickets, Logging, XP & Ranking and Starboard pages.",
+        "Every statement matches the merged code of TASK-2021 to TASK-2024; `pnpm docs:build` passes (it regenerates the website command list with `pnpm docs:commands`)."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm format:check"
     }
   ],
   "chores": [
@@ -11685,6 +13790,61 @@
         "CORE_VERSION in packages/core/src/index.ts is 2.0.2, so /api/health and ririko --version report 2.0.2; the three tests that assert it (apps/bot/src/index.test.ts, apps/cli/src/program.test.ts, apps/web/src/app/api/health/route.test.ts) expect 2.0.2. pnpm build, pnpm typecheck, pnpm format:check and those three test files pass."
       ],
       "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/bot/src/index.test.ts apps/cli/src/program.test.ts apps/web/src/app/api/health/route.test.ts packages/core/src/index.test.ts && pnpm format:check"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "small",
+      "handovers": [
+        "CHORE-2011",
+        "CHORE-2010",
+        "EPIC-021"
+      ],
+      "id": "CHORE-2011",
+      "parent": "EPIC-021",
+      "points": 1,
+      "status": "DONE",
+      "title": "Version 2.1.0 in Every Workspace package.json",
+      "description": "EPIC-021 (support tickets, event logs, level role rewards, starboard, and the setup commands of STORY-202, PRs #739 to #744) ships as the 2.1.0 minor release. docs/release.md section 4 step 2 says package.json must hold the version before the tag. Same files as CHORE-2010.",
+      "context": {
+        "files": [
+          "package.json",
+          "apps/bot/package.json",
+          "apps/cli/package.json",
+          "apps/web/package.json",
+          "packages/ai/package.json",
+          "packages/core/package.json",
+          "packages/database/package.json",
+          "packages/discord/package.json",
+          "packages/music/package.json",
+          "website/package.json",
+          "packages/core/src/index.ts",
+          "apps/bot/src/index.test.ts",
+          "apps/cli/src/program.test.ts",
+          "apps/web/src/app/api/health/route.test.ts",
+          "packages/core/src/index.test.ts",
+          "website/src/components/DiscordDemo/reply.ts",
+          "scripts/website-demo-reply.test.ts"
+        ],
+        "symbols": [
+          "CORE_VERSION",
+          "BOT_VERSION"
+        ],
+        "codegraph_queries": [
+          "CORE_VERSION BOT_VERSION releaseTags RELEASE_TAG_PATTERN"
+        ]
+      },
+      "acceptance": [
+        "The \"version\" field is 2.1.0 in the root package.json, apps/bot, apps/cli, apps/web, packages/ai, packages/core, packages/database, packages/discord, packages/music and website. apps/starter (the npm starter, versioned on its own) and packages/music-private (a separate repository) keep their own versions.",
+        "CORE_VERSION in packages/core/src/index.ts and BOT_VERSION in website/src/components/DiscordDemo/reply.ts are 2.1.0, and the five tests that assert the version (apps/bot/src/index.test.ts, apps/cli/src/program.test.ts, apps/web/src/app/api/health/route.test.ts, packages/core/src/index.test.ts, scripts/website-demo-reply.test.ts) expect 2.1.0.",
+        "No other line changes. Strings such as IP addresses or sample tags that merely contain 2.0.2 are not the app version and stay. pnpm-lock.yaml changes only if it records these versions."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/bot/src/index.test.ts apps/cli/src/program.test.ts apps/web/src/app/api/health/route.test.ts packages/core/src/index.test.ts scripts/website-demo-reply.test.ts && pnpm format:check"
     }
   ],
   "bugs": [
@@ -13288,6 +15448,53 @@
         "A test with energy at 00:00 and potions at 06:00 (same offset), at a time between the two boundaries, shows that drinking a potion and then reading or spending energy gives no second refill and no second bonus. Another shows the potion counter resets at the potion boundary and not at the energy boundary. A repository test covers a row whose lastPotionResetDate is null. With equal schedules, every existing test passes and no existing assertion is removed."
       ],
       "verify_cmd": "pnpm db:check && pnpm vitest run packages/database/src packages/services/src/waifu-tcg packages/services/src/economy apps/bot/src/commands/tcg apps/bot/src/commands/economy && pnpm --filter @ririko/database typecheck && pnpm --filter @ririko/services typecheck && pnpm --filter @ririko/bot typecheck && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "BUG-0052",
+      "parent": "EPIC-021",
+      "title": "Logging Page Says Ignored Channels Skip All Events, but Only Messages Are Skipped",
+      "points": 1,
+      "status": "DONE",
+      "model": "small",
+      "requires": [
+        "TASK-1995",
+        "TASK-1996"
+      ],
+      "handovers": [
+        "BUG-0052",
+        "STORY-199",
+        "EPIC-021"
+      ],
+      "description": "Found in review of TASK-1996 (FLAG on STORY-199). EventLogService applies ignoredChannelIds to message events only. The Logging page description says every event in those channels is skipped.",
+      "context": {
+        "files": [
+          "apps/web/src/app/dashboard/[guildId]/logging/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/logging/actions.test.ts",
+          "packages/core/src/config/guild-config.ts",
+          "docs/dashboard.md"
+        ],
+        "symbols": [
+          "LoggingSettingsPage",
+          "ChannelListField",
+          "EventLogService.messageAllowed"
+        ],
+        "codegraph_queries": [
+          "LoggingSettingsPage ignoredChannelIds ChannelListField includeVoice",
+          "EventLogService messageAllowed ignoredChannelIds"
+        ]
+      },
+      "acceptance": [
+        "The Ignored channels description on the Logging page says messages in these channels (and threads under them, and the text chat of picked voice channels) are not logged, and that member, server and voice events are always logged. includeVoice stays, because a voice channel text chat is a message channel.",
+        "The ignoredChannelIds describe() text in guild-config.ts says the same in one line.",
+        "docs/dashboard.md 4.4 matches this wording."
+      ],
+      "verify_cmd": "pnpm vitest run 'apps/web/src/app/dashboard/[guildId]/logging' packages/core/src/config && pnpm --filter @ririko/web typecheck && pnpm docs:build && pnpm lint --quiet && pnpm format:check"
     }
   ],
   "active_in_progress_ticket": null

@@ -8,6 +8,8 @@ export * from './integrations.js';
 export * from './moderation-settings.js';
 export * from './command-overrides.js';
 export * from './auto-voice.js';
+export * from './level-roles.js';
+export * from './starboard.js';
 export * from './games.js';
 export * from './reaction-roles.js';
 export * from './economy.js';

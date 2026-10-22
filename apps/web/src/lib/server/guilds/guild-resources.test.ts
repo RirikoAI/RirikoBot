@@ -132,6 +132,24 @@ describe('GuildResourceDirectory (TASK-1112)', () => {
     });
   });
 
+  it('lists channel categories in sidebar order, from the shared channel list', async () => {
+    const get = vi
+      .fn()
+      .mockResolvedValue([
+        channel('c-b', 'Community', ChannelType.GuildCategory, 1),
+        channel('c-a', 'Support', ChannelType.GuildCategory, 0),
+        channel('c-text', 'general', ChannelType.GuildText, 0, 'c-a'),
+        channel('c-voice', 'Lounge', ChannelType.GuildVoice, 1, 'c-b'),
+      ]);
+    const directory = new GuildResourceDirectory({ get }, () => 0);
+    expect(await directory.categories(GUILD)).toEqual([
+      { id: 'c-a', name: 'Support', category: null },
+      { id: 'c-b', name: 'Community', category: null },
+    ]);
+    await directory.messageChannels(GUILD);
+    expect(get).toHaveBeenCalledTimes(1);
+  });
+
   it('lists voice channels in sidebar order', async () => {
     const get = vi
       .fn()

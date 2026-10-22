@@ -11,6 +11,9 @@ import {
   GuildRepository,
   CommandCatalogRepository,
   CommandSettingsRepository,
+  EventLogSettingsRepository,
+  LevelRoleSettingsRepository,
+  StarboardRepository,
   LeaderboardRepository,
   ItemRepository,
   InventoryRepository,
@@ -45,6 +48,7 @@ import {
   AuditLogRepository,
   GuildDataRepository,
   ItemCategoryRepository,
+  TicketRepository,
   type DatabaseClient,
   databaseConfigFromEnv,
 } from '@ririko/database';
@@ -148,6 +152,7 @@ import {
   AchievementService,
   TcgRulesService,
   AutoRoleService,
+  TicketService,
   ReactionRoleService,
   AniListClient,
   JikanClient,
@@ -170,6 +175,9 @@ import {
   ConsentService,
   DataRetentionService,
   CommandOverrideService,
+  EventLogService,
+  LevelRoleService,
+  StarboardService,
   BotStatusReporter,
   ReactionGifService,
   MemeSynthesizer,
@@ -256,6 +264,12 @@ export interface BotServices {
   legalLinks: LegalLinks;
   /** Per-guild and per-channel command overrides read by the router middlewares. */
   commandOverrideService: CommandOverrideService;
+  /** Posts message, member, server and voice events to the channels chosen on the Logging page. */
+  eventLogService: EventLogService;
+  /** Gives the roles chosen on the XP & Ranking page at a level and when a member returns. */
+  levelRoleService: LevelRoleService;
+  /** Copies messages that reach the star threshold to the starboard channel chosen on the Engagement page. */
+  starboardService: StarboardService;
   /** Registered commands, written at startup so the dashboard and CLI can list them. */
   commandCatalogRepo: CommandCatalogRepository;
   /** The servers the bot is in, with owner and inviter; kept current by the guild registry listener. */
@@ -325,6 +339,8 @@ export interface BotServices {
   autoRoleRepo: AutoRoleRepository;
   reactionRoleService: ReactionRoleService;
   autoRoleService: AutoRoleService;
+  ticketRepo: TicketRepository;
+  ticketService: TicketService;
   imageRepo: ImageRepository;
   imageGenerationService: ImageGenerationService;
   welcomerRepo: WelcomerRepository;
@@ -368,6 +384,8 @@ export async function createBotServices(
   const autoRoleRepo = new AutoRoleRepository(db);
   const reactionRoleService = new ReactionRoleService(reactionRoleRepo);
   const autoRoleService = new AutoRoleService(autoRoleRepo);
+  const ticketRepo = new TicketRepository(db);
+  const ticketService = new TicketService(ticketRepo, guildSettingsRepo);
   const welcomerRepo = new WelcomerRepository(db);
   const welcomerService = new WelcomerService();
   const dropManager = new DropManager(waifuCardRepo, waifuAssetRepo, undefined, {
@@ -627,6 +645,26 @@ export async function createBotServices(
   eventBus.on('guild:configChanged', ({ guildId, module }) => {
     // The Games page writes the games' server-wide overrides too.
     if (module === 'commands' || module === 'games') commandOverrideService.invalidate(guildId);
+  });
+  const eventLogService = new EventLogService({ repo: new EventLogSettingsRepository(db) });
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'eventlogs') eventLogService.invalidate(guildId);
+  });
+  const levelRoleService = new LevelRoleService({
+    settings: new LevelRoleSettingsRepository(db),
+    xp: xpRepo,
+  });
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'levelroles') levelRoleService.invalidate(guildId);
+  });
+  const starboardService = new StarboardService({
+    repo: new StarboardRepository(db),
+    // The client is optional (tests build services without one), so the server is looked up when
+    // an event arrives. Without a client no server is found and the service does nothing.
+    guilds: { cache: { get: (guildId) => discordClient?.guilds.cache.get(guildId) } },
+  });
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'starboard') starboardService.invalidate(guildId);
   });
   const commandCatalogRepo = new CommandCatalogRepository(db);
   const maintenanceService = new MaintenanceService({ eventBus });
@@ -1111,6 +1149,9 @@ export async function createBotServices(
     dataRetentionService,
     legalLinks,
     commandOverrideService,
+    eventLogService,
+    levelRoleService,
+    starboardService,
     commandCatalogRepo,
     guildRepo,
     botStatusReporter,
@@ -1171,6 +1212,8 @@ export async function createBotServices(
     autoRoleRepo,
     reactionRoleService,
     autoRoleService,
+    ticketRepo,
+    ticketService,
     welcomerRepo,
     welcomerService,
     imageRepo,

@@ -228,6 +228,12 @@ export const USER_DATA_INVENTORY: readonly UserDataEntry[] = [
   { table: 'player_energy', column: 'user_id', action: 'delete' },
   { table: 'reminders', column: 'user_id', action: 'delete' },
   {
+    table: 'starboard_posts',
+    column: 'author_id',
+    action: 'delete',
+    note: 'The record of a starred message the member wrote. The copy in the starboard channel is a Discord message and is not part of the bot database.',
+  },
+  {
     table: 'streamers',
     column: 'platform_user_id',
     action: 'keep',
@@ -246,6 +252,25 @@ export const USER_DATA_INVENTORY: readonly UserDataEntry[] = [
     note: 'The role belongs to another member and stays.',
   },
   { table: 'temporary_roles', column: 'user_id', action: 'delete' },
+  {
+    table: 'tickets',
+    column: 'claimed_by',
+    action: 'tombstone',
+    note: 'The ticket belongs to the member who opened it. The staff member who claimed it is only named.',
+  },
+  {
+    table: 'tickets',
+    column: 'closed_by',
+    action: 'tombstone',
+    note: 'The ticket belongs to the member who opened it. Whoever closed it is only named.',
+  },
+  {
+    table: 'tickets',
+    column: 'opener_id',
+    action: 'tombstone',
+    clear: ['subject'],
+    note: 'The server keeps the ticket number, its dates and who handled it. The opener ID and the subject the opener typed go.',
+  },
   { table: 'user_achievements', column: 'user_id', action: 'delete' },
   { table: 'user_cards', column: 'user_id', action: 'delete' },
   { table: 'user_consents', column: 'user_id', action: 'delete' },
