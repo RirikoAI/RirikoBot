@@ -515,6 +515,29 @@
       "requires": [],
       "blocks": [],
       "description": "Maintainer (2026-10-21): features most Discord servers expect that Ririko does not have yet. A gap review of develop found no support tickets, no message, member or role event logs, no level role rewards and no starboard. The maintainer chose support tickets first (STORY-198). More stories are added here when the maintainer picks the next gap."
+    },
+    {
+      "children": [
+        "STORY-203",
+        "STORY-204",
+        "CHORE-2012",
+        "CHORE-2013"
+      ],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "handovers": [
+        "EPIC-022"
+      ],
+      "id": "EPIC-022",
+      "title": "Scripted Board and Assisted Releases",
+      "points": 21,
+      "status": "TODO",
+      "description": "Maintainer retrospective (2026-10-23) after STORY-202 and the v2.1.0 release: every board change goes through scripts that stamp time, agent, model and tier; the web board sorts and filters by them; releases are planned in plan mode and run by scripts with one merge stop; the retro rules become standing rules. Also two problems found on 2026-10-22."
     }
   ],
   "stories": [
@@ -3458,6 +3481,105 @@
         "TASK-2021 to TASK-2025 are DONE."
       ],
       "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm docs:build && pnpm test:coverage"
+    },
+    {
+      "children": [
+        "TASK-2031",
+        "TASK-2032",
+        "TASK-2033"
+      ],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "STORY-203",
+      "parent": "EPIC-022",
+      "points": 21,
+      "title": "Scrum-Kanban-Template 0.8.0: Every Board Change Through Scripts",
+      "description": "Built in earnestangel/Scrum-Kanban-Template first (maintainer decision 2026-10-23), released as 0.8.0, then adopted here by CHORE-2013. Executed in a separate session in the template repository, not by ticket-worker in this checkout; the coordinator here reviews the template PR and closes the tasks.",
+      "context": {
+        "files": [
+          "scripts/kanban/ticket.mjs",
+          "scripts/kanban/board-lib.mjs",
+          "scripts/kanban/render-board.mjs",
+          "scripts/kanban/board-web/index.html",
+          "scripts/hooks/worker-delegation.mjs",
+          "scripts/kanban/precommit-check.mjs",
+          "docs/kanban/protocol.md",
+          "docs/kanban/providers.md",
+          "bin/scrum-kanban.mjs"
+        ],
+        "symbols": [
+          "ticket.mjs claim handover note review recover show",
+          "formatHeader",
+          "nowIso",
+          "migrateBoard"
+        ],
+        "codegraph_queries": [
+          "(template repo has no CodeGraph index here) read scripts/kanban/ticket.mjs and board-lib.mjs"
+        ]
+      },
+      "acceptance": [
+        "TASK-2031 to TASK-2033 are DONE, and the template is tagged and released as 0.8.0."
+      ],
+      "verify_cmd": "npm test && node scripts/kanban/render-board.mjs --check (run in the Scrum-Kanban-Template checkout)",
+      "model": "large",
+      "handovers": [
+        "STORY-203",
+        "EPIC-022"
+      ],
+      "status": "TODO"
+    },
+    {
+      "children": [
+        "TASK-2041",
+        "TASK-2042",
+        "TASK-2043",
+        "TASK-2044"
+      ],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "STORY-204",
+      "parent": "EPIC-022",
+      "points": 21,
+      "title": "Scripted Releases: Plan Mode, One Merge Stop, Assisted Tag and Images",
+      "description": "Maintainer (2026-10-23): a release starts in plan mode with the version, features, tickets, fixes and draft notes; scripts bump the version on develop, open one develop-to-master PR, then tag, wait for the images, publish the GitHub release and move latest. Agents assist with the whole release unless the maintainer asks to release by hand.",
+      "context": {
+        "files": [
+          "scripts/release/",
+          "package.json",
+          ".claude/skills/release/SKILL.md",
+          "scripts/hooks/release-nudge.mjs",
+          ".claude/settings.json",
+          "docs/release.md",
+          "AGENTS.md"
+        ],
+        "symbols": [
+          "releaseTags",
+          "RELEASE_TAG_PATTERN",
+          "CORE_VERSION"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.ts",
+          "CORE_VERSION BOT_VERSION"
+        ]
+      },
+      "acceptance": [
+        "TASK-2041 to TASK-2044 are DONE."
+      ],
+      "verify_cmd": "pnpm vitest run scripts/release scripts/hooks && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm docs:build",
+      "model": "large",
+      "handovers": [
+        "STORY-204",
+        "EPIC-022"
+      ],
+      "status": "DONE"
     }
   ],
   "tasks": [
@@ -12972,6 +13094,332 @@
         "Every statement matches the merged code of TASK-2021 to TASK-2024; `pnpm docs:build` passes (it regenerates the website command list with `pnpm docs:commands`)."
       ],
       "verify_cmd": "pnpm docs:build && pnpm format:check"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-2031",
+      "parent": "STORY-203",
+      "points": 8,
+      "title": "ticket.mjs: Create, Groom, Edit, Grooming Note Edit and Delete, and Who Touched What",
+      "description": "Every board write goes through ticket.mjs and stamps the time, the agent, the role, the model and the tier.",
+      "context": {
+        "files": [
+          "scripts/kanban/ticket.mjs",
+          "scripts/kanban/board-lib.mjs",
+          "scripts/kanban/render-board.mjs",
+          "bin/scrum-kanban.mjs",
+          "test/ticket.test.mjs",
+          "docs/kanban/board.json"
+        ],
+        "symbols": [
+          "FLAGS",
+          "appendEntry",
+          "commit",
+          "clearClaim",
+          "formatHeader",
+          "nowIso",
+          "migrateBoard"
+        ],
+        "codegraph_queries": [
+          "(template repo) scripts/kanban/ticket.mjs switch (cmd) appendEntry commit"
+        ]
+      },
+      "acceptance": [
+        "New commands: `create` (type, title, parent, points, description; next free ID per type, refuses a used ID), `groom` (sets points, model by the tier rule, context, acceptance, verify_cmd, requires, handovers, from flags or a JSON file, and moves BACKLOG to TODO only when the Definition of Groomed passes), `edit` (any non-state field, with --reason), `status` for coordinator moves the other commands do not cover (for example BACKLOG, ABANDONED with --reason), and `note --type GROOMING --edit <n> | --delete <n>` that rewrite a grooming entry and append an `AMEND` entry with the time, agent, model and reason. `--delete` refuses without --reason.",
+        "Every write sets `created_at` (create only), `updated_at`, and `last_actor` { name, role: worker|coordinator, model, tier } on the ticket, and claim and handover append to a `claims` list { worker, model, tier, claimed_at, released_at, outcome }. Times come from the machine clock, never from an argument: ISO 8601 UTC stored, so they sort; shown in local time by the views.",
+        "render-board.mjs validates the new fields (ISO format, role, tier) and the template upgrade backfills them on old boards: created_at and updated_at from the first and last dated handover entry, else from git log of the note, else null.",
+        "Tests in test/ticket.test.mjs cover every new command, the refusals and the stamps, on Windows and Linux (template-tests.yml)."
+      ],
+      "verify_cmd": "npm test && node scripts/kanban/render-board.mjs --check (run in the Scrum-Kanban-Template checkout)",
+      "model": "medium",
+      "handovers": [
+        "TASK-2031",
+        "STORY-203",
+        "EPIC-022"
+      ],
+      "status": "DONE"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-2031"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-2032",
+      "parent": "STORY-203",
+      "points": 5,
+      "title": "Web Board and BOARD.md: Sort and Filter by Last Change, Claims and Last Model",
+      "description": "The web board and BOARD.md show who last worked on each ticket and when, and sort and filter by it.",
+      "context": {
+        "files": [
+          "scripts/kanban/board-web/index.html",
+          "scripts/kanban/render-board.mjs",
+          "scripts/kanban/board-server.mjs"
+        ],
+        "symbols": [
+          "renderBoard",
+          "card",
+          "details",
+          "matches",
+          "renderFilterOptions"
+        ],
+        "codegraph_queries": [
+          "(template repo) board-web/index.html renderBoard card details matches"
+        ]
+      },
+      "acceptance": [
+        "Each card shows the last change (relative time, local time on hover) and the last actor with role, model and tier. The detail drawer lists created, updated and the claims history.",
+        "A sort control orders cards within columns by last change, created, claimed, ID or points (ascending or descending), and filters cover last actor, role, model and tier. The choice is kept in the URL so a link reproduces the view.",
+        "BOARD.md gets an \"Updated\" and \"Last actor\" column in each table, sorted newest first in In Progress, Review and Done."
+      ],
+      "verify_cmd": "npm test && node scripts/kanban/render-board.mjs --check (run in the Scrum-Kanban-Template checkout)",
+      "model": "medium",
+      "handovers": [
+        "TASK-2032",
+        "STORY-203",
+        "EPIC-022"
+      ],
+      "status": "DONE"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-2031"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-2033",
+      "parent": "STORY-203",
+      "points": 8,
+      "title": "Enforce Script-Only Board Edits and Write the Retro Rules into the Protocol",
+      "description": "No agent edits the board or handover notes by hand, on any provider, and the generic rules from the Ririko 2026-10-22 retrospective become standing rules.",
+      "context": {
+        "files": [
+          "scripts/hooks/worker-delegation.mjs",
+          "scripts/kanban/precommit-check.mjs",
+          "scripts/kanban/ticket.mjs",
+          "docs/kanban/protocol.md",
+          "docs/kanban/providers.md",
+          "AGENTS.md",
+          ".claude/agents/ticket-worker.md",
+          "test/precommit.test.mjs",
+          "test/worker-delegation.test.mjs"
+        ],
+        "symbols": [
+          "deny",
+          "sessionModel",
+          "problems"
+        ],
+        "codegraph_queries": [
+          "(template repo) worker-delegation.mjs precommit-check.mjs"
+        ]
+      },
+      "acceptance": [
+        "The Claude Code hook denies Edit, Write and MultiEdit on docs/kanban/board.json, BOARD.md and handovers/ for every agent and points to the ticket.mjs command to use. ticket.mjs records a content hash of what it wrote, and the pre-commit check fails a staged board or note that differs from the last script write, unless the user commits with KANBAN_ALLOW_MANUAL_EDIT=1.",
+        "protocol.md and providers.md describe the new commands and drop the \"edit grooming fields directly\" exception. Standing rules added: grooming checks every constant or default it states against the code; shared touch points (registries, lists in tests) go into the first task and later tasks list disjoint files; all times come from ticket.mjs; a 1-point mechanical chore may be done by a script or inline by the coordinator, recorded with ticket.mjs.",
+        "ticket-worker.md and the worker prompt name the ticket.mjs commands. Tests cover the hook denial and the pre-commit hash check. The template is tagged and released as 0.8.0 with release notes."
+      ],
+      "verify_cmd": "npm test && node scripts/kanban/render-board.mjs --check (run in the Scrum-Kanban-Template checkout)",
+      "model": "medium",
+      "handovers": [
+        "TASK-2033",
+        "STORY-203",
+        "EPIC-022"
+      ],
+      "status": "TODO"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-2041",
+      "parent": "STORY-204",
+      "points": 3,
+      "title": "pnpm release:version: Set the Version in Every File That Holds It",
+      "description": "Replaces the hand-made version bump (CHORE-2008, CHORE-2010, CHORE-2011) with a script.",
+      "context": {
+        "files": [
+          "scripts/release/version.ts",
+          "scripts/release/version.test.ts",
+          "scripts/release/version-files.ts",
+          "package.json",
+          "scripts/release-tags.ts"
+        ],
+        "symbols": [
+          "CORE_VERSION",
+          "BOT_VERSION",
+          "releaseTags",
+          "RELEASE_TAG_PATTERN"
+        ],
+        "codegraph_queries": [
+          "CORE_VERSION BOT_VERSION",
+          "releaseTags RELEASE_TAG_PATTERN release-tags.ts"
+        ]
+      },
+      "acceptance": [
+        "`pnpm release:version <x.y.z>` sets the version in the 17 places CHORE-2011 changed (ten package.json files, CORE_VERSION, BOT_VERSION, five tests), listed once in scripts/release/version-files.ts. It finds each value by its own pattern (the \"version\" field, the constant, the test assertion), never by a plain search for the old version, so strings like 10.0.2.2 are never touched. apps/starter and packages/music-private keep their versions.",
+        "It refuses a value that is not x.y.z, a version not greater than the current one, and a file whose pattern does not match exactly once, and then changes nothing. It prints each file and old to new. `--check <x.y.z>` exits 1 unless every place already holds that version.",
+        "scripts/release/version.test.ts runs it on a temporary copy of the files and covers the refusals."
+      ],
+      "verify_cmd": "pnpm vitest run scripts/release && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "model": "medium",
+      "handovers": [
+        "TASK-2041",
+        "STORY-204",
+        "EPIC-022"
+      ],
+      "status": "DONE"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-2041"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-2042",
+      "parent": "STORY-204",
+      "points": 8,
+      "title": "pnpm release:prepare: Bump on develop and Open the One Release PR",
+      "description": "One command from a clean develop to the develop-to-master release PR, so the maintainer merges once.",
+      "context": {
+        "files": [
+          "scripts/release/run.ts",
+          "scripts/release/run.test.ts",
+          "scripts/release/prepare.ts",
+          "scripts/release/prepare.test.ts",
+          "scripts/release/notes.ts",
+          "scripts/release/notes.test.ts",
+          "scripts/release/version.ts",
+          "package.json",
+          ".gitignore"
+        ],
+        "symbols": [
+          "releaseTags"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.ts"
+        ]
+      },
+      "acceptance": [
+        "`pnpm release:prepare <x.y.z> --notes <file>` refuses unless the tree is clean, the branch is develop and it equals origin/develop. It runs release:version, then build, typecheck, the five version tests and format:check, commits \"chore(release): version x.y.z\" with the attribution trailer, pushes develop, and opens the develop-to-master PR whose body says to use a merge commit and holds the notes. `--dry-run` prints every step and changes nothing.",
+        "`pnpm release:notes <x.y.z>` writes a draft notes file to .local/release-notes-vx.y.z.md (git-ignored) from the last v tag: merged PR titles, board tickets that became DONE in that range grouped as features, fixes and chores, new migrations under packages/database/migrations, and the image tags. The coordinator edits it in plan mode before prepare.",
+        "Tests cover the refusals, the dry run and the notes grouping with injected git and gh runners; no test touches the network."
+      ],
+      "verify_cmd": "pnpm vitest run scripts/release && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "model": "medium",
+      "handovers": [
+        "TASK-2042",
+        "STORY-204",
+        "EPIC-022"
+      ],
+      "status": "DONE"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-2042"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-2043",
+      "parent": "STORY-204",
+      "points": 5,
+      "title": "pnpm release:publish: Tag, Wait for the Images, Publish, Move latest",
+      "description": "After the maintainer merges the release PR, one command finishes the release in the safe order.",
+      "context": {
+        "files": [
+          "scripts/release/publish.ts",
+          "scripts/release/publish.test.ts",
+          "scripts/release-tags.ts",
+          "package.json"
+        ],
+        "symbols": [
+          "releaseTags"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.ts"
+        ]
+      },
+      "acceptance": [
+        "`pnpm release:publish <x.y.z>` refuses unless origin/master holds that version (release:version --check on it) and the release PR is merged. It tags vx.y.z on origin/master annotated \"Ririko x.y.z\" (unless the tag already points there), pushes the tag, and polls Docker Hub until both images have the x.y.z, x.y and x tags with one digest each (timeout 40 minutes).",
+        "Only then it publishes the GitHub release from the notes file and marks it Latest, and moves latest of both images by digest with `docker buildx imagetools create`, spawned without a shell so it works from Git Bash and PowerShell. It reports the staging deploy status and never approves production.",
+        "Each step is skipped when already done, so a rerun after a failure continues. `--dry-run` prints the steps. Tests use injected runners and a fake clock."
+      ],
+      "verify_cmd": "pnpm vitest run scripts/release && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "model": "medium",
+      "handovers": [
+        "TASK-2043",
+        "STORY-204",
+        "EPIC-022"
+      ],
+      "status": "DONE"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-2043"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-2044",
+      "parent": "STORY-204",
+      "points": 5,
+      "title": "The /release Skill, the Release Prompt Nudge, and docs/release.md",
+      "description": "Every release starts in plan mode, and the docs say agents assist with releases by default.",
+      "context": {
+        "files": [
+          ".claude/skills/release/SKILL.md",
+          "scripts/hooks/release-nudge.mjs",
+          "scripts/hooks/release-nudge.test.ts",
+          ".claude/settings.json",
+          "docs/release.md",
+          "AGENTS.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.ts"
+        ]
+      },
+      "acceptance": [
+        ".claude/skills/release/SKILL.md (invocable as /release, and described so it also triggers on plain requests to release): first enter plan mode, run release:notes, and write a plan with the proposed version and why (semver from the tickets), features, tickets, bug fixes, migrations, Discord or config changes, and the edited notes. After approval: release:prepare, stop for the maintainer to merge the PR, then release:publish. It says to release by hand only when the maintainer asks for that.",
+        "scripts/hooks/release-nudge.mjs, registered as a UserPromptSubmit hook in .claude/settings.json, adds one short line of context (\"Use the /release skill; start in plan mode\") when a prompt asks to release, tag or publish a version, and nothing otherwise. Tested with sample prompts.",
+        "docs/release.md: agents run the release by default, including the tag, the GitHub release and moving latest, unless the maintainer asks to do it by hand; the GitHub release is published only after both images are on Docker Hub; the script commands replace the hand steps; the production approval stays the maintainer's. AGENTS.md section 10 says the same in one bullet."
+      ],
+      "verify_cmd": "pnpm vitest run scripts/hooks scripts/release && pnpm format:check && pnpm docs:build",
+      "model": "medium",
+      "handovers": [
+        "TASK-2044",
+        "STORY-204",
+        "EPIC-022"
+      ],
+      "status": "DONE"
     }
   ],
   "chores": [
@@ -13845,6 +14293,133 @@
         "No other line changes. Strings such as IP addresses or sample tags that merely contain 2.0.2 are not the app version and stay. pnpm-lock.yaml changes only if it records these versions."
       ],
       "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/bot/src/index.test.ts apps/cli/src/program.test.ts apps/web/src/app/api/health/route.test.ts packages/core/src/index.test.ts scripts/website-demo-reply.test.ts && pnpm format:check"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "CHORE-2012",
+      "parent": "EPIC-022",
+      "points": 3,
+      "title": "Ririko Rules from the 2026-10-22 Retrospective",
+      "description": "The project-specific rules the maintainer agreed to on 2026-10-23. Generic board rules go to the template (TASK-2033).",
+      "context": {
+        "files": [
+          "AGENTS.md",
+          "docs/testing.md",
+          "docs/contributing.md",
+          "package.json",
+          "vitest.config.ts"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "registerBotCommands command-set.ts GUILD_SCOPED"
+        ]
+      },
+      "acceptance": [
+        "AGENTS.md section 5 or 8: a ticket that adds a command lists apps/bot/src/command-set.ts and the GUILD_SCOPED list in apps/bot/src/command-set.test.ts, and when a story adds several commands those shared files are changed in its first task only.",
+        "A ticket that adds a source file covers that file in its own tests: `pnpm test:file-coverage <files>` (new root script) runs vitest coverage limited to those files and fails below the project thresholds; grooming puts it in the verify_cmd. docs/testing.md explains it.",
+        "Grooming checks every constant or default it writes in a note against the code (example: the default prefix is \"!\", the maintainer's .env uses \"$\")."
+      ],
+      "verify_cmd": "pnpm test:file-coverage packages/core/src/index.ts && pnpm format:check && pnpm docs:build",
+      "model": "medium",
+      "handovers": [
+        "CHORE-2012",
+        "EPIC-022"
+      ],
+      "status": "TODO"
+    },
+    {
+      "children": [],
+      "requires": [
+        "STORY-203"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "CHORE-2013",
+      "parent": "EPIC-022",
+      "points": 5,
+      "title": "Upgrade Ririko to Scrum-Kanban 0.8.0",
+      "description": "Adopt the scripted board here once the template releases 0.8.0, and remove the duplicate CodeGraph prompt hook found on 2026-10-22.",
+      "context": {
+        "files": [
+          "scripts/kanban/",
+          "scripts/hooks/",
+          "docs/kanban/",
+          "AGENTS.md",
+          ".claude/settings.json",
+          ".claude/agents/ticket-worker.md"
+        ],
+        "symbols": [
+          "render-board.mjs",
+          "ticket.mjs"
+        ],
+        "codegraph_queries": [
+          "render-board.mjs worker-delegation.mjs board-server.mjs"
+        ]
+      },
+      "acceptance": [
+        "The template upgrade from 0.6.0 to 0.8.0 runs, the board migrates (new fields backfilled), and `node scripts/kanban/render-board.mjs --check` passes. Ririko's own settings, coordinator_paths and AGENTS.md sections 4 and up are kept.",
+        ".claude/settings.json runs `codegraph prompt-hook` once: the direct \"codegraph.cmd prompt-hook\" entry is removed, because prompt-context.mjs already runs it (today every prompt gets the CodeGraph context twice).",
+        "scripts/kanban/build-board-site.mjs and its test still pass with the new fields, and the published board shows them."
+      ],
+      "verify_cmd": "node scripts/kanban/render-board.mjs --check && pnpm vitest run scripts/kanban && pnpm format:check",
+      "model": "medium",
+      "handovers": [
+        "CHORE-2013",
+        "EPIC-022"
+      ],
+      "status": "TODO"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "CHORE-2014",
+      "parent": null,
+      "points": 5,
+      "title": "Fix the discord.js Deprecation Warnings: ready and ephemeral",
+      "description": "Found 2026-10-22 in the bot log: \"The ready event has been renamed to clientReady\" and \"Supplying ephemeral for interaction response options is deprecated. Utilize flags instead.\" Both stop working in discord.js v15.",
+      "context": {
+        "files": [
+          "packages/discord/src/client/gateway.ts",
+          "packages/discord/src/command/context.ts",
+          "apps/bot/src/",
+          "packages/services/src/"
+        ],
+        "symbols": [
+          "GatewayManager.setupListeners",
+          "CommandContext.reply",
+          "deferReply",
+          "followUp"
+        ],
+        "codegraph_queries": [
+          "GatewayManager setupListeners onReady",
+          "CommandContext reply deferReply followUp editReply ephemeral"
+        ]
+      },
+      "acceptance": [
+        "gateway.ts listens only to Events.ClientReady; the \"ready\" listener is removed and the gateway tests still pass.",
+        "The command context translates `ephemeral: true` into `flags: MessageFlags.Ephemeral` for slash and component replies in one place, so command code keeps its option. Every direct call to an interaction reply, deferReply or followUp outside that place uses flags (about 213 uses in 61 files today; the PROGRESS entry lists what changed).",
+        "A bot start and a slash command reply print neither warning. pnpm test:coverage passes."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm test:coverage",
+      "model": "medium",
+      "handovers": [
+        "CHORE-2014"
+      ],
+      "status": "TODO"
     }
   ],
   "bugs": [
@@ -15495,6 +16070,50 @@
         "docs/dashboard.md 4.4 matches this wording."
       ],
       "verify_cmd": "pnpm vitest run 'apps/web/src/app/dashboard/[guildId]/logging' packages/core/src/config && pnpm --filter @ririko/web typecheck && pnpm docs:build && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "BUG-0053",
+      "parent": null,
+      "points": 3,
+      "title": "Music Stops for Good When Lavalink Is Down for More Than 50 Seconds",
+      "description": "Found 2026-10-22: lavalink-client retries a node 5 times, 10 s apart, then gives up (\"Unable to connect after 5 attempts\"). A bot started before Lavalink, or a Lavalink restart that takes longer, leaves music off until the bot restarts.",
+      "context": {
+        "files": [
+          "packages/music/src/lavalink/lavalink-service.ts",
+          "packages/music/src/lavalink/lavalink-service.test.ts",
+          "packages/music/src/lavalink/types.ts"
+        ],
+        "symbols": [
+          "LavalinkService",
+          "wireManagerEvents",
+          "init",
+          "isReady"
+        ],
+        "entry_points": [
+          "LavalinkService constructor"
+        ],
+        "codegraph_queries": [
+          "LavalinkService wireManagerEvents init isReady constructor"
+        ]
+      },
+      "acceptance": [
+        "After the library gives up, LavalinkService keeps trying to connect the node in the background with backoff (30 s, doubling to at most 5 minutes) until it connects, and stops when the service is destroyed. It logs one line per attempt.",
+        "Once connected again, music commands work without a bot restart; isReady() is false while disconnected. A connect that succeeds resets the backoff.",
+        "Tests with fake timers cover the give-up, the backoff, the reconnect and the stop on destroy."
+      ],
+      "verify_cmd": "pnpm vitest run packages/music && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "model": "medium",
+      "handovers": [
+        "BUG-0053"
+      ],
+      "status": "TODO"
     }
   ],
   "active_in_progress_ticket": null
