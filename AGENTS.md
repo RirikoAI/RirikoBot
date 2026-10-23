@@ -205,6 +205,7 @@ These rules add to section 1.7. Where they differ, this section wins.
 - **Branch names**: `feat/|fix/|chore/<TICKET-ID>-<slug>`. This project uses `feat/`, not the template's `feature/`.
 - **Grouped batches**: commits and PRs correspond to a complete Story, Bug, or Epic. Standalone chores are the exception.
 - **Maintainer merge gate**: agents push branches and open PRs only after the user confirms (section 1.7). The maintainer verifies the PR and merges it after CI passes. Agents never merge PRs.
+- **Releases**: agents run the whole release by default with the `/release` skill and the `pnpm release:*` scripts ([docs/release.md](docs/release.md) section 4.1). That covers plan mode, the version bump on `develop`, the release PR, the tag, waiting for the images, the GitHub release and moving `latest`. The maintainer merges the release PR and approves production. Release by hand (section 4.2) only when the maintainer asks for it.
 
 ---
 

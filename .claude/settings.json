@@ -21,6 +21,14 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/prompt-context.mjs\""
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/release-nudge.mjs\""
+          }
+        ]
       }
     ],
     "SessionStart": [

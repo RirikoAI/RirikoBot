@@ -17,7 +17,13 @@
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
 | `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188, STORY-192, STORY-193 | yes | large |
+| `STORY-203` | Story | Scrum-Kanban-Template 0.8.0: Every Board Change Through Scripts | 21 | EPIC-022 | — | yes | large |
+| `TASK-2033` | Task | Enforce Script-Only Board Edits and Write the Retro Rules into the Protocol | 8 | STORY-203 | TASK-2031 | yes | medium |
 | `CHORE-2004` | Chore | Add the New Discord, Gemini, OpenAI, YouTube and Spotify Screenshots to the Setup Wizard Guides | 1 | EPIC-020 | TASK-1924 | yes | small |
+| `CHORE-2012` | Chore | Ririko Rules from the 2026-10-22 Retrospective | 3 | EPIC-022 | — | yes | medium |
+| `CHORE-2013` | Chore | Upgrade Ririko to Scrum-Kanban 0.8.0 | 5 | EPIC-022 | STORY-203 | blocked | medium |
+| `CHORE-2014` | Chore | Fix the discord.js Deprecation Warnings: ready and ephemeral | 5 | — | — | yes | medium |
+| `BUG-0053` | Bug | Music Stops for Good When Lavalink Is Down for More Than 50 Seconds | 3 | — | — | yes | medium |
 
 ## 🔍 Review
 *None.*
@@ -145,6 +151,7 @@
 | `STORY-200` | Story | Level Role Rewards: Roles Given Automatically at Chosen Levels | 21 | EPIC-021 | [STORY-200.md](./handovers/STORY-200.md) |
 | `STORY-201` | Story | Starboard: Repost Popular Messages to a Highlights Channel | 21 | EPIC-021 | [STORY-201.md](./handovers/STORY-201.md) |
 | `STORY-202` | Story | Set Up Tickets, Starboard, Event Logs and Level Role Stacking with Commands | 21 | EPIC-021 | [STORY-202.md](./handovers/STORY-202.md) |
+| `STORY-204` | Story | Scripted Releases: Plan Mode, One Merge Stop, Assisted Tag and Images | 21 | EPIC-022 | [STORY-204.md](./handovers/STORY-204.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -455,6 +462,12 @@
 | `TASK-2023` | Task | New /starboard Command: Setup, Off, Self-Star, Ignore and Settings | 5 | STORY-202 | [TASK-2023.md](./handovers/TASK-2023.md) |
 | `TASK-2024` | Task | New /eventlogs Command: Set, Off, Ignore, Bots and Settings | 5 | STORY-202 | [TASK-2024.md](./handovers/TASK-2024.md) |
 | `TASK-2025` | Task | Document the Setup Commands for Tickets, Starboard, Event Logs and Level Roles | 3 | STORY-202 | [TASK-2025.md](./handovers/TASK-2025.md) |
+| `TASK-2031` | Task | ticket.mjs: Create, Groom, Edit, Grooming Note Edit and Delete, and Who Touched What | 8 | STORY-203 | [TASK-2031.md](./handovers/TASK-2031.md) |
+| `TASK-2032` | Task | Web Board and BOARD.md: Sort and Filter by Last Change, Claims and Last Model | 5 | STORY-203 | [TASK-2032.md](./handovers/TASK-2032.md) |
+| `TASK-2041` | Task | pnpm release:version: Set the Version in Every File That Holds It | 3 | STORY-204 | [TASK-2041.md](./handovers/TASK-2041.md) |
+| `TASK-2042` | Task | pnpm release:prepare: Bump on develop and Open the One Release PR | 8 | STORY-204 | [TASK-2042.md](./handovers/TASK-2042.md) |
+| `TASK-2043` | Task | pnpm release:publish: Tag, Wait for the Images, Publish, Move latest | 5 | STORY-204 | [TASK-2043.md](./handovers/TASK-2043.md) |
+| `TASK-2044` | Task | The /release Skill, the Release Prompt Nudge, and docs/release.md | 5 | STORY-204 | [TASK-2044.md](./handovers/TASK-2044.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -568,3 +581,4 @@
 | `EPIC-019` | Production Harness: Controlled, Automated and Safeguarded Releases | DONE | 21 | STORY-185, STORY-186 | [EPIC-019.md](./handovers/EPIC-019.md) |
 | `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, STORY-193, STORY-194, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045, STORY-195, CHORE-2005, STORY-196, CHORE-2006, CHORE-2007, BUG-0049, CHORE-2008, STORY-197, BUG-0050, CHORE-2009, BUG-0051 | [EPIC-020.md](./handovers/EPIC-020.md) |
 | `EPIC-021` | Essential Server Tools | TODO | 21 | STORY-198, STORY-199, BUG-0052, STORY-200, STORY-201, STORY-202, CHORE-2011 | [EPIC-021.md](./handovers/EPIC-021.md) |
+| `EPIC-022` | Scripted Board and Assisted Releases | TODO | 21 | STORY-203, STORY-204, CHORE-2012, CHORE-2013 | [EPIC-022.md](./handovers/EPIC-022.md) |
