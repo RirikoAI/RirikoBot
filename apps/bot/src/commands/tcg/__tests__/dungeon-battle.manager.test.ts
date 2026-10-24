@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { EventEmitter } from 'node:events';
 import { DungeonBattleManager } from '../dungeon-battle.manager.js';
 import type { BotServices } from '../../../services.js';
+import { MessageFlags } from 'discord.js';
 
 /* A scripted stand-in for DungeonBattleSession: each action moves to the next prepared state,
  * so every turn outcome is deterministic and no RNG is involved. */
@@ -487,7 +488,7 @@ describe('DungeonBattleManager (TASK-1254)', () => {
       await collect(intruder);
       expect(intruder.reply).toHaveBeenCalledWith({
         content: '⏳ This is not your dungeon battle!',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       expect(sessions.length).toBe(0);
     });
@@ -639,7 +640,7 @@ describe('DungeonBattleManager (TASK-1254)', () => {
       await collect(status);
       expect(status.reply).toHaveBeenCalledWith({
         content: expect.stringContaining('/dungeon status'),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     });
 
@@ -675,7 +676,7 @@ describe('DungeonBattleManager (TASK-1254)', () => {
       await collect(pick);
       expect(pick.reply).toHaveBeenCalledWith({
         content: expect.stringContaining('only use 1 potion per turn'),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       expect(services.userInventoryItemRepo.findById).not.toHaveBeenCalled();
     });
@@ -690,7 +691,7 @@ describe('DungeonBattleManager (TASK-1254)', () => {
       await collect(pick);
       expect(pick.reply).toHaveBeenCalledWith({
         content: '❌ That potion is no longer available in your inventory!',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       expect(services.userInventoryItemRepo.delete).not.toHaveBeenCalled();
     });
@@ -707,7 +708,7 @@ describe('DungeonBattleManager (TASK-1254)', () => {
       await collect(pick);
       expect(pick.reply).toHaveBeenCalledWith({
         content: '❌ Item definition not found.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     });
 

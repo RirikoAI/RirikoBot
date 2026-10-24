@@ -3,6 +3,7 @@ import { AdventureError, type ActiveAdventureSession } from '@ririko/services';
 import type { ButtonInteraction, Client, Message } from 'discord.js';
 import type { BotServices } from '../../services.js';
 import { adventureView } from './adventure-view.js';
+import { MessageFlags } from 'discord.js';
 
 type Services = Pick<BotServices, 'adventureEngine' | 'adventureSessions'>;
 const errorCode = (error: unknown): number | undefined =>
@@ -19,21 +20,24 @@ export class AdventureController {
   async button(interaction: ButtonInteraction): Promise<void> {
     const [, id, revisionText, choice, extra] = interaction.customId.split(':');
     if (!id || !/^\d+$/.test(revisionText ?? '') || !choice || extra) {
-      await interaction.reply({ content: 'This adventure button is invalid.', ephemeral: true });
+      await interaction.reply({
+        content: 'This adventure button is invalid.',
+        flags: MessageFlags.Ephemeral,
+      });
       return;
     }
     const session = await this.services.adventureSessions.findById(id);
     if (!session || session.userId !== interaction.user.id) {
       await interaction.reply({
         content: 'Only the player who started this adventure can choose.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
     if (session.guildId !== interaction.guildId || session.channelId !== interaction.channelId) {
       await interaction.reply({
         content: 'Use the adventure buttons in the original channel.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -64,7 +68,7 @@ export class AdventureController {
           error instanceof AdventureError
             ? error.message
             : 'Your choice could not finish. Check adventure status and try again.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   }

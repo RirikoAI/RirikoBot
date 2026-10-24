@@ -20,10 +20,7 @@
 | `STORY-203` | Story | Scrum-Kanban-Template 0.8.0: Every Board Change Through Scripts | 21 | EPIC-022 | — | yes | large |
 | `TASK-2033` | Task | Enforce Script-Only Board Edits and Write the Retro Rules into the Protocol | 8 | STORY-203 | TASK-2031 | yes | medium |
 | `CHORE-2004` | Chore | Add the New Discord, Gemini, OpenAI, YouTube and Spotify Screenshots to the Setup Wizard Guides | 1 | EPIC-020 | TASK-1924 | yes | small |
-| `CHORE-2012` | Chore | Ririko Rules from the 2026-10-22 Retrospective | 3 | EPIC-022 | — | yes | medium |
 | `CHORE-2013` | Chore | Upgrade Ririko to Scrum-Kanban 0.8.0 | 5 | EPIC-022 | STORY-203 | blocked | medium |
-| `CHORE-2014` | Chore | Fix the discord.js Deprecation Warnings: ready and ephemeral | 5 | — | — | yes | medium |
-| `BUG-0053` | Bug | Music Stops for Good When Lavalink Is Down for More Than 50 Seconds | 3 | — | — | yes | medium |
 
 ## 🔍 Review
 *None.*
@@ -493,6 +490,8 @@
 | `CHORE-2009` | Chore | Lavalink "Never Ready" Deploy Test Polls Only Once Under Load | 1 | EPIC-020 | [CHORE-2009.md](./handovers/CHORE-2009.md) |
 | `CHORE-2010` | Chore | Version 2.0.2 in Every Workspace package.json | 1 | EPIC-020 | [CHORE-2010.md](./handovers/CHORE-2010.md) |
 | `CHORE-2011` | Chore | Version 2.1.0 in Every Workspace package.json | 1 | EPIC-021 | [CHORE-2011.md](./handovers/CHORE-2011.md) |
+| `CHORE-2012` | Chore | Ririko Rules from the 2026-10-22 Retrospective | 3 | EPIC-022 | [CHORE-2012.md](./handovers/CHORE-2012.md) |
+| `CHORE-2014` | Chore | Fix the discord.js Deprecation Warnings: ready and ephemeral | 5 | — | [CHORE-2014.md](./handovers/CHORE-2014.md) |
 | `BUG-0001` | Bug | Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors | 5 | STORY-050 | [BUG-0001.md](./handovers/BUG-0001.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | STORY-050 | [BUG-0002.md](./handovers/BUG-0002.md) |
 | `BUG-0003` | Bug | OpenAI & LLM Providers Function Name Schema Validation & Sanitization | 2 | STORY-060 | [BUG-0003.md](./handovers/BUG-0003.md) |
@@ -545,6 +544,7 @@
 | `BUG-0050` | Bug | Energy Is Shown, Spent or Refunded Without the Daily Reset: /dungeon status, /adventure and the Floor Refund | 3 | EPIC-020 | [BUG-0050.md](./handovers/BUG-0050.md) |
 | `BUG-0051` | Bug | Energy and the Potion Limit Share One Stored Reset Date: a Potion Can Refill Energy Again When Their Reset Times Differ | 5 | EPIC-020 | [BUG-0051.md](./handovers/BUG-0051.md) |
 | `BUG-0052` | Bug | Logging Page Says Ignored Channels Skip All Events, but Only Messages Are Skipped | 1 | EPIC-021 | [BUG-0052.md](./handovers/BUG-0052.md) |
+| `BUG-0053` | Bug | Music Stops for Good When Lavalink Is Down for More Than 50 Seconds | 3 | — | [BUG-0053.md](./handovers/BUG-0053.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |

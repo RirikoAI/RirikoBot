@@ -8,6 +8,7 @@ import {
   createWallpaperCommand,
 } from '../wallpaper.command.js';
 import { flush, makeContext, selectInteraction } from './helpers.js';
+import { MessageFlags } from 'discord.js';
 
 const wallpaper = (id: string, overrides: Partial<Wallpaper> = {}): Wallpaper => ({
   id,
@@ -133,7 +134,9 @@ describe('/wallpaper (TASK-1442)', () => {
     const intruder = pick(WALLPAPER_SOURCE_ID, 'wallhaven', 'user-2');
     collector.emit('collect', intruder);
     await flush();
-    expect(intruder.reply).toHaveBeenCalledWith(expect.objectContaining({ ephemeral: true }));
+    expect(intruder.reply).toHaveBeenCalledWith(
+      expect.objectContaining({ flags: MessageFlags.Ephemeral }),
+    );
     expect(next).not.toHaveBeenCalled();
 
     const empty = setup(vi.fn(), null);

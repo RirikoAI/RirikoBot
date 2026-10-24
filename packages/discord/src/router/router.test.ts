@@ -10,6 +10,7 @@ import type {
   User,
   AutocompleteInteraction,
 } from 'discord.js';
+import { MessageFlags } from 'discord.js';
 
 describe('CommandRegistry (TASK-0312)', () => {
   let registry: CommandRegistry;
@@ -254,7 +255,7 @@ describe('CommandRouter Dual Dispatcher (TASK-0312)', () => {
       expect(handled).toBe(true);
       expect(mockReply).toHaveBeenCalledWith({
         content: '❌ You do not have permission to execute this operation.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     });
   });

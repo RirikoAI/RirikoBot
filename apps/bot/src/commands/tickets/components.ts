@@ -8,6 +8,7 @@ import {
   type GuildMember,
   type ModalSubmitInteraction,
   type TextChannel,
+  MessageFlags,
 } from 'discord.js';
 import { describeErrorForLog } from '@ririko/core';
 import {
@@ -122,7 +123,10 @@ export async function handleTicketButton(
 ): Promise<void> {
   const { customId } = interaction;
   if (!interaction.inGuild()) {
-    await interaction.reply({ content: 'Tickets only work in a server.', ephemeral: true });
+    await interaction.reply({
+      content: 'Tickets only work in a server.',
+      flags: MessageFlags.Ephemeral,
+    });
     return;
   }
 
@@ -136,7 +140,7 @@ export async function handleTicketButton(
   }
   if (customId !== TICKET_CLAIM_BUTTON_ID) return;
 
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
   const member = await resolveMember(interaction);
   const channel = ticketChannel(interaction);
   if (!member || !channel) {
@@ -155,12 +159,15 @@ export async function handleTicketModal(
   const { customId } = interaction;
   if (customId !== TICKET_OPEN_MODAL_ID && customId !== TICKET_CLOSE_MODAL_ID) return;
   if (!interaction.inGuild()) {
-    await interaction.reply({ content: 'Tickets only work in a server.', ephemeral: true });
+    await interaction.reply({
+      content: 'Tickets only work in a server.',
+      flags: MessageFlags.Ephemeral,
+    });
     return;
   }
 
   // Opening creates a channel and closing pages through the history; both can pass 3 seconds.
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
   const member = await resolveMember(interaction);
   if (!member) {
     await finish(interaction, 'Could not find you in this server. Try again in a moment.');

@@ -6,6 +6,7 @@ import {
   ComponentType,
   type Message,
   type ButtonInteraction,
+  MessageFlags,
 } from 'discord.js';
 import { randomUUID } from 'node:crypto';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
@@ -127,7 +128,7 @@ export function createHighLowCommand(services: BotServices): Command {
         if (interaction.user.id !== user.id) {
           await interaction.reply({
             content: '❌ This HighLow game belongs to someone else!',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }

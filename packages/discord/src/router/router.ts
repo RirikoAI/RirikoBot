@@ -114,7 +114,7 @@ export class CommandRouter {
         content: command.metadata.messageContextMenuName
           ? `Right-click a message → Apps → ${command.metadata.messageContextMenuName}.`
           : `This command is only available as a prefix command (\`${this.options.defaultPrefix}${command.metadata.name}\`).`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return true;
     }

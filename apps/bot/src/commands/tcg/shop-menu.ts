@@ -5,6 +5,7 @@ import {
   EmbedBuilder,
   StringSelectMenuBuilder,
   type Message,
+  MessageFlags,
 } from 'discord.js';
 import type { CommandContext } from '@ririko/discord';
 import type { EquipmentStats, GearSlot } from '@ririko/services';
@@ -258,7 +259,10 @@ export async function openShopMenu(
 
   collector.on('collect', async (interaction) => {
     if (interaction.user.id !== userId) {
-      await interaction.reply({ content: '⏳ This is not your shop menu!', ephemeral: true });
+      await interaction.reply({
+        content: '⏳ This is not your shop menu!',
+        flags: MessageFlags.Ephemeral,
+      });
       return;
     }
 

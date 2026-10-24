@@ -6,6 +6,7 @@ import {
   ComponentType,
   type Message,
   type ButtonInteraction,
+  MessageFlags,
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
@@ -263,7 +264,7 @@ export function createRpsCommand(services: BotServices): Command {
         if (userId !== player1.id && userId !== player2.id) {
           await interaction.reply({
             content: '❌ You are not a participant in this Rock-Paper-Scissors match!',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -272,7 +273,7 @@ export function createRpsCommand(services: BotServices): Command {
           const submitResult = services.rpsEngine.submitChoice(session.id, userId, choice);
           await interaction.reply({
             content: `🤫 You picked **${CHOICE_EMOJIS[choice]}**! Your choice is hidden until both players have chosen.`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
 
           const currentSession = submitResult.session;
@@ -347,7 +348,7 @@ export function createRpsCommand(services: BotServices): Command {
         } catch (err: any) {
           await interaction.reply({
             content: `❌ ${err.message ?? 'Submission error'}`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
       });

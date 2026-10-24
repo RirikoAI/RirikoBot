@@ -5,6 +5,7 @@ import {
   type ButtonStyle,
   type ButtonInteraction,
   type GuildMember,
+  MessageFlags,
 } from 'discord.js';
 import type { BotServices } from '../../services.js';
 import type { GiveawayRequirements } from '@ririko/services';
@@ -20,7 +21,7 @@ export async function handleGiveawayButtonInteraction(
   if (!giveaway || giveaway.isEnded) {
     await interaction.reply({
       content: '❌ This giveaway has ended or is no longer available.',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -32,7 +33,7 @@ export async function handleGiveawayButtonInteraction(
   if (alreadyEntered) {
     await interaction.reply({
       content: '⚠️ You have already entered this giveaway!',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -65,7 +66,7 @@ export async function handleGiveawayButtonInteraction(
   if (!validation.allowed) {
     await interaction.reply({
       content: `❌ You cannot enter this giveaway: ${validation.reason ?? 'Requirements not met.'}`,
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -79,7 +80,7 @@ export async function handleGiveawayButtonInteraction(
   if (!added) {
     await interaction.reply({
       content: '⚠️ You have already entered this giveaway!',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -115,6 +116,6 @@ export async function handleGiveawayButtonInteraction(
   const bonusText = bonusMultiplier > 1 ? ` (Bonus entries: **${bonusMultiplier}x**)` : '';
   await interaction.reply({
     content: `🎉 You have successfully entered the giveaway for **${giveaway.prize}**!${bonusText}`,
-    ephemeral: true,
+    flags: MessageFlags.Ephemeral,
   });
 }
