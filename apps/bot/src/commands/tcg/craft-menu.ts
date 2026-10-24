@@ -5,6 +5,7 @@ import {
   EmbedBuilder,
   StringSelectMenuBuilder,
   type Message,
+  MessageFlags,
 } from 'discord.js';
 import type { CommandContext } from '@ririko/discord';
 import {
@@ -274,7 +275,7 @@ export async function openCraftMenu(
     if (interaction.user.id !== userId) {
       await interaction.reply({
         content: '⏳ This crafting menu belongs to someone else.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PermissionFlagsBits } from 'discord.js';
+import { PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { createGiveawayCommands, parseGiveawayDuration } from '../giveaway.command.js';
 import { handleGiveawayButtonInteraction } from '../components.js';
 import type { BotServices } from '../../../services.js';
@@ -350,7 +350,7 @@ describe('Giveaway Commands & Components Suite (TASK-0902)', () => {
       expect(mockInteraction.reply).toHaveBeenCalledWith(
         expect.objectContaining({
           content: expect.stringContaining('successfully entered'),
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         }),
       );
     });
@@ -369,7 +369,7 @@ describe('Giveaway Commands & Components Suite (TASK-0902)', () => {
       expect(mockInteraction.reply).toHaveBeenCalledWith(
         expect.objectContaining({
           content: expect.stringContaining('already entered'),
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         }),
       );
     });
@@ -393,7 +393,7 @@ describe('Giveaway Commands & Components Suite (TASK-0902)', () => {
       expect(mockInteraction.reply).toHaveBeenCalledWith(
         expect.objectContaining({
           content: expect.stringContaining('too new'),
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         }),
       );
     });

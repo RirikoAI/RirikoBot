@@ -5,6 +5,7 @@ import {
   ButtonStyle,
   StringSelectMenuBuilder,
   type Message,
+  MessageFlags,
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
@@ -379,7 +380,10 @@ async function handleInventory(
 
   collector.on('collect', async (interaction) => {
     if (interaction.user.id !== ctx.user.id) {
-      await interaction.reply({ content: '⏳ This is not your inventory!', ephemeral: true });
+      await interaction.reply({
+        content: '⏳ This is not your inventory!',
+        flags: MessageFlags.Ephemeral,
+      });
       return;
     }
 
@@ -437,7 +441,7 @@ async function handleInventory(
         } catch (err: unknown) {
           await interaction.reply({
             content: `❌ Error using item: ${err instanceof Error ? err.message : String(err)}`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
         return;
@@ -476,7 +480,7 @@ async function handleInventory(
         } catch (err: unknown) {
           await interaction.reply({
             content: `❌ **Enhancement Failed**: ${err instanceof Error ? err.message : String(err)}`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
         return;

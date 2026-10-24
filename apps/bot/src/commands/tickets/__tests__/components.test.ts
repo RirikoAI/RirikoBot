@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ChannelType } from 'discord.js';
+import { ChannelType, MessageFlags } from 'discord.js';
 import {
   TICKET_CLAIM_BUTTON_ID,
   TICKET_CLOSE_BUTTON_ID,
@@ -128,7 +128,7 @@ describe('ticket buttons and modals (TASK-1984)', () => {
     it('Claim calls the service and answers privately', async () => {
       const interaction = makeInteraction(TICKET_CLAIM_BUTTON_ID);
       await handleTicketButton(interaction, services);
-      expect(interaction.deferReply).toHaveBeenCalledWith({ ephemeral: true });
+      expect(interaction.deferReply).toHaveBeenCalledWith({ flags: MessageFlags.Ephemeral });
       expect(ticketService.claim).toHaveBeenCalledWith(MEMBER, ticketChannel);
       expect(answer(interaction)).toBe('You claimed this ticket.');
     });
@@ -175,7 +175,10 @@ describe('ticket buttons and modals (TASK-1984)', () => {
       const interaction = makeInteraction(TICKET_OPEN_BUTTON_ID, { inGuild: () => false });
       await handleTicketButton(interaction, services);
       expect(interaction.reply).toHaveBeenCalledWith(
-        expect.objectContaining({ ephemeral: true, content: expect.stringContaining('server') }),
+        expect.objectContaining({
+          flags: MessageFlags.Ephemeral,
+          content: expect.stringContaining('server'),
+        }),
       );
       expect(interaction.showModal).not.toHaveBeenCalled();
     });
@@ -201,7 +204,7 @@ describe('ticket buttons and modals (TASK-1984)', () => {
     it('the subject modal defers, opens the ticket and links the channel', async () => {
       const interaction = makeInteraction(TICKET_OPEN_MODAL_ID, {}, { subject: 'Cannot log in' });
       await handleTicketModal(interaction, services);
-      expect(interaction.deferReply).toHaveBeenCalledWith({ ephemeral: true });
+      expect(interaction.deferReply).toHaveBeenCalledWith({ flags: MessageFlags.Ephemeral });
       expect(ticketService.open).toHaveBeenCalledWith(MEMBER, 'Cannot log in');
       expect(answer(interaction)).toBe('Your ticket is ready: <#new-chan>.');
     });
@@ -232,7 +235,7 @@ describe('ticket buttons and modals (TASK-1984)', () => {
     it('the reason modal closes the ticket with the typed reason', async () => {
       const interaction = makeInteraction(TICKET_CLOSE_MODAL_ID, {}, { reason: 'Solved' });
       await handleTicketModal(interaction, services);
-      expect(interaction.deferReply).toHaveBeenCalledWith({ ephemeral: true });
+      expect(interaction.deferReply).toHaveBeenCalledWith({ flags: MessageFlags.Ephemeral });
       expect(ticketService.close).toHaveBeenCalledWith(MEMBER, ticketChannel, 'Solved');
       expect(answer(interaction)).toBe('Ticket #0003 is closed. The transcript is in <#log-1>.');
     });
@@ -271,7 +274,9 @@ describe('ticket buttons and modals (TASK-1984)', () => {
     it('refuses outside a server and ignores unknown modals', async () => {
       const outside = makeInteraction(TICKET_OPEN_MODAL_ID, { inGuild: () => false });
       await handleTicketModal(outside, services);
-      expect(outside.reply).toHaveBeenCalledWith(expect.objectContaining({ ephemeral: true }));
+      expect(outside.reply).toHaveBeenCalledWith(
+        expect.objectContaining({ flags: MessageFlags.Ephemeral }),
+      );
       expect(outside.deferReply).not.toHaveBeenCalled();
 
       const unknown = makeInteraction('ticket:modal:other');

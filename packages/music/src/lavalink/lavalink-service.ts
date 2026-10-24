@@ -1,8 +1,13 @@
 import { EventEmitter } from 'node:events';
-import { LavalinkManager, type Player, EQList } from 'lavalink-client';
+import { LavalinkManager, type LavalinkNodeOptions, type Player, EQList } from 'lavalink-client';
 import type { AudioFilterName, LoopMode, QueueState, QueuedTrack } from '../queue/types.js';
 import type { PlayOptions, PlayResult } from '../player/types.js';
 import type { LavalinkClientOptions } from './types.js';
+
+const PRIMARY_NODE_ID = 'primary-node';
+const NODE_RECONNECT_FAIL = 'NodeReconnectFail';
+const RECONNECT_BASE_DELAY_MS = 30_000;
+const RECONNECT_MAX_DELAY_MS = 300_000;
 
 export function lavalinkTrackToQueuedTrack(track: any, requester?: any): QueuedTrack {
   const info = track?.info || {};
@@ -196,6 +201,10 @@ export class LavalinkService extends EventEmitter {
   private sendToShardFn?: ((guildId: string, payload: unknown) => void) | undefined;
   private readonly options: LavalinkClientOptions;
   private readonly queueAdapters = new Map<string, LavalinkQueueAdapter>();
+  private readonly nodeOptions: LavalinkNodeOptions;
+  private reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+  private reconnectAttempt = 0;
+  private isDestroyed = false;
 
   constructor(options: LavalinkClientOptions = {}) {
     super();
@@ -208,16 +217,16 @@ export class LavalinkService extends EventEmitter {
 
     this.sendToShardFn = options.sendToShard;
 
+    this.nodeOptions = {
+      id: PRIMARY_NODE_ID,
+      host,
+      port,
+      authorization: password,
+      secure,
+    };
+
     this.manager = new LavalinkManager({
-      nodes: [
-        {
-          id: 'primary-node',
-          host,
-          port,
-          authorization: password,
-          secure,
-        },
-      ],
+      nodes: [this.nodeOptions],
       sendToShard: (guildId, payload) => {
         if (this.sendToShardFn) {
           this.sendToShardFn(guildId, payload);
@@ -243,6 +252,7 @@ export class LavalinkService extends EventEmitter {
   private wireManagerEvents(): void {
     this.manager.nodeManager.on('connect', (node) => {
       this.isConnectedNode = true;
+      this.stopReconnecting();
       console.log(
         `[LavalinkService] Connected to Lavalink node: ${node.options.host}:${node.options.port}`,
       );
@@ -263,6 +273,12 @@ export class LavalinkService extends EventEmitter {
         `[LavalinkService] Lavalink node error: ${node.options.host}:${node.options.port}:`,
         error.message,
       );
+    });
+
+    // lavalink-client retries a node a few times, then gives up and deletes it. From then on
+    // this service keeps trying in the background so music returns when Lavalink does.
+    this.manager.nodeManager.on('destroy', (_node, reason) => {
+      if (reason === NODE_RECONNECT_FAIL) this.scheduleReconnect();
     });
 
     // Player Event Bridges for Reactive Controller & Commands
@@ -286,6 +302,45 @@ export class LavalinkService extends EventEmitter {
       this.emit('stateChange', player.guildId, 'PLAYING', 'IDLE');
       this.queueAdapters.delete(player.guildId);
     });
+  }
+
+  private scheduleReconnect(): void {
+    if (this.isDestroyed || this.reconnectTimer) return;
+    const delayMs = Math.min(
+      RECONNECT_BASE_DELAY_MS * 2 ** this.reconnectAttempt,
+      RECONNECT_MAX_DELAY_MS,
+    );
+    this.reconnectAttempt += 1;
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = undefined;
+      this.attemptReconnect();
+    }, delayMs);
+    this.reconnectTimer.unref?.();
+  }
+
+  private attemptReconnect(): void {
+    console.log(
+      `[LavalinkService] Reconnecting to Lavalink node ${this.nodeOptions.host}:${this.nodeOptions.port} (attempt ${this.reconnectAttempt}, after the library gave up).`,
+    );
+    try {
+      const node = this.manager.nodeManager.createNode(this.nodeOptions);
+      if (!node.connected) node.connect();
+    } catch (err) {
+      console.warn('[LavalinkService] Lavalink reconnect attempt failed:', err);
+      this.scheduleReconnect();
+    }
+  }
+
+  private stopReconnecting(): void {
+    if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+    this.reconnectTimer = undefined;
+    this.reconnectAttempt = 0;
+  }
+
+  /** Stops the background reconnect loop. Call it when the service shuts down. */
+  destroy(): void {
+    this.isDestroyed = true;
+    this.stopReconnecting();
   }
 
   setSendToShard(fn: (guildId: string, payload: unknown) => void): void {

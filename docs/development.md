@@ -27,6 +27,7 @@ Run these commands in the repository folder. CircleCI runs the same checks (see 
 | `pnpm typecheck` | `tsc --noEmit` in every workspace package, and in the test-only projects. |
 | `pnpm test` | All Vitest tests, including the integration tests. |
 | `pnpm test:coverage` | The same tests with coverage. The report is in `coverage/index.html`. |
+| `pnpm test:file-coverage <files>` | Coverage of only the source files you name, against the project thresholds. Use it for the files a change adds ([testing.md](testing.md#41-coverage)). |
 | `pnpm test:integration` | Only the bot integration tests and the tests of the fake Discord API. |
 | `pnpm test:e2e` | Builds the dashboard, then runs the Playwright end-to-end tests. |
 

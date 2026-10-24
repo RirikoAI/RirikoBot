@@ -8,6 +8,7 @@ import {
 } from '@ririko/services';
 import { createGamesCommands } from '../index.js';
 import type { BotServices } from '../../../services.js';
+import { MessageFlags } from 'discord.js';
 
 /* Games run against the real engines, session manager and escrow service with an in-memory
  * economy stub. Randomness is pinned: Math.random is scripted per test and the RPS AI
@@ -267,7 +268,7 @@ describe('mini-game commands (TASK-1254)', () => {
         await collect(first);
         expect(first.reply).toHaveBeenCalledWith({
           content: expect.stringContaining('You picked **🪨 Rock**'),
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         expect(message.edit.mock.calls[0]![0].embeds[0].data.description).toContain(
           '• Alice: Chosen ✅\n• Bob: Thinking 🤔',
@@ -314,7 +315,7 @@ describe('mini-game commands (TASK-1254)', () => {
         await collect(spectator);
         expect(spectator.reply).toHaveBeenCalledWith({
           content: '❌ You are not a participant in this Rock-Paper-Scissors match!',
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         const stray = click('rps:choose:other-session:ROCK', 'user-1');
@@ -329,7 +330,7 @@ describe('mini-game commands (TASK-1254)', () => {
         await collect(again);
         expect(again.reply).toHaveBeenCalledWith({
           content: '❌ Player user-1 has already submitted a choice',
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       });
 
@@ -461,7 +462,7 @@ describe('mini-game commands (TASK-1254)', () => {
       await collect(early);
       expect(early.reply).toHaveBeenCalledWith({
         content: '⏳ It is not your turn!',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
 
       await collect(move(4, 'user-1'));
@@ -505,7 +506,7 @@ describe('mini-game commands (TASK-1254)', () => {
       await collect(late);
       expect(late.reply).toHaveBeenCalledWith({
         content: '⚠️ This game session has already ended or expired.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     });
 
@@ -677,7 +678,7 @@ describe('mini-game commands (TASK-1254)', () => {
       await collect(intruder);
       expect(intruder.reply).toHaveBeenCalledWith({
         content: '❌ This HighLow game belongs to someone else!',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       expect(intruder.update).not.toHaveBeenCalled();
     });

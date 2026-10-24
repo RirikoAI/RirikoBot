@@ -117,6 +117,7 @@ This document governs how AI agents collaborate, divide responsibilities, mainta
 7. **LLM Security Barrier**: The LLM is never the security boundary. Applications must mediate and enforce Discord permissions before executing any tool call.
 8. **Coverage Gate (merge blocker)**: Code that fails any coverage threshold is **NOT MERGED**. `pnpm test:coverage` must pass every threshold in `vitest.config.ts` (lines ≥ 80%, functions ≥ 81%, statements ≥ 79%, branches ≥ 68% as of 2026-10-03). CircleCI's `test` job enforces it. Never lower a threshold to get a build through; write real tests for the code you add or change. See [docs/testing.md §4.1](docs/testing.md).
 9. **Schema Changes Ship a Migration (merge blocker)**: every change to a Drizzle schema (`packages/database/src/schema/`) ships its generated migration for **both** dialects in the same change: run `pnpm db:generate` (see [docs/database.md](docs/database.md)), review the SQL and commit `packages/database/migrations/`, the embedded modules and the DDL files. Never edit a migration after it is released. A destructive change (`DROP TABLE`, `DROP COLUMN`, a rename, a column type change, `SET NOT NULL`) follows expand/contract: ship the additive step first, and put the destructive step in a later migration whose first line is `-- ririko:contract`, once no release still uses the old shape. `pnpm db:push` is a development shortcut and **never** runs against staging or production. CircleCI's `lint` job runs `pnpm db:check`, which fails a schema change without its migration, stale embedded modules and an unmarked destructive statement; its `test-postgres` job runs the PostgreSQL migration tests.
+10. **A New Source File Is Covered by Its Own Tests**: the whole-project gate in rule 8 lets an untested file hide behind the rest. A ticket that adds a source file (`packages/*/src` or `apps/*/src`) tests it in the same ticket, and grooming puts `pnpm test:file-coverage <the new files>` first in its `verify_cmd`. The script runs the tests that import those files and fails when the coverage of those files alone is below the thresholds in `vitest.config.ts`. See [docs/testing.md §4.1](docs/testing.md#41-coverage).
 
 ---
 
@@ -187,6 +188,11 @@ This document governs how AI agents collaborate, divide responsibilities, mainta
    - The `code-reviewer` agent has the authority to reject PRs for unhandled promises, missing error boundaries, or non-compliant typing.
 4. **Zero Legacy Mutation**:
    - The `.local/RirikoBot` repository is strictly immutable. If an agent attempts to edit files inside `.local/`, the action will be rejected.
+5. **Adding Commands**:
+   - A ticket that adds a command lists `apps/bot/src/command-set.ts` (where `registerBotCommands` registers it) and the `GUILD_SCOPED` list in `apps/bot/src/command-set.test.ts` (the commands that register per server, not globally) in its `context.files`, and says in its acceptance which of the two scopes the command uses.
+   - When a Story adds several commands, those two shared files change in its **first Task only**. That Task registers every command of the Story, so the later Tasks never edit them and never conflict with each other.
+6. **Check Facts Before You Write Them**:
+   - Grooming checks every constant, default, limit or name it writes into a ticket or note against the code, and cites where it found it. Example: the default command prefix is `!` (`DEFAULT_COMMAND_PREFIX` in `packages/core/src/config/guild-config.ts`), and the maintainer's own `.env` sets `$`, so what a running bot shows is not the default.
 
 ---
 
@@ -205,6 +211,7 @@ These rules add to section 1.7. Where they differ, this section wins.
 - **Branch names**: `feat/|fix/|chore/<TICKET-ID>-<slug>`. This project uses `feat/`, not the template's `feature/`.
 - **Grouped batches**: commits and PRs correspond to a complete Story, Bug, or Epic. Standalone chores are the exception.
 - **Maintainer merge gate**: agents push branches and open PRs only after the user confirms (section 1.7). The maintainer verifies the PR and merges it after CI passes. Agents never merge PRs.
+- **Releases**: agents run the whole release by default with the `/release` skill and the `pnpm release:*` scripts ([docs/release.md](docs/release.md) section 4.1). That covers plan mode, the version bump on `develop`, the release PR, the tag, waiting for the images, the GitHub release and moving `latest`. The maintainer merges the release PR and approves production. Release by hand (section 4.2) only when the maintainer asks for it.
 
 ---
 

@@ -11,6 +11,7 @@ import {
 } from './index.js';
 import { handleAiConsentButton } from './privacy/ai-consent.js';
 import type { BotServices } from './services.js';
+import { MessageFlags } from 'discord.js';
 
 export interface ComponentInteractionOptions {
   services: BotServices;
@@ -68,7 +69,7 @@ export function registerComponentInteractions(
               guild,
               member as GuildMember,
             );
-            await interaction.reply({ content: res.message, ephemeral: true });
+            await interaction.reply({ content: res.message, flags: MessageFlags.Ephemeral });
           }
           return;
         }

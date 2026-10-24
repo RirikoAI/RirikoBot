@@ -3,6 +3,7 @@ import type { WaifuImImage } from '@ririko/services';
 import type { BotServices } from '../../../services.js';
 import { WAIFU_REROLL_ID, buildWaifuEmbed, createWaifuCommand } from '../waifu.command.js';
 import { buttonInteraction, flush, makeContext } from './helpers.js';
+import { MessageFlags } from 'discord.js';
 
 const image = (id: number, overrides: Partial<WaifuImImage> = {}): WaifuImImage => ({
   id,
@@ -68,7 +69,9 @@ describe('/waifu (TASK-1441)', () => {
     const intruder = buttonInteraction(WAIFU_REROLL_ID, 'user-2');
     collector.emit('collect', intruder);
     await flush();
-    expect(intruder.reply).toHaveBeenCalledWith(expect.objectContaining({ ephemeral: true }));
+    expect(intruder.reply).toHaveBeenCalledWith(
+      expect.objectContaining({ flags: MessageFlags.Ephemeral }),
+    );
 
     const owner = buttonInteraction(WAIFU_REROLL_ID);
     collector.emit('collect', owner);

@@ -1,10 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { tokenizeCommandArgs } from './tokenizer.js';
 import { PrefixOptionsResolver, SlashOptionsResolver } from './options.js';
-import { PrefixCommandContext, SlashCommandContext } from './context.js';
+import { PrefixCommandContext, SlashCommandContext, withEphemeralFlag } from './context.js';
 import type { CommandOptionDefinition } from './types.js';
 import { ValidationError } from '@ririko/core';
 import type { ChatInputCommandInteraction, Client, Message, User } from 'discord.js';
+import { MessageFlags } from 'discord.js';
 
 describe('Command Argument Tokenizer (TASK-0311)', () => {
   it('tokenizes simple whitespace-separated words', () => {
@@ -215,7 +216,7 @@ describe('Unified CommandContext (TASK-0311)', () => {
     expect(mockReply).toHaveBeenCalledWith('Pong!');
 
     await ctx.deferReply({ ephemeral: true });
-    expect(mockDefer).toHaveBeenCalledWith({ ephemeral: true });
+    expect(mockDefer).toHaveBeenCalledWith({ flags: MessageFlags.Ephemeral });
   });
 
   it('normalizes PrefixCommandContext properly', async () => {
@@ -308,5 +309,68 @@ describe('Unified CommandContext (TASK-0311)', () => {
     const ctx = new PrefixCommandContext(mockMessage, 'ping', '!', [], [], '  PING  ');
 
     expect(ctx.invokedName).toBe('ping');
+  });
+});
+
+describe('withEphemeralFlag (CHORE-2014)', () => {
+  it('leaves strings, missing options and options without ephemeral unchanged', () => {
+    const plain = { content: 'hi' };
+    expect(withEphemeralFlag('hi')).toBe('hi');
+    expect(withEphemeralFlag(undefined)).toBeUndefined();
+    expect(withEphemeralFlag(plain)).toBe(plain);
+  });
+
+  it('turns ephemeral: true into the ephemeral message flag and drops the option', () => {
+    const result = withEphemeralFlag({ content: 'hi', ephemeral: true });
+    expect(result).toEqual({ content: 'hi', flags: MessageFlags.Ephemeral });
+    expect('ephemeral' in result).toBe(false);
+  });
+
+  it('drops ephemeral: false without adding a flag', () => {
+    expect(withEphemeralFlag({ content: 'hi', ephemeral: false })).toEqual({ content: 'hi' });
+  });
+
+  it('keeps flags the caller already set', () => {
+    expect(withEphemeralFlag({ ephemeral: true, flags: MessageFlags.SuppressEmbeds })).toEqual({
+      flags: MessageFlags.SuppressEmbeds | MessageFlags.Ephemeral,
+    });
+    expect(withEphemeralFlag({ ephemeral: true, flags: [MessageFlags.SuppressEmbeds] })).toEqual({
+      flags: [MessageFlags.SuppressEmbeds, MessageFlags.Ephemeral],
+    });
+    expect(withEphemeralFlag({ ephemeral: true, flags: 'SuppressEmbeds' })).toEqual({
+      flags: ['SuppressEmbeds', MessageFlags.Ephemeral],
+    });
+  });
+
+  it('converts ephemeral for slash replies, follow-ups and deferred replies', async () => {
+    const reply = vi.fn().mockResolvedValue(undefined);
+    const followUp = vi.fn().mockResolvedValue(undefined);
+    const interaction = {
+      id: 'i1',
+      commandName: 'ping',
+      client: {},
+      guild: null,
+      guildId: null,
+      channel: null,
+      channelId: 'ch1',
+      user: { id: 'u1' },
+      member: null,
+      replied: false,
+      deferred: false,
+      reply,
+      followUp,
+      options: { getString: vi.fn() },
+    } as unknown as ChatInputCommandInteraction;
+    const ctx = new SlashCommandContext(interaction);
+
+    await ctx.reply({ content: 'first', ephemeral: true });
+    expect(reply).toHaveBeenCalledWith({ content: 'first', flags: MessageFlags.Ephemeral });
+
+    await ctx.followUp({ content: 'second', ephemeral: true });
+    expect(followUp).toHaveBeenCalledWith({ content: 'second', flags: MessageFlags.Ephemeral });
+
+    (interaction as unknown as { replied: boolean }).replied = true;
+    await ctx.reply({ content: 'third', ephemeral: true });
+    expect(followUp).toHaveBeenLastCalledWith({ content: 'third', flags: MessageFlags.Ephemeral });
   });
 });

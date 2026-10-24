@@ -8,6 +8,7 @@ import {
 } from '@ririko/database';
 import { createCardsCommand } from '../cards.command.js';
 import type { BotServices } from '../../../services.js';
+import { MessageFlags } from 'discord.js';
 
 /* /cards against a real in-memory database, driven through a fake message and collector. */
 
@@ -277,7 +278,7 @@ describe('/cards interactive album (TASK-1254)', () => {
       await collect(intruder);
       expect(intruder.reply).toHaveBeenCalledWith({
         content: '⏳ This is not your card album! Run `/cards` to open your own.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       expect(collector.resetTimer).not.toHaveBeenCalled();
 
@@ -356,7 +357,7 @@ describe('/cards interactive album (TASK-1254)', () => {
       await collect(unknown);
       expect(unknown.reply).toHaveBeenCalledWith({
         content: '❌ Card not found in album.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     });
 
@@ -388,7 +389,7 @@ describe('/cards interactive album (TASK-1254)', () => {
       await collect(refused);
       expect(refused.reply).toHaveBeenCalledWith({
         content: '❌ Cannot equip card locked in `IN_TRADE`.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       expect((await cardRepo.findUserCardById(locked.id))?.state).toBe('IN_TRADE');
 
@@ -396,7 +397,7 @@ describe('/cards interactive album (TASK-1254)', () => {
       await collect(unknown);
       expect(unknown.reply).toHaveBeenCalledWith({
         content: '❌ Card not found.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     });
 
@@ -416,7 +417,7 @@ describe('/cards interactive album (TASK-1254)', () => {
       await collect(unknown);
       expect(unknown.reply).toHaveBeenCalledWith({
         content: '❌ Card not found.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     });
 

@@ -7,6 +7,7 @@ import {
   type ButtonInteraction,
   type StringSelectMenuInteraction,
   type Message,
+  MessageFlags,
 } from 'discord.js';
 import type { CommandContext } from '@ririko/discord';
 import {
@@ -312,7 +313,7 @@ export class DungeonBattleManager {
       if (interaction.user.id !== ctx.user.id) {
         await interaction.reply({
           content: '⏳ This is not your dungeon battle!',
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -331,7 +332,7 @@ export class DungeonBattleManager {
           await interaction.reply({
             content:
               '⚠️ You can only use 1 potion per turn! Complete your turn with Attack, Skill, or Defend first.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -340,7 +341,7 @@ export class DungeonBattleManager {
         if (!invItem || invItem.userId !== ctx.user.id || invItem.quantity <= 0) {
           await interaction.reply({
             content: '❌ That potion is no longer available in your inventory!',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -349,7 +350,7 @@ export class DungeonBattleManager {
         if (!gameItem) {
           await interaction.reply({
             content: '❌ Item definition not found.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -476,7 +477,7 @@ export class DungeonBattleManager {
       if (customId === 'dungeon:action:status') {
         await interaction.reply({
           content: 'ℹ️ Use `/dungeon status` or `$tower` to inspect full seasonal tower standing.',
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }

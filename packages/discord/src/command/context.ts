@@ -1,3 +1,4 @@
+import { MessageFlags } from 'discord.js';
 import type {
   ChatInputCommandInteraction,
   MessageContextMenuCommandInteraction,
@@ -22,6 +23,29 @@ import type {
   ICommandOptionsResolver,
 } from './types.js';
 import { SlashOptionsResolver, PrefixOptionsResolver } from './options.js';
+
+/**
+ * Turns the legacy `ephemeral` option into `flags: MessageFlags.Ephemeral`. discord.js v15
+ * drops `ephemeral` from reply options, and v14 prints a deprecation warning for it. Command
+ * code keeps writing `ephemeral: true`; this is the one place that converts it for interactions.
+ * Strings, payload objects and options without `ephemeral` pass through unchanged.
+ */
+export function withEphemeralFlag<T>(options: T): T {
+  if (typeof options !== 'object' || options === null || !('ephemeral' in options)) {
+    return options;
+  }
+  const { ephemeral, ...rest } = options as Record<string, unknown>;
+  if (ephemeral !== true) return rest as T;
+  const current = rest['flags'];
+  if (current === undefined || current === null) {
+    return { ...rest, flags: MessageFlags.Ephemeral } as T;
+  }
+  if (typeof current === 'number') {
+    return { ...rest, flags: current | MessageFlags.Ephemeral } as T;
+  }
+  const list = Array.isArray(current) ? current : [current];
+  return { ...rest, flags: [...list, MessageFlags.Ephemeral] } as T;
+}
 
 /**
  * CommandContext implementation wrapping a Discord Slash Command interaction.
@@ -79,17 +103,17 @@ class InteractionCommandContext<
   ): Promise<Message | InteractionResponse> {
     if (this.interaction.deferred || this.interaction.replied) {
       return await this.interaction.followUp(
-        options as string | MessagePayload | InteractionReplyOptions,
+        withEphemeralFlag(options) as string | MessagePayload | InteractionReplyOptions,
       );
     }
     return await this.interaction.reply(
-      options as string | MessagePayload | InteractionReplyOptions,
+      withEphemeralFlag(options) as string | MessagePayload | InteractionReplyOptions,
     );
   }
 
   public async deferReply(options?: { ephemeral?: boolean }): Promise<void> {
     if (!this.interaction.deferred && !this.interaction.replied) {
-      await this.interaction.deferReply(options);
+      await this.interaction.deferReply(withEphemeralFlag(options));
     }
   }
 
@@ -103,7 +127,7 @@ class InteractionCommandContext<
     options: string | MessagePayload | InteractionReplyOptions | MessageReplyOptions,
   ): Promise<Message> {
     return await this.interaction.followUp(
-      options as string | MessagePayload | InteractionReplyOptions,
+      withEphemeralFlag(options) as string | MessagePayload | InteractionReplyOptions,
     );
   }
 

@@ -2,7 +2,7 @@
 
 This guide is for the maintainer. It explains how to publish a release, how to deploy it to staging and production, and how to recover when a deploy fails.
 
-**Agents never push, retag or log in to Docker Hub. They never create release tags, never move `latest` and never approve a deploy.** They prepare the code and the documents. The maintainer does every step below.
+**Agents run the release by default, with the scripts in section 4.1.** That covers the version bump, the release pull request, the tag, waiting for the images, the GitHub release and moving `latest`. The maintainer merges the release pull request and approves the production deploy; agents never do either. When the maintainer asks to release by hand, agents only prepare the code and the documents, and the maintainer follows section 4.2.
 
 For launch day, follow the checklist in section 10. For the npm package (`npx ririko`), follow section 11.
 
@@ -36,13 +36,32 @@ CircleCI has no branch filters for releases: the `release` workflow runs for `v*
 
 Open pull requests move to `develop` by themselves when the maintainer renames the branch on GitHub.
 
+## When to Release
+
+`master` moves only with a release, so it always matches the newest tag. Never merge `develop` into `master` without tagging it. The reasons:
+
+- **Docs**: the docs site is built from `master`. Untagged changes there would document commands that no one can run yet.
+- **Images**: Docker images are built only from a `v*` tag, so `master` without a tag gives self-hosters nothing.
+- **Version numbers**: they change only inside `pnpm release:prepare`, never in a commit of their own.
+
+| Change on `develop` | What to do |
+|---|---|
+| Internal only: Kanban board, CI, agent rules, release scripts, tests, refactors | No release. It stays on `develop` and ships with the next release, as a short "Maintenance" line in the notes or not at all. |
+| User-facing bug fix, urgent: a crash, a security issue, data loss, a feature that is down | Patch release (`x.y.Z`) as soon as it is merged. |
+| User-facing bug fix, minor | Collect them. Release a patch within about a week, or with the next feature if that comes first. |
+| New feature, command, setting or migration | Minor release (`x.Y.0`). |
+| Breaking change to commands, settings or data | Major release (`X.0.0`) with upgrade notes. |
+| Docs only | It stays on `develop` and reaches the site with the next release. If a wrong doc is hurting users now, cut a patch. |
+
+The `/release` skill proposes the version from this table.
+
 ## How Releases Work
 
 - The CircleCI `release` workflow (`.circleci/config.yml`) runs only for git tags such as `v2.1.3` or `v2.1.3-beta.1`. A branch push never starts it.
 - The workflow builds `bot-runner` and `web-runner`. It runs `scripts/docker-smoke.ts` on both images. Then it pushes them to Docker Hub:
   - `ririkoai/ririkobot` and `ririkoai/ririkobot-dashboard`;
   - with the tags `2.1.3`, `2.1` and `2` for a release, or only `2.1.3-beta.1` for a prerelease (`scripts/release-tags.ts`).
-- The workflow never pushes `latest`. You move `latest` by hand (section 6).
+- The workflow never pushes `latest`. `pnpm release:publish` moves it after the images are pushed (section 4.1), or you move it by hand (section 6).
 - The Docker Hub login comes from the CircleCI context `dockerhub`.
 - After the push, the workflow deploys. `deploy-staging` runs for every release tag. For a final tag `vX.Y.Z`, the workflow then waits for your approval and runs `deploy-production` (section 8).
 
@@ -99,6 +118,44 @@ The package version inside that image is 1.4.1. If you want that tag too, repeat
 
 ## 4. Publish a Release
 
+### 4.1. With the Scripts (Default)
+
+An agent runs these steps with the `/release` skill (`.claude/skills/release/SKILL.md`). You can run the same commands yourself.
+
+**Before you start**: `gh` is signed in with the right to push `develop` and tags, and `docker` is signed in to Docker Hub as an account that can push to `ririkoai`.
+
+1. **Plan.** The release starts in plan mode. Draft the notes:
+
+   ```bash
+   pnpm release:notes 2.2.0
+   ```
+
+   The draft is in `.local/release-notes-v2.2.0.md` (git ignores it). The plan names the version and why, the features, tickets, fixes, migrations and Discord or settings changes, and holds the edited notes. The maintainer approves the plan.
+
+2. **Prepare.** On a clean, up-to-date `develop`, first check the steps with a dry run:
+
+   ```bash
+   pnpm release:prepare 2.2.0 --notes .local/release-notes-v2.2.0.md --dry-run
+   ```
+
+   Then run it without `--dry-run`. It sets the version in every file that holds it, builds and tests, commits the version to `develop`, pushes it, and opens the pull request from `develop` to `master`. If a check fails, nothing is committed and the version change stays in the working tree: revert it and run again.
+
+3. **Merge.** The maintainer merges the pull request with a **merge commit**, not a squash.
+
+4. **Publish.** Check the steps with a dry run, then run it without `--dry-run`:
+
+   ```bash
+   pnpm release:publish 2.2.0 --dry-run
+   ```
+
+   It tags `v2.2.0` on `master`, pushes the tag, waits until both images have the tags `2.2.0`, `2.2` and `2` on Docker Hub, and only then publishes the GitHub release and moves `latest` of both images. Each step is skipped when it is already done, so you can run it again after a failure.
+
+5. **Deploy.** Staging deploys by itself (section 8). The maintainer checks staging and approves production.
+
+### 4.2. By Hand
+
+Use these steps when the maintainer asks to release by hand, or when a script cannot run.
+
 1. Merge `develop` into `master` with a pull request, so `master` holds the release.
 2. Check that `package.json` has the version you are about to tag.
 3. Optional: publish a prerelease first. A prerelease checks the pipeline and does not move the tag `2`:
@@ -150,7 +207,7 @@ The package version inside that image is 1.4.1. If you want that tag too, repeat
 
    The last command still shows the 1.4.0 digest.
 
-9. Publish a GitHub release for the tag. Add a link to `docs/upgrading-from-1.4.md` in the notes.
+9. Publish a GitHub release for the tag only after step 8 shows both images. A release published earlier points `npx ririko --docker` to images that do not exist yet. Add a link to `docs/upgrading-from-1.4.md` in the notes.
 
 If the workflow fails, fix the cause and run it again in CircleCI. A new run pushes the same tags again from the same commit. Never use a version number for a different commit. Tag a new patch version instead.
 
@@ -199,7 +256,7 @@ Do this on the announced date. It points `latest` to the current 2.x release, by
 
 5. In `docs/dockerhub/` and on Docker Hub, change the tag tables: `latest` is now 2.x.
 
-Later releases do not move `latest`. Repeat this section after a release if `latest` must follow it.
+Since 2.0.1, `latest` follows every release. `pnpm release:publish` moves it (section 4.1). Use this section only for a release made by hand.
 
 ## 7. Move `latest` Back to 1.4.0
 
@@ -297,7 +354,7 @@ Then limit who can deploy to production:
 
 A job that uses a restricted context runs only for a member of the group. A collaborator who is not a maintainer cannot make production deploy, even if they click **Approve**. The approval job has no context of its own, so the restriction on `deploy-production` is what protects it. Restricting the staging contexts is optional.
 
-Agents never create these contexts, push tags or approve a deploy.
+Agents never create these contexts or approve a deploy. They push a release tag only through `pnpm release:publish` (section 4.1).
 
 ### 8.3. What the Job Does
 
@@ -641,7 +698,7 @@ Production starts with an empty database. The first deploy runs the migrations f
 
 ### 10.1. Before You Tag
 
-1. **Maintainer.** Check that the release is on `master` and that its version is right. Update `master` (section 4, step 4), then print the version:
+1. **Maintainer.** Check that the release is on `master` and that its version is right. Update `master` (section 4.2, step 4), then print the version:
 
    ```bash
    node -p "require('./package.json').version"
@@ -722,7 +779,7 @@ Production starts with an empty database. The first deploy runs the migrations f
 
 ### 10.2. Tag and Approve
 
-12. **Maintainer.** Create and push the release tag from `master` (section 4, steps 4 to 6):
+12. **Coordinator (default), or the maintainer for a release by hand.** Create and push the release tag from `master` (section 4.2, steps 4 to 6), or run `pnpm release:publish` (section 4.1), which also covers steps 22 and 23:
 
     ```bash
     git checkout master
@@ -812,7 +869,7 @@ Production starts with an empty database. The first deploy runs the migrations f
 
     Check: `journalctl -u ririko-backup` ends without an error, and the monitor of `BACKUP_PING_URL` shows a ping. The monitor of `HEALTHCHECK_PING_URL` shows a ping every minute.
 
-22. **Maintainer.** Check the Docker Hub tags (section 4, step 8).
+22. **Maintainer.** Check the Docker Hub tags (section 4.2, step 8).
 
     Check: `ririkoai/ririkobot:2.0.0` and `ririkoai/ririkobot-dashboard:2` show a manifest, and `ririkoai/ririkobot:latest` still shows the 1.4.0 digest.
 
@@ -820,7 +877,7 @@ Production starts with an empty database. The first deploy runs the migrations f
 
 All of these steps are the maintainer's. The texts are written already. Paste them from the file named in each step.
 
-23. **Maintainer.** Publish a GitHub release for the tag (section 4, step 9). Add a link to `docs/upgrading-from-1.4.md` in the notes.
+23. **Maintainer.** Publish a GitHub release for the tag (section 4.2, step 9). Add a link to `docs/upgrading-from-1.4.md` in the notes.
 
     Check: the release shows on the **Releases** page of the repository.
 
