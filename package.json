@@ -46,6 +46,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:file-coverage": "tsx scripts/file-coverage.ts",
     "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml",
     "test:postgres": "vitest run packages/database/src packages/services/src",
     "test:integration": "vitest run apps/bot/test/ tests/support/",
