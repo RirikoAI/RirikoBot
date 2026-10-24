@@ -16118,6 +16118,70 @@
         "BUG-0053"
       ],
       "status": "DONE"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "BUG-0054",
+      "parent": null,
+      "points": 5,
+      "title": "Profile Card Text Too Small, Emoji Drawn as Boxes and the Equipped Card Never Shown",
+      "description": "Found 2026-10-24 by the maintainer on a live /profile. The card is drawn at 1200x400 with 11 to 16 px text, and Discord shows it at about 57% size, so most text cannot be read. The five emoji (wallet, bank, total XP, karma, card slot) draw as empty boxes, because no canvas font has emoji glyphs (the Docker image installs only fonts-dejavu-core). The profile command never passes equippedCard, so the slot always says NO CARD EQUIPPED, and its hint names /tcg equip, which is not a slash command (the action is /card action:equip). Grooming also found: the presence dot is hard-coded to online (the bot has no GuildPresences intent), the name is the account name instead of the server nickname, and a custom background is stretched to 1200x400 instead of cropped.",
+      "context": {
+        "files": [
+          "packages/services/src/economy/profile-card.renderer.ts",
+          "packages/services/src/economy/profile-card.renderer.test.ts",
+          "packages/services/src/economy/types.ts",
+          "apps/bot/src/commands/economy/commands.ts",
+          "apps/bot/src/commands/economy/commands.test.ts",
+          "docs/economy.md"
+        ],
+        "symbols": [
+          "ProfileCardRenderer.renderProfileCard",
+          "ProfileCardRenderer.renderFromRepositories",
+          "ProfileCardRenderer.drawBackground",
+          "ProfileCardRenderer.drawAvatarSection",
+          "ProfileCardRenderer.drawMiddleSection",
+          "ProfileCardRenderer.drawStatCard",
+          "ProfileCardRenderer.drawRankBadge",
+          "ProfileCardRenderer.drawProgressBarSection",
+          "ProfileCardRenderer.drawTcgCardSlot",
+          "EquippedTcgCardView",
+          "ProfileCardData",
+          "ProfileCardRenderOptions",
+          "createEconomyCommands",
+          "CardImageService.getCardImage",
+          "getCardAttribution"
+        ],
+        "entry_points": [
+          "profileCommand.execute in createEconomyCommands (apps/bot/src/commands/economy/commands.ts)"
+        ],
+        "codegraph_queries": [
+          "ProfileCardRenderer renderProfileCard renderFromRepositories drawTcgCardSlot drawStatCard drawBackground",
+          "createEconomyCommands profileCommand profileCardRenderer.renderFromRepositories",
+          "CardImageService getCardImage attachCardImage getCardAttribution buildCardInspectEmbed"
+        ]
+      },
+      "acceptance": [
+        "No string drawn on the profile card contains an emoji or pictographic character: the wallet, bank, total XP, karma and card-slot icons are drawn with canvas paths. A renderer test records every fillText call and checks this for the empty-slot, equipped-card and custom-background renders.",
+        "Every text drawn on the card is at least 20 px, and the main values (wallet, bank, total XP, level) are at least 30 px, on the unchanged 1200x400 canvas. The same test checks the font size of every fillText call. The bottom watermark is removed.",
+        "/profile and !profile show the target's EQUIPPED Waifu TCG card: the command loads the full card PNG with cardImageService.getCardImage, with the same attributionText and maxCollectionNumber as /card inspect, and the renderer draws it contain-fit in a 2:3 slot. A failure to load the card logs a warning and the profile still posts without it. An empty slot shows the hint /card action:equip.",
+        "The presence dot is drawn only when the target's real presence is known (GuildMember.presence); it is never hard-coded. The name is the target's server display name when the member is available, otherwise their global display name, otherwise their username.",
+        "A custom background keeps its aspect ratio: it is scaled to cover 1200x400 and cropped at the centre, never stretched.",
+        "Tests cover the equipped card (getCardImage spied, so nothing is written to public/cards), the card render failure, no equipped card, the member display name and presence, and the background crop. pnpm test:file-coverage passes for profile-card.renderer.ts (its branch coverage is 54% today).",
+        "docs/economy.md says the profile card shows the equipped card and how to equip one."
+      ],
+      "verify_cmd": "pnpm build && pnpm test:file-coverage packages/services/src/economy/profile-card.renderer.ts && pnpm vitest run packages/services/src/economy apps/bot/src/commands/economy && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "model": "medium",
+      "handovers": [
+        "BUG-0054"
+      ],
+      "status": "DONE"
     }
   ],
   "active_in_progress_ticket": null

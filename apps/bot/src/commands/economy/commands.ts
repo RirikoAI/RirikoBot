@@ -1,6 +1,35 @@
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
+import { getCardAttribution, type EquippedTcgCardView } from '@ririko/services';
 import type { BotServices } from '../../services.js';
 import { recordAchievementProgress } from '../tcg/achievement-progress.js';
+
+/**
+ * Loads the user's EQUIPPED Waifu TCG card as the full card PNG, the same image `/card inspect`
+ * shows (same attribution text and collection size, so a profile view never caches a card
+ * without its source credit). Any failure logs a warning and returns undefined, so the profile
+ * still posts without the card.
+ */
+async function loadEquippedCard(
+  services: BotServices,
+  userId: string,
+): Promise<EquippedTcgCardView | undefined> {
+  try {
+    const [userCard] = await services.waifuCardRepo.listUserCards(userId, { state: 'EQUIPPED' });
+    if (!userCard) return undefined;
+    const base = await services.waifuCardRepo.findById(userCard.cardId);
+    if (!base) return undefined;
+    const asset = base.assetId ? await services.waifuAssetRepo.findById(base.assetId) : null;
+    const source = asset ? await services.waifuAssetRepo.findSourceById(asset.sourceId) : null;
+    const imageBuffer = await services.cardImageService.getCardImage(base, asset, {
+      attributionText: getCardAttribution(source).footerText,
+      maxCollectionNumber: await services.waifuCardRepo.count(),
+    });
+    return { id: userCard.id, name: base.name, rarity: base.rarity, imageBuffer };
+  } catch (err) {
+    console.warn(`[profile] Could not load the equipped card of ${userId}:`, err);
+    return undefined;
+  }
+}
 
 /**
  * Creates the complete suite of 11 dual-dispatch Economy commands with full Slash & Prefix parity:
@@ -404,14 +433,22 @@ export function createEconomyCommands(services: BotServices): Command[] {
         : undefined;
 
       try {
+        // The server nickname and the real presence come from the guild member, when known.
+        const member =
+          target.id === ctx.user.id ? ctx.member : await ctx.options.getMember('target');
+        const status = member?.presence?.status;
+        const presenceStatus = status === 'invisible' ? 'offline' : status;
+        const equippedCard = await loadEquippedCard(services, target.id);
+
         const buffer = await services.profileCardRenderer.renderFromRepositories(
           target.id,
           ctx.guild?.id,
           {
-            presenceStatus: 'online',
+            presenceStatus,
             username: target.username,
-            displayName: target.displayName ?? target.username,
+            displayName: member?.displayName ?? target.displayName ?? target.username,
             avatarUrl,
+            equippedCard,
           },
         );
 
