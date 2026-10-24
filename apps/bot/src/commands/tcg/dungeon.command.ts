@@ -6,6 +6,7 @@ import {
   ComponentType,
   type ButtonInteraction,
   type Message,
+  MessageFlags,
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
@@ -158,7 +159,10 @@ export function createDungeonCommand(services: BotServices): Command {
             });
             collector.on('collect', async (interaction: ButtonInteraction) => {
               if (interaction.user.id !== ctx.user.id) {
-                await interaction.reply({ content: '⏳ This is not your menu!', ephemeral: true });
+                await interaction.reply({
+                  content: '⏳ This is not your menu!',
+                  flags: MessageFlags.Ephemeral,
+                });
                 return;
               }
               collector.stop();
@@ -244,7 +248,7 @@ export function createDungeonCommand(services: BotServices): Command {
                 if (interaction.user.id !== ctx.user.id) {
                   await interaction.reply({
                     content: '⏳ This is not your menu!',
-                    ephemeral: true,
+                    flags: MessageFlags.Ephemeral,
                   });
                   return;
                 }

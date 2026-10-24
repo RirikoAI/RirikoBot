@@ -12,6 +12,7 @@ Run these commands before you open a pull request:
 | `pnpm build` | That the TypeScript build passes. |
 | `pnpm typecheck` | The types in every workspace package. |
 | `pnpm test:coverage` | All tests, with the coverage thresholds. |
+| `pnpm test:file-coverage <files>` | The coverage of only the source files you name (see [section 4.1](#41-coverage)). |
 | `pnpm test:e2e` | The end-to-end tests of the dashboard. |
 
 CI runs the same gate on every push (see [section 4](#4-continuous-integration)). `pnpm test:coverage` includes the bot integration suites. `pnpm test:integration` runs only those.
@@ -132,6 +133,11 @@ Git hooks (Husky, installed by `pnpm install`) run the lint checks locally:
 - **Merge gate (standing rule for every contributor and agent)**: a PR is **not merged** unless it passes every threshold in `vitest.config.ts` `coverage.thresholds`. The thresholds are lines 80%, functions 81%, statements 79% and branches 68%. The CircleCI `test` job fails below any of them. Run `pnpm test:coverage` before opening a PR, and cover the code you add or change with real tests.
 - `pnpm test:ci` runs Vitest with v8 coverage and writes `coverage/` (HTML, `lcov.info`, `coverage-summary.json`) and `test-results/junit.xml`. Run `pnpm test:coverage` locally for the same numbers.
 - Coverage counts every source file under `packages/*/src` and `apps/*/src`, including files no test imports.
+- **Coverage of the files you add** (`pnpm test:file-coverage <files>`): `pnpm test:coverage` measures the whole project, so a new file with no tests can hide behind the rest. A ticket that adds a source file proves its own coverage with this command, and grooming puts it first in the ticket's `verify_cmd`. Example: `pnpm test:file-coverage packages/core/src/config/guild-config.ts packages/core/src/index.ts`.
+  - It takes one or more paths, relative to the repository root or absolute. Each must be a source file that coverage counts (`packages/*/src` or `apps/*/src`, not a test or a `.d.ts` file); otherwise it stops and says which one.
+  - It runs `vitest related` on those files, so only the tests that import them run, then checks the coverage of those files alone against the same thresholds as `vitest.config.ts` (it reads them from there). It exits 1 below any threshold, and prints the per-file table so you can see the uncovered lines. A file that no test imports has 0% coverage and fails.
+  - The numbers are for the named files together, not each one separately. The report goes to `coverage/file-coverage/`, so it does not overwrite the report of `pnpm test:coverage`. The same note as below applies: a test that reaches the file through a built workspace package (`dist/`) does not count.
+  - It does not replace `pnpm test:coverage`, which stays the merge gate.
 - **Ratchet rule**: `coverage.thresholds` in `vitest.config.ts` hold the measured baseline, rounded down. Raise them when coverage grows. Never lower them to get a build through; add tests instead.
 - A test that imports a workspace package (`@ririko/database`, `@ririko/music`, ...) runs its built `dist/`, which coverage does not count. To cover a package's code, test it from inside that package with a relative import.
 

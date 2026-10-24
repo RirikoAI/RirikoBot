@@ -8,6 +8,7 @@ import {
   type ButtonInteraction,
   type Message,
   type MessageComponentInteraction,
+  MessageFlags,
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { ImageAspectRatio } from '@ririko/services';
@@ -161,7 +162,7 @@ export async function handleImagineButtonInteraction(
     if (interaction.user.id !== ownerId) {
       await interaction.reply({
         content: '❌ Only the person who requested this image can dismiss it.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -177,7 +178,7 @@ export async function handleImagineButtonInteraction(
     if (!originalJob) {
       await interaction.reply({
         content: '❌ Original image job information could not be found to regenerate.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -185,7 +186,7 @@ export async function handleImagineButtonInteraction(
     if (originalJob.userId && originalJob.userId !== interaction.user.id) {
       await interaction.reply({
         content: '❌ Only the person who requested this image can regenerate it.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -248,7 +249,7 @@ export async function handleImagineButtonInteraction(
       const message = err instanceof Error ? err.message : String(err);
       await interaction.followUp({
         content: `❌ Regeneration failed: ${message}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   }

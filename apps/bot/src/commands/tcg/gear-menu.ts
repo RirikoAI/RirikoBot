@@ -5,6 +5,7 @@ import {
   EmbedBuilder,
   StringSelectMenuBuilder,
   type Message,
+  MessageFlags,
 } from 'discord.js';
 import type { CommandContext } from '@ririko/discord';
 import {
@@ -463,7 +464,7 @@ export async function openGearMenu(
     if (interaction.user.id !== userId) {
       await interaction.reply({
         content: '⏳ This gear menu belongs to someone else.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }

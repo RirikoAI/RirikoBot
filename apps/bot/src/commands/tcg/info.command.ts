@@ -4,6 +4,7 @@ import {
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
   ComponentType,
+  MessageFlags,
 } from 'discord.js';
 import {
   CommandCategory,
@@ -518,7 +519,7 @@ export function createTcgInfoCommand(services: BotServices): Command {
             await interaction.reply({
               content:
                 'Only the summoner who opened this guide can switch topics. Run `/tcg-info` to open your own!',
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
             return;
           }

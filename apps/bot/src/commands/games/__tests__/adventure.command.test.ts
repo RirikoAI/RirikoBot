@@ -5,6 +5,7 @@ import {
   type Message,
   type ButtonInteraction,
   type AutocompleteInteraction,
+  MessageFlags,
 } from 'discord.js';
 import {
   createDatabaseClient,
@@ -298,7 +299,9 @@ describe('adventure Discord integration', () => {
   it('rejects another player and malformed input without changing state', async () => {
     const outsider = button('1', 'bob');
     await controller.button(outsider);
-    expect(outsider.reply).toHaveBeenCalledWith(expect.objectContaining({ ephemeral: true }));
+    expect(outsider.reply).toHaveBeenCalledWith(
+      expect.objectContaining({ flags: MessageFlags.Ephemeral }),
+    );
     const invalid = { ...button('1'), customId: 'adventure:bad' } as unknown as ButtonInteraction;
     await controller.button(invalid);
     expect(invalid.reply).toHaveBeenCalled();

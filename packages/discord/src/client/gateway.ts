@@ -63,7 +63,6 @@ export class GatewayManager extends EventEmitter {
       this.setState('READY', 'Gateway connection ready');
     };
     this.client.on(Events.ClientReady, onReady);
-    this.client.on('ready', onReady);
 
     this.client.on('shardDisconnect', (_closeEvent, shardId) => {
       if (this._state !== 'DESTROYED') {

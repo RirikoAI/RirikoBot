@@ -7,6 +7,7 @@ import {
   type Client,
   type Message,
   type TextChannel,
+  MessageFlags,
 } from 'discord.js';
 import type { BotServices } from '../services.js';
 import type { GuildQueue, LoopMode, QueuedTrack } from '@ririko/music';
@@ -529,7 +530,7 @@ export class MusicEmbedController {
     if (!guildId) {
       await interaction.reply({
         content: '⚠️ This button can only be used in a server.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -544,7 +545,7 @@ export class MusicEmbedController {
     if (!voiceChannelId) {
       await interaction.reply({
         content: '⚠️ You must join a voice channel to use music controls!',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -553,7 +554,7 @@ export class MusicEmbedController {
     if (DJ_BUTTONS.has(customId)) {
       const djRoleId = (await this.services.musicRepo.getGuildSettings(guildId))?.djRoleId ?? null;
       if (djRoleId && !canControlPlayback(toPlaybackMember(member), djRoleId)) {
-        await interaction.reply({ content: DJ_ONLY_MESSAGE, ephemeral: true });
+        await interaction.reply({ content: DJ_ONLY_MESSAGE, flags: MessageFlags.Ephemeral });
         return;
       }
     }
@@ -566,7 +567,7 @@ export class MusicEmbedController {
         if (!backed) {
           await interaction.reply({
             content: '⚠️ No previous track available in history.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -577,7 +578,10 @@ export class MusicEmbedController {
 
       case 'music_play_pause': {
         if (!queue || !queue.currentTrack) {
-          await interaction.reply({ content: '⚠️ Nothing is currently playing.', ephemeral: true });
+          await interaction.reply({
+            content: '⚠️ Nothing is currently playing.',
+            flags: MessageFlags.Ephemeral,
+          });
           return;
         }
 
@@ -594,7 +598,10 @@ export class MusicEmbedController {
       case 'music_skip': {
         const skipped = this.services.musicPlayer.skip(guildId);
         if (!skipped) {
-          await interaction.reply({ content: '⚠️ No track available to skip.', ephemeral: true });
+          await interaction.reply({
+            content: '⚠️ No track available to skip.',
+            flags: MessageFlags.Ephemeral,
+          });
           return;
         }
         await interaction.deferUpdate();
@@ -611,7 +618,10 @@ export class MusicEmbedController {
 
       case 'music_mute_unmute': {
         if (!queue) {
-          await interaction.reply({ content: '⚠️ No active music queue.', ephemeral: true });
+          await interaction.reply({
+            content: '⚠️ No active music queue.',
+            flags: MessageFlags.Ephemeral,
+          });
           return;
         }
         if (queue.volume > 0) {
@@ -628,7 +638,10 @@ export class MusicEmbedController {
 
       case 'music_loop': {
         if (!queue) {
-          await interaction.reply({ content: '⚠️ No active music queue.', ephemeral: true });
+          await interaction.reply({
+            content: '⚠️ No active music queue.',
+            flags: MessageFlags.Ephemeral,
+          });
           return;
         }
         const nextMode =
@@ -644,7 +657,7 @@ export class MusicEmbedController {
         if (!shuffled) {
           await interaction.reply({
             content: '⚠️ Need at least 2 tracks in queue to shuffle.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -656,11 +669,14 @@ export class MusicEmbedController {
       case 'music_lyrics': {
         const track = queue?.currentTrack;
         if (!track) {
-          await interaction.reply({ content: '⚠️ Nothing is currently playing.', ephemeral: true });
+          await interaction.reply({
+            content: '⚠️ Nothing is currently playing.',
+            flags: MessageFlags.Ephemeral,
+          });
           return;
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         const reply = await fetchLyricsReply(this.services, { track });
         try {
           await interaction.editReply(reply);
@@ -675,7 +691,7 @@ export class MusicEmbedController {
         if (!queue || totalTracks === 0) {
           await interaction.reply({
             content: '📜 The music queue is currently empty.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -709,7 +725,7 @@ export class MusicEmbedController {
             text: `Total: ${totalTracks} ${totalTracks === 1 ? 'track' : 'tracks'} | Total Duration: ${formatDuration(queue.totalDurationSeconds)} | Loop: ${queue.loopMode}`,
           });
 
-        await interaction.reply({ embeds: [queueEmbed], ephemeral: true });
+        await interaction.reply({ embeds: [queueEmbed], flags: MessageFlags.Ephemeral });
         break;
       }
 

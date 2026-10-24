@@ -27,6 +27,7 @@ import {
 } from '@ririko/music';
 import { Readable } from 'node:stream';
 import type { LrclibLyrics } from '@ririko/services';
+import { MessageFlags } from 'discord.js';
 
 describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', () => {
   let dbClient: SqliteDatabaseClient;
@@ -542,7 +543,7 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
 
       await controller.handleButtonInteraction(interaction);
 
-      expect(interaction.deferReply).toHaveBeenCalledWith({ ephemeral: true });
+      expect(interaction.deferReply).toHaveBeenCalledWith({ flags: MessageFlags.Ephemeral });
       expect(find).toHaveBeenCalledWith({
         title: 'YOASOBI Idol',
         artist: 'YOASOBI',
@@ -644,7 +645,7 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
 
       await controller.handleButtonInteraction(interaction);
 
-      expect(interaction.deferReply).toHaveBeenCalledWith({ ephemeral: true });
+      expect(interaction.deferReply).toHaveBeenCalledWith({ flags: MessageFlags.Ephemeral });
     });
 
     it('does not look anything up when nothing is playing', async () => {
@@ -668,7 +669,7 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
       const lyricsInteraction = createMockButtonInteraction('music_lyrics');
       await controller.handleButtonInteraction(lyricsInteraction);
       expect(lyricsInteraction.deferReply).toHaveBeenCalledWith(
-        expect.objectContaining({ ephemeral: true }),
+        expect.objectContaining({ flags: MessageFlags.Ephemeral }),
       );
       expect(lyricsInteraction.editReply).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -696,7 +697,7 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
               }),
             }),
           ]),
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         }),
       );
 

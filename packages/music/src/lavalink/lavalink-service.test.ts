@@ -510,3 +510,138 @@ describe('LavalinkService', () => {
     expect(player.destroy).toHaveBeenCalled();
   });
 });
+
+describe('LavalinkService background reconnect', () => {
+  let service: LavalinkService;
+  let warn: ReturnType<typeof vi.spyOn>;
+  let log: ReturnType<typeof vi.spyOn>;
+
+  const fakeNode = () => ({ connected: false, connect: vi.fn() });
+  const node = { options: { host: '127.0.0.1', port: 2333 } };
+  const giveUp = () =>
+    service.manager.nodeManager.emit('destroy', node as never, 'NodeReconnectFail');
+  const mockNode = (instance: ReturnType<typeof fakeNode>) =>
+    vi.spyOn(service.manager.nodeManager, 'createNode').mockReturnValue(instance as never);
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    service = new LavalinkService({ node: { host: '127.0.0.1', port: 2333 } });
+  });
+
+  afterEach(() => {
+    service.destroy();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('ignores a node that is destroyed for another reason', () => {
+    const createNode = mockNode(fakeNode());
+    service.manager.nodeManager.emit('destroy', node as never, 'ServiceDestroy');
+    vi.advanceTimersByTime(600_000);
+    expect(createNode).not.toHaveBeenCalled();
+  });
+
+  it('recreates the node 30 s after the library gives up and logs one line per attempt', () => {
+    const first = fakeNode();
+    const createNode = mockNode(first);
+
+    giveUp();
+    vi.advanceTimersByTime(29_999);
+    expect(createNode).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1);
+    expect(createNode).toHaveBeenCalledTimes(1);
+    expect(createNode.mock.calls[0]?.[0]).toMatchObject({
+      id: 'primary-node',
+      host: '127.0.0.1',
+      port: 2333,
+    });
+    expect(first.connect).toHaveBeenCalledTimes(1);
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(log.mock.calls[0]?.[0]).toContain('attempt 1');
+  });
+
+  it('doubles the delay on each give-up up to 5 minutes', () => {
+    const createNode = mockNode(fakeNode());
+    const delays = [30_000, 60_000, 120_000, 240_000, 300_000, 300_000];
+
+    for (const [index, delay] of delays.entries()) {
+      giveUp();
+      vi.advanceTimersByTime(delay - 1);
+      expect(createNode).toHaveBeenCalledTimes(index);
+      vi.advanceTimersByTime(1);
+      expect(createNode).toHaveBeenCalledTimes(index + 1);
+    }
+  });
+
+  it('does not stack a second timer when the library gives up twice', () => {
+    const createNode = mockNode(fakeNode());
+    giveUp();
+    giveUp();
+    vi.advanceTimersByTime(30_000);
+    expect(createNode).toHaveBeenCalledTimes(1);
+  });
+
+  it('is ready again after a reconnect and resets the backoff', async () => {
+    vi.spyOn(service.manager, 'init').mockResolvedValue(service.manager);
+    await service.init({ id: 'bot-1' });
+    const createNode = mockNode(fakeNode());
+
+    giveUp();
+    vi.advanceTimersByTime(30_000);
+    giveUp();
+    expect(service.isReady()).toBe(false);
+
+    service.manager.nodeManager.emit('connect', node as never);
+    expect(service.isReady()).toBe(true);
+    vi.advanceTimersByTime(600_000);
+    expect(createNode).toHaveBeenCalledTimes(1);
+
+    giveUp();
+    vi.advanceTimersByTime(30_000);
+    expect(createNode).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not connect a node that is already connected', () => {
+    const connected = { connected: true, connect: vi.fn() };
+    mockNode(connected);
+    giveUp();
+    vi.advanceTimersByTime(30_000);
+    expect(connected.connect).not.toHaveBeenCalled();
+  });
+
+  it('schedules another attempt when creating the node throws', () => {
+    const createNode = vi
+      .spyOn(service.manager.nodeManager, 'createNode')
+      .mockImplementationOnce(() => {
+        throw new Error('boom');
+      })
+      .mockReturnValue(fakeNode() as never);
+
+    giveUp();
+    vi.advanceTimersByTime(30_000);
+    expect(createNode).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith(
+      '[LavalinkService] Lavalink reconnect attempt failed:',
+      expect.any(Error),
+    );
+
+    vi.advanceTimersByTime(60_000);
+    expect(createNode).toHaveBeenCalledTimes(2);
+  });
+
+  it('stops trying once the service is destroyed', () => {
+    const createNode = mockNode(fakeNode());
+    giveUp();
+    vi.advanceTimersByTime(10_000);
+    service.destroy();
+    vi.advanceTimersByTime(600_000);
+    expect(createNode).not.toHaveBeenCalled();
+
+    giveUp();
+    vi.advanceTimersByTime(600_000);
+    expect(createNode).not.toHaveBeenCalled();
+  });
+});

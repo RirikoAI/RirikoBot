@@ -8,6 +8,7 @@ import {
   type ButtonInteraction,
   type StringSelectMenuInteraction,
   type Message,
+  MessageFlags,
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
@@ -536,7 +537,7 @@ export async function handleCardsCommand(
     if (interaction.user.id !== ctx.user.id) {
       await interaction.reply({
         content: '⏳ This is not your card album! Run `/cards` to open your own.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -557,7 +558,10 @@ export async function handleCardsCommand(
 
       const target = filtered.find((c) => c.userCard.id === cardId);
       if (!target) {
-        await interaction.reply({ content: '❌ Card not found in album.', ephemeral: true });
+        await interaction.reply({
+          content: '❌ Card not found in album.',
+          flags: MessageFlags.Ephemeral,
+        });
         return;
       }
 
@@ -661,14 +665,14 @@ export async function handleCardsCommand(
         const target = filtered.find((c) => c.userCard.id === cardId);
 
         if (!target) {
-          await interaction.reply({ content: '❌ Card not found.', ephemeral: true });
+          await interaction.reply({ content: '❌ Card not found.', flags: MessageFlags.Ephemeral });
           return;
         }
 
         if (target.userCard.state === 'IN_TRADE' || target.userCard.state === 'IN_MARKET') {
           await interaction.reply({
             content: `❌ Cannot equip card locked in \`${target.userCard.state}\`.`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -705,7 +709,7 @@ export async function handleCardsCommand(
         const target = filtered.find((c) => c.userCard.id === cardId);
 
         if (!target) {
-          await interaction.reply({ content: '❌ Card not found.', ephemeral: true });
+          await interaction.reply({ content: '❌ Card not found.', flags: MessageFlags.Ephemeral });
           return;
         }
 

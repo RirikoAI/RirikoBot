@@ -6,6 +6,7 @@ import {
   ComponentType,
   type Message,
   type ButtonInteraction,
+  MessageFlags,
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
@@ -222,7 +223,7 @@ export function createTicTacToeCommand(services: BotServices): Command {
         if (!currentSession || currentSession.state !== 'IN_PROGRESS') {
           await interaction.reply({
             content: '⚠️ This game session has already ended or expired.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -230,7 +231,7 @@ export function createTicTacToeCommand(services: BotServices): Command {
         if (currentSession.currentTurnPlayerId !== clickerId) {
           await interaction.reply({
             content: '⏳ It is not your turn!',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -306,7 +307,7 @@ export function createTicTacToeCommand(services: BotServices): Command {
         } catch (err: any) {
           await interaction.reply({
             content: `❌ ${err.message ?? 'Invalid move'}`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
       });

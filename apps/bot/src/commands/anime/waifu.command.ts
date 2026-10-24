@@ -4,6 +4,7 @@ import {
   ButtonStyle,
   EmbedBuilder,
   type Message,
+  MessageFlags,
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { WaifuImImage } from '@ririko/services';
@@ -123,7 +124,7 @@ export function createWaifuCommand(services: BotServices): Command {
             console.error('[Waifu] waifu.im reroll failed:', err);
             await interaction.followUp({
               content: '❌ Could not fetch another image right now.',
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
         },
