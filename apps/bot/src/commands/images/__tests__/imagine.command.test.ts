@@ -363,7 +363,7 @@ describe('Dual-Dispatch /imagine Command Suite (TASK-1322)', () => {
       expect(mockMessage.delete).not.toHaveBeenCalled();
       expect(interaction.reply).toHaveBeenCalledWith({
         content: '❌ Only the person who requested this image can dismiss it.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     });
 
@@ -445,7 +445,7 @@ describe('Dual-Dispatch /imagine Command Suite (TASK-1322)', () => {
 
       expect(interaction.reply).toHaveBeenCalledWith({
         content: '❌ Original image job information could not be found to regenerate.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     });
   });

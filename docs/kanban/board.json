@@ -14313,7 +14313,10 @@
           "docs/testing.md",
           "docs/contributing.md",
           "package.json",
-          "vitest.config.ts"
+          "vitest.config.ts",
+          "docs/development.md",
+          "scripts/file-coverage.ts",
+          "scripts/file-coverage.test.ts"
         ],
         "symbols": [],
         "codegraph_queries": [
@@ -14331,7 +14334,7 @@
         "CHORE-2012",
         "EPIC-022"
       ],
-      "status": "TODO"
+      "status": "DONE"
     },
     {
       "children": [],
@@ -14395,6 +14398,7 @@
         "files": [
           "packages/discord/src/client/gateway.ts",
           "packages/discord/src/command/context.ts",
+          "packages/discord/src/router/router.ts",
           "apps/bot/src/",
           "packages/services/src/"
         ],
@@ -14419,7 +14423,7 @@
       "handovers": [
         "CHORE-2014"
       ],
-      "status": "TODO"
+      "status": "DONE"
     }
   ],
   "bugs": [
@@ -16113,7 +16117,7 @@
       "handovers": [
         "BUG-0053"
       ],
-      "status": "TODO"
+      "status": "DONE"
     }
   ],
   "active_in_progress_ticket": null

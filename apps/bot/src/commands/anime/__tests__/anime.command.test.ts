@@ -8,6 +8,7 @@ import {
 } from '../search.command.js';
 import { buildMediaEmbed, humanize, mediaOption } from '../embeds.js';
 import { flush, makeContext, selectInteraction } from './helpers.js';
+import { MessageFlags } from 'discord.js';
 
 const frieren: AnimeMediaDetails = {
   source: 'myanimelist',
@@ -93,7 +94,9 @@ describe('Anime search commands (TASK-1423)', () => {
     collector.emit('collect', intruder);
     await flush();
 
-    expect(intruder.reply).toHaveBeenCalledWith(expect.objectContaining({ ephemeral: true }));
+    expect(intruder.reply).toHaveBeenCalledWith(
+      expect.objectContaining({ flags: MessageFlags.Ephemeral }),
+    );
     expect(intruder.editReply).not.toHaveBeenCalled();
   });
 

@@ -12,6 +12,7 @@ import {
   mediaOption,
 } from './embeds.js';
 import { attachOwnerCollector } from '../shared/owner-collector.js';
+import { MessageFlags } from 'discord.js';
 
 const MAX_QUERY_LENGTH = 100;
 
@@ -110,7 +111,7 @@ async function showSelection<T>(
     console.error(`[AnimeSearch] Failed to load ${flow.noun} details:`, err);
     await interaction.followUp({
       content: '❌ Could not load the details right now. Please try again in a moment.',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 }

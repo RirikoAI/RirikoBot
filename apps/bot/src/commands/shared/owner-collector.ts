@@ -1,4 +1,5 @@
 import type { Message, MessageComponentInteraction } from 'discord.js';
+import { MessageFlags } from 'discord.js';
 
 const COLLECTOR_TIME_MS = 120_000;
 
@@ -24,7 +25,7 @@ export function attachOwnerCollector(
 
   collector.on('collect', async (interaction) => {
     if (interaction.user.id !== options.ownerId) {
-      await interaction.reply({ content: options.notOwnerHint, ephemeral: true });
+      await interaction.reply({ content: options.notOwnerHint, flags: MessageFlags.Ephemeral });
       return;
     }
     collector.resetTimer();

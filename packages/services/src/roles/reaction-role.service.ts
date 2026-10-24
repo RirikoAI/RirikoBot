@@ -5,6 +5,7 @@ import {
   type ButtonInteraction,
   type StringSelectMenuInteraction,
   PermissionFlagsBits,
+  MessageFlags,
 } from 'discord.js';
 import type { ReactionRoleRepository } from '@ririko/database';
 import type { RoleAssignmentResult, ReactionRoleMode } from './types.js';
@@ -333,7 +334,10 @@ export class ReactionRoleService {
         message: 'Could not resolve target role for this button.',
       };
       await interaction
-        .reply({ content: result.message ?? 'Could not resolve target role.', ephemeral: true })
+        .reply({
+          content: result.message ?? 'Could not resolve target role.',
+          flags: MessageFlags.Ephemeral,
+        })
         .catch(() => null);
       return result;
     }
@@ -346,7 +350,7 @@ export class ReactionRoleService {
         message: "I don't have permission to manage roles in this server.",
       };
       await interaction
-        .reply({ content: result.message ?? 'Permission denied.', ephemeral: true })
+        .reply({ content: result.message ?? 'Permission denied.', flags: MessageFlags.Ephemeral })
         .catch(() => null);
       return result;
     }
@@ -359,7 +363,7 @@ export class ReactionRoleService {
         message: 'This role cannot be assigned (hierarchy or managed role).',
       };
       await interaction
-        .reply({ content: result.message ?? 'Invalid role.', ephemeral: true })
+        .reply({ content: result.message ?? 'Invalid role.', flags: MessageFlags.Ephemeral })
         .catch(() => null);
       return result;
     }
@@ -376,7 +380,10 @@ export class ReactionRoleService {
         message: 'Role not found in guild.',
       };
       await interaction
-        .reply({ content: result.message ?? 'Role not found in guild.', ephemeral: true })
+        .reply({
+          content: result.message ?? 'Role not found in guild.',
+          flags: MessageFlags.Ephemeral,
+        })
         .catch(() => null);
       return result;
     }
@@ -407,7 +414,7 @@ export class ReactionRoleService {
     await interaction
       .reply({
         content: result.message ?? 'Role updated.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       })
       .catch(() => null);
 
@@ -424,7 +431,7 @@ export class ReactionRoleService {
     const { guild, member, values, customId } = interaction;
     if (!guild || !member) {
       await interaction
-        .reply({ content: 'Interaction outside of guild.', ephemeral: true })
+        .reply({ content: 'Interaction outside of guild.', flags: MessageFlags.Ephemeral })
         .catch(() => null);
       return [];
     }
@@ -436,7 +443,7 @@ export class ReactionRoleService {
 
     if (!guildMember) {
       await interaction
-        .reply({ content: 'Could not resolve guild member.', ephemeral: true })
+        .reply({ content: 'Could not resolve guild member.', flags: MessageFlags.Ephemeral })
         .catch(() => null);
       return [];
     }
@@ -445,7 +452,7 @@ export class ReactionRoleService {
       await interaction
         .reply({
           content: 'Cannot manage roles due to permissions or hierarchy.',
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         })
         .catch(() => null);
       return [];
@@ -532,7 +539,7 @@ export class ReactionRoleService {
     await interaction
       .reply({
         content: messages.join('\n'),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       })
       .catch(() => null);
 

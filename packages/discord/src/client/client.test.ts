@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
+  Events,
   GatewayIntentBits,
   Partials,
   Client,
@@ -94,6 +95,11 @@ describe('Gateway Lifecycle State Machine & Monitoring (TASK-0302)', () => {
     expect(manager.state).toBe('DISCONNECTED');
   });
 
+  it('listens to clientReady only, not the deprecated ready event', () => {
+    expect(client.listenerCount(Events.ClientReady)).toBe(1);
+    expect(client.listenerCount('ready')).toBe(0);
+  });
+
   it('transitions state and emits stateChange events', async () => {
     const states: string[] = [];
     manager.on('stateChange', (event) => {
@@ -102,7 +108,7 @@ describe('Gateway Lifecycle State Machine & Monitoring (TASK-0302)', () => {
 
     // Mock client.login
     vi.spyOn(client, 'login').mockImplementation(async () => {
-      client.emit('ready', client as unknown as Client<true>);
+      client.emit(Events.ClientReady, client as unknown as Client<true>);
       return 'token';
     });
 

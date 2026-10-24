@@ -13,6 +13,7 @@ import {
 import { CommandRouter } from '../router/router.js';
 import { CommandRegistry } from '../router/registry.js';
 import type { ChatInputCommandInteraction, Message } from 'discord.js';
+import { MessageFlags } from 'discord.js';
 
 describe('MiddlewarePipeline Engine (TASK-0321)', () => {
   let pipeline: MiddlewarePipeline;
@@ -240,7 +241,7 @@ describe('CommandRouter & Error Boundary Integration (TASK-0321)', () => {
 
     expect(mockReply).toHaveBeenCalledWith({
       content: '⏳ Wait 15 seconds before gambling again.',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   });
 
@@ -280,7 +281,7 @@ describe('CommandRouter & Error Boundary Integration (TASK-0321)', () => {
 
     expect(mockReply).toHaveBeenCalledWith({
       content: '🚫 You lack BanMembers permission.',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   });
 
@@ -363,21 +364,21 @@ describe('CommandRouter & Error Boundary Integration (TASK-0321)', () => {
     await router.dispatchInteraction(mockInteraction);
     expect(mockReply).toHaveBeenLastCalledWith({
       content: '🛠️ Ririko is currently undergoing scheduled maintenance.',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
 
     // 2. Rate limit
     await router.dispatchInteraction(mockInteraction);
     expect(mockReply).toHaveBeenLastCalledWith({
       content: '⏱️ Rate limit exceeded. Try again in 30s.',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
 
     // 3. Disabled module
     await router.dispatchInteraction(mockInteraction);
     expect(mockReply).toHaveBeenLastCalledWith({
       content: '🔒 The AI module is disabled in this server.',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   });
 });
