@@ -36,6 +36,25 @@ CircleCI has no branch filters for releases: the `release` workflow runs for `v*
 
 Open pull requests move to `develop` by themselves when the maintainer renames the branch on GitHub.
 
+## When to Release
+
+`master` moves only with a release, so it always matches the newest tag. Never merge `develop` into `master` without tagging it. The reasons:
+
+- **Docs**: the docs site is built from `master`. Untagged changes there would document commands that no one can run yet.
+- **Images**: Docker images are built only from a `v*` tag, so `master` without a tag gives self-hosters nothing.
+- **Version numbers**: they change only inside `pnpm release:prepare`, never in a commit of their own.
+
+| Change on `develop` | What to do |
+|---|---|
+| Internal only: Kanban board, CI, agent rules, release scripts, tests, refactors | No release. It stays on `develop` and ships with the next release, as a short "Maintenance" line in the notes or not at all. |
+| User-facing bug fix, urgent: a crash, a security issue, data loss, a feature that is down | Patch release (`x.y.Z`) as soon as it is merged. |
+| User-facing bug fix, minor | Collect them. Release a patch within about a week, or with the next feature if that comes first. |
+| New feature, command, setting or migration | Minor release (`x.Y.0`). |
+| Breaking change to commands, settings or data | Major release (`X.0.0`) with upgrade notes. |
+| Docs only | It stays on `develop` and reaches the site with the next release. If a wrong doc is hurting users now, cut a patch. |
+
+The `/release` skill proposes the version from this table.
+
 ## How Releases Work
 
 - The CircleCI `release` workflow (`.circleci/config.yml`) runs only for git tags such as `v2.1.3` or `v2.1.3-beta.1`. A branch push never starts it.
