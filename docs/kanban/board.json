@@ -16187,8 +16187,8 @@
       "children": [],
       "requires": [],
       "blocks": [],
-      "assignee": "claude-medium",
-      "claimed_at": "2026-10-26T11:29:00Z",
+      "assignee": null,
+      "claimed_at": null,
       "blocked_reason": null,
       "tier_override": null,
       "id": "BUG-0055",
@@ -16235,8 +16235,8 @@
       "handovers": [
         "BUG-0055"
       ],
-      "status": "IN_PROGRESS"
+      "status": "REVIEW"
     }
   ],
-  "active_in_progress_ticket": "BUG-0055"
+  "active_in_progress_ticket": null
 }

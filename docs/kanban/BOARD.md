@@ -5,9 +5,7 @@
 > **WIP rule**: at most 1 ticket in `IN_PROGRESS` on the whole board. Any agent (Claude, Gemini, Codex, or another) may hold it.
 
 ## ⚡ In Progress
-| ID | Type | Title | Pts | Parent | Worker | Claimed | Model | Handover |
-|---|---|---|---|---|---|---|---|---|
-| `BUG-0055` | Bug | Lavalink Trusts the Compromised eMudhra CAs, and Next.js 16.3 Has Critical Advisories | 5 | — | claude-medium | 2026-10-26T11:29:00Z | medium | [BUG-0055.md](./handovers/BUG-0055.md) |
+*None.*
 
 ## 🚧 Blocked
 *None.*
@@ -25,7 +23,9 @@
 | `CHORE-2013` | Chore | Upgrade Ririko to Scrum-Kanban 0.8.0 | 5 | EPIC-022 | STORY-203 | blocked | medium |
 
 ## 🔍 Review
-*None.*
+| ID | Type | Title | Pts | Parent | Handover |
+|---|---|---|---|---|---|
+| `BUG-0055` | Bug | Lavalink Trusts the Compromised eMudhra CAs, and Next.js 16.3 Has Critical Advisories | 5 | — | [BUG-0055.md](./handovers/BUG-0055.md) |
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
