@@ -23,9 +23,7 @@
 | `CHORE-2013` | Chore | Upgrade Ririko to Scrum-Kanban 0.8.0 | 5 | EPIC-022 | STORY-203 | blocked | medium |
 
 ## 🔍 Review
-| ID | Type | Title | Pts | Parent | Handover |
-|---|---|---|---|---|---|
-| `BUG-0055` | Bug | Lavalink Trusts the Compromised eMudhra CAs, and Next.js 16.3 Has Critical Advisories | 5 | — | [BUG-0055.md](./handovers/BUG-0055.md) |
+*None.*
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -548,6 +546,7 @@
 | `BUG-0052` | Bug | Logging Page Says Ignored Channels Skip All Events, but Only Messages Are Skipped | 1 | EPIC-021 | [BUG-0052.md](./handovers/BUG-0052.md) |
 | `BUG-0053` | Bug | Music Stops for Good When Lavalink Is Down for More Than 50 Seconds | 3 | — | [BUG-0053.md](./handovers/BUG-0053.md) |
 | `BUG-0054` | Bug | Profile Card Text Too Small, Emoji Drawn as Boxes and the Equipped Card Never Shown | 5 | — | [BUG-0054.md](./handovers/BUG-0054.md) |
+| `BUG-0055` | Bug | Lavalink Trusts the Compromised eMudhra CAs, and Next.js 16.3 Has Critical Advisories | 5 | — | [BUG-0055.md](./handovers/BUG-0055.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |
