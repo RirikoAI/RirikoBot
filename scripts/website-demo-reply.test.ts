@@ -263,7 +263,7 @@ describe('replyTo: showcase commands mirror the bot', () => {
     expect(name).toBe('ping');
     expect(trigger).toBe('!');
     expect(reply.content).toMatch(/^🏓 \*\*Pong!\*\*\n• Gateway Latency: `\d+ms`/);
-    expect(reply.content).toContain('• Bot Version: `v2.1.1`');
+    expect(reply.content).toContain('• Bot Version: `v2.1.2`');
   });
 
   it('help shows the Help Center home with one inline field per used category', () => {
