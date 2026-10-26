@@ -13,7 +13,7 @@ Other guides:
 ## 1. What You Need
 
 - A computer or server that runs Linux, macOS or Windows with Docker. Use a Linux server for a bot that stays online all the time.
-- Docker Engine 23 or newer, with the Compose plugin (Compose v2). Docker Desktop includes both.
+- Docker Engine 23 or newer, with the Compose plugin version 2.24.4 or newer. Docker Desktop includes both.
 - Git.
 - `openssl`, to make secret keys. Git for Windows includes it.
 - A Discord account.
@@ -434,6 +434,8 @@ The bot connects to the Lavalink server with a plain WebSocket, so keep the link
 
 The file `deploy/lavalink/docker-compose.yml` runs one Lavalink container for each environment: `lavalink-production` on port `2333` and `lavalink-staging` on port `2334`. Both containers use the same Lavalink image as `docker-compose.production.yml`. A test keeps the two image tags equal.
 
+Both containers also get a newer list of blocked certificates for Java, `blocked.certs`, from the `java-blocked-certs` config in the compose file. The Java in the Lavalink image has no fix for the eMudhra CA compromise (CVE-2026-111943), so without it Lavalink would still trust those CAs. The list is inline in the file, so the host needs nothing else.
+
 1. Copy `deploy/lavalink/lavalink.env.example` to one file for each environment you run, for example `/opt/ririko/lavalink-production.env`. Use a different `LAVALINK_PASSWORD` in each file. Keep each file readable by `root` only.
 2. Set the paths of the files in `LAVALINK_PRODUCTION_ENV_FILE` and `LAVALINK_STAGING_ENV_FILE`. The defaults are `/opt/ririko/lavalink-production.env` and `/opt/ririko/lavalink-staging.env`.
 3. Go into the folder of the repository checkout that holds the file. The compose file reads `../../docker/lavalink/application.yml`, so keep the repository layout.
@@ -528,7 +530,7 @@ The image holds no settings. The Discord token and the other keys are given to t
 | --- | --- | --- |
 | `postgres` | `postgres:16-alpine` | The database. It is healthy when `pg_isready` answers. |
 | `lavalink-plugins` | `ghcr.io/lavalink-devs/lavalink:4.2.2` | Runs once. It makes the plugin volume writable for Lavalink (uid/gid 322), then stops. |
-| `lavalink` | `ghcr.io/lavalink-devs/lavalink:4.2.2` | The audio server. It uses `docker/lavalink/application.yml`. Its plugins download on the first start. |
+| `lavalink` | `ghcr.io/lavalink-devs/lavalink:4.2.2` | The audio server. It uses `docker/lavalink/application.yml`. Its plugins download on the first start. The compose file replaces Java's list of blocked certificates (`blocked.certs`), because the image's Java has no fix for the eMudhra CA compromise. |
 | `bot` | `ririkoai/ririkobot:${RIRIKO_VERSION:-2}` | The Discord bot. It starts when PostgreSQL is healthy. |
 | `web` | `ririkoai/ririkobot-dashboard:${RIRIKO_VERSION:-2}` | The dashboard. It uses `${DASHBOARD_BIND:-127.0.0.1}:${DASHBOARD_PORT:-3000}`. |
 

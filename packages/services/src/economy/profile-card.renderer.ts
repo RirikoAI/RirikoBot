@@ -14,6 +14,18 @@ import type {
 const CARD_WIDTH = 1200;
 const CARD_HEIGHT = 400;
 
+// Discord shows the card at about 57% of its size, so no text is drawn below 20 px and the
+// main values are 30 px or more. Layout: avatar column, middle column, equipped card slot.
+const COLUMN_X = 250;
+const COLUMN_RIGHT = 925;
+const SLOT_X = 945;
+const SLOT_Y = 20;
+const SLOT_W = 240;
+const SLOT_H = 360; // 2:3, the shape of the rendered Waifu TCG card (800x1200)
+const SLOT_RADIUS = 16;
+
+const TEXT_SECONDARY = '#cbd5e1';
+
 const RARITY_COLORS: Record<string, string> = {
   COMMON: '#94a3b8',
   UNCOMMON: '#22c55e',
@@ -21,16 +33,22 @@ const RARITY_COLORS: Record<string, string> = {
   SUPER_RARE: '#8b5cf6',
   ULTRA_RARE: '#ec4899',
   LEGENDARY: '#f59e0b',
-  MYTHICAL: '#ef4444',
+  MYTHIC: '#ef4444',
+  SIR: '#f472b6',
   SECRET_RARE: '#06b6d4',
 };
 
-const PRESENCE_COLORS: Record<string, string> = {
+const PRESENCE_COLORS: Record<NonNullable<ProfileCardData['presenceStatus']>, string> = {
   online: '#10b981',
   idle: '#f59e0b',
   dnd: '#ef4444',
   offline: '#64748b',
 };
+
+const COMPACT_NUMBER = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
 
 function formatNumber(val: number | bigint | undefined): string {
   if (val === undefined || val === null) return '0';
@@ -45,6 +63,116 @@ function truncateText(ctx: SKRSContext2D, text: string, maxWidth: number): strin
     truncated = truncated.slice(0, -1);
   }
   return truncated + '...';
+}
+
+/** Draws text with a soft shadow, so it stays readable on a bright custom background. */
+function fillShadowedText(ctx: SKRSContext2D, text: string, x: number, y: number): void {
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetY = 1;
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+/**
+ * Picks the text of a main value that fits `maxWidth` and leaves `ctx.font` set to the size it
+ * fits at: 32 px, then 30 px, then the compact form (12.3M) at 30 px. The value is never
+ * smaller than 30 px and a number that is too big is shortened, not cut off.
+ */
+function fitMainValue(
+  ctx: SKRSContext2D,
+  val: number | bigint | undefined,
+  maxWidth: number,
+): string {
+  const full = formatNumber(val);
+  for (const size of [32, 30]) {
+    ctx.font = `bold ${size}px sans-serif`;
+    if (ctx.measureText(full).width <= maxWidth) return full;
+  }
+  return COMPACT_NUMBER.format(typeof val === 'bigint' ? Number(val) : (val ?? 0));
+}
+
+type IconKind = 'coin' | 'bank' | 'star' | 'sparkle' | 'card';
+
+/** Adds a star outline to the current path. */
+function starPath(
+  ctx: SKRSContext2D,
+  cx: number,
+  cy: number,
+  outer: number,
+  inner: number,
+  points: number,
+): void {
+  for (let i = 0; i < points * 2; i++) {
+    const radius = i % 2 === 0 ? outer : inner;
+    const angle = -Math.PI / 2 + (i * Math.PI) / points;
+    const px = cx + Math.cos(angle) * radius;
+    const py = cy + Math.sin(angle) * radius;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+}
+
+/**
+ * Draws a small icon from canvas paths, centred on (cx, cy) inside a `size` box. No canvas
+ * font has emoji glyphs (the Docker image only has DejaVu), so emoji would draw as boxes.
+ */
+function drawIcon(
+  ctx: SKRSContext2D,
+  kind: IconKind,
+  cx: number,
+  cy: number,
+  size: number,
+  color: string,
+): void {
+  const r = size / 2;
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(2, size * 0.08);
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+
+  if (kind === 'coin') {
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.62, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(10, 13, 22, 0.55)';
+    ctx.stroke();
+  } else if (kind === 'bank') {
+    // Roof, beam, three columns and a base.
+    ctx.moveTo(cx - r, cy - r * 0.3);
+    ctx.lineTo(cx, cy - r);
+    ctx.lineTo(cx + r, cy - r * 0.3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillRect(cx - r * 0.85, cy - r * 0.18, r * 1.7, r * 0.16);
+    const columnW = r * 0.28;
+    for (const dx of [-0.55, 0, 0.55]) {
+      ctx.fillRect(cx + dx * r - columnW / 2, cy + r * 0.04, columnW, r * 0.7);
+    }
+    ctx.fillRect(cx - r, cy + r * 0.82, size, r * 0.18);
+  } else if (kind === 'star') {
+    starPath(ctx, cx, cy + r * 0.06, r, r * 0.42, 5);
+    ctx.fill();
+  } else if (kind === 'sparkle') {
+    starPath(ctx, cx - r * 0.12, cy + r * 0.14, r * 0.86, r * 0.24, 4);
+    ctx.fill();
+    ctx.beginPath();
+    starPath(ctx, cx + r * 0.62, cy - r * 0.6, r * 0.4, r * 0.12, 4);
+    ctx.fill();
+  } else {
+    // A trading card with a diamond in the middle.
+    ctx.roundRect(cx - size * 0.34, cy - r, size * 0.68, size, size * 0.1);
+    ctx.stroke();
+    ctx.beginPath();
+    starPath(ctx, cx, cy, size * 0.2, size * 0.07, 4);
+    ctx.fill();
+  }
+  ctx.restore();
 }
 
 /**
@@ -100,7 +228,7 @@ export class ProfileCardRenderer {
     // 6. Draw Equipped Waifu TCG Card Slot
     await this.drawTcgCardSlot(ctx, data.equippedCard);
 
-    // 7. Draw Card Outer Border & Branding Watermark
+    // 7. Draw Card Outer Border
     ctx.restore(); // Exit clip
 
     // Card Glass Border
@@ -203,7 +331,8 @@ export class ProfileCardRenderer {
       displayName,
       avatarUrl,
       avatarBuffer: options?.avatarBuffer,
-      presenceStatus: options?.presenceStatus ?? 'offline',
+      // Unknown presence stays unknown: no dot is drawn for it.
+      presenceStatus: options?.presenceStatus,
       level,
       currentLevelXp,
       xpForNextLevel,
@@ -258,14 +387,29 @@ export class ProfileCardRenderer {
     }
 
     if (bgImage) {
-      // Draw image scaled to cover canvas
-      ctx.drawImage(bgImage, 0, 0, CARD_WIDTH, CARD_HEIGHT);
+      // Scale to cover the canvas and crop the overflow at the centre, so the image keeps its
+      // aspect ratio whatever its size.
+      const scale = Math.max(CARD_WIDTH / bgImage.width, CARD_HEIGHT / bgImage.height);
+      const srcW = CARD_WIDTH / scale;
+      const srcH = CARD_HEIGHT / scale;
+      ctx.drawImage(
+        bgImage,
+        (bgImage.width - srcW) / 2,
+        (bgImage.height - srcH) / 2,
+        srcW,
+        srcH,
+        0,
+        0,
+        CARD_WIDTH,
+        CARD_HEIGHT,
+      );
 
-      // Dark translucent gradient overlay for high contrast readability
+      // Dark translucent gradient overlay: light enough to show the image, dark enough to read.
+      // The stat panels carry their own dark fill.
       const overlay = ctx.createLinearGradient(0, 0, CARD_WIDTH, 0);
-      overlay.addColorStop(0, 'rgba(10, 13, 22, 0.92)');
-      overlay.addColorStop(0.5, 'rgba(15, 20, 32, 0.86)');
-      overlay.addColorStop(1, 'rgba(12, 16, 26, 0.94)');
+      overlay.addColorStop(0, 'rgba(10, 13, 22, 0.7)');
+      overlay.addColorStop(0.5, 'rgba(15, 20, 32, 0.58)');
+      overlay.addColorStop(1, 'rgba(12, 16, 26, 0.68)');
       ctx.fillStyle = overlay;
       ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
     } else {
@@ -304,8 +448,8 @@ export class ProfileCardRenderer {
 
   private async drawAvatarSection(ctx: SKRSContext2D, data: ProfileCardData): Promise<void> {
     const centerX = 130;
-    const centerY = 145;
-    const radius = 68;
+    const centerY = 124;
+    const radius = 80;
 
     let avatarImg: Image | null = null;
     if (data.avatarBuffer) {
@@ -365,7 +509,7 @@ export class ProfileCardRenderer {
       ctx.fillRect(centerX - radius, centerY - radius, radius * 2, radius * 2);
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 44px sans-serif';
+      ctx.font = 'bold 56px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const initial = (data.displayName || data.username || 'A')[0]?.toUpperCase() ?? 'A';
@@ -373,30 +517,30 @@ export class ProfileCardRenderer {
     }
     ctx.restore();
 
-    // Presence Indicator Dot
-    const presenceKey = data.presenceStatus ?? 'offline';
-    const presenceColor = PRESENCE_COLORS[presenceKey] ?? PRESENCE_COLORS.offline;
-    const dotX = centerX + 46;
-    const dotY = centerY + 46;
-    const dotRadius = 14;
+    // Presence Indicator Dot: only when the member's real presence is known.
+    if (data.presenceStatus) {
+      const dotX = centerX + 58;
+      const dotY = centerY + 58;
+      const dotRadius = 16;
 
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(dotX, dotY, dotRadius + 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#0a0d16';
-    ctx.fill();
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, dotRadius + 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#0a0d16';
+      ctx.fill();
 
-    ctx.beginPath();
-    ctx.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
-    ctx.fillStyle = presenceColor!;
-    ctx.fill();
-    ctx.restore();
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
+      ctx.fillStyle = PRESENCE_COLORS[data.presenceStatus];
+      ctx.fill();
+      ctx.restore();
+    }
 
     // Level Badge Pill (underneath avatar)
-    const badgeW = 140;
-    const badgeH = 34;
+    const badgeW = 176;
+    const badgeH = 50;
     const badgeX = centerX - badgeW / 2;
-    const badgeY = centerY + radius + 22;
+    const badgeY = centerY + radius + 28;
 
     ctx.save();
     ctx.beginPath();
@@ -408,65 +552,85 @@ export class ProfileCardRenderer {
     ctx.stroke();
 
     ctx.fillStyle = '#00f2fe';
-    ctx.font = 'bold 16px sans-serif';
+    ctx.font = 'bold 30px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(`LVL ${data.level}`, centerX, badgeY + badgeH / 2);
     ctx.restore();
 
-    // Karma Indicator (underneath Level badge)
+    // Karma Indicator (underneath Level badge): a drawn sparkle and the amount.
     ctx.save();
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '13px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`✨ ${data.karma ?? 0} Karma`, centerX, badgeY + badgeH + 24);
+    ctx.fillStyle = TEXT_SECONDARY;
+    ctx.font = '22px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    const karmaText = `${data.karma ?? 0} Karma`;
+    const iconSize = 26;
+    const iconGap = 8;
+    const karmaY = badgeY + badgeH + 30;
+    const karmaLeft = centerX - (iconSize + iconGap + ctx.measureText(karmaText).width) / 2;
+    drawIcon(ctx, 'sparkle', karmaLeft + iconSize / 2, karmaY, iconSize, '#c084fc');
+    fillShadowedText(ctx, karmaText, karmaLeft + iconSize + iconGap, karmaY);
     ctx.restore();
   }
 
   private drawMiddleSection(ctx: SKRSContext2D, data: ProfileCardData): void {
-    const startX = 240;
+    const startX = COLUMN_X;
+    const columnW = COLUMN_RIGHT - COLUMN_X;
 
-    // Display Name
+    // Display Name (the server nickname when the command knows it)
     ctx.save();
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 30px sans-serif';
+    ctx.font = 'bold 44px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    const displayStr = truncateText(ctx, data.displayName, 380);
-    ctx.fillText(displayStr, startX, 64);
-
-    // Handle / Username
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '16px sans-serif';
-    ctx.fillText(`@${data.username}`, startX, 90);
+    fillShadowedText(ctx, truncateText(ctx, data.displayName, columnW), startX, 62);
     ctx.restore();
 
-    // Server & Global Rank Badges (Top Right of middle section)
-    this.drawRankBadge(
+    // Server & Global Rank Badges (right-aligned on the second row)
+    const rowY = 78;
+    const rowH = 40;
+    const globalLeft = this.drawRankBadge(
       ctx,
-      640,
-      42,
-      'SERVER',
-      data.serverRank,
-      '#fbbf24',
-      'rgba(245, 158, 11, 0.18)',
-    );
-    this.drawRankBadge(
-      ctx,
-      780,
-      42,
+      COLUMN_RIGHT,
+      rowY,
+      rowH,
       'GLOBAL',
       data.globalRank,
       '#a78bfa',
       'rgba(139, 92, 246, 0.18)',
     );
+    const serverLeft = this.drawRankBadge(
+      ctx,
+      globalLeft - 12,
+      rowY,
+      rowH,
+      'SERVER',
+      data.serverRank,
+      '#fbbf24',
+      'rgba(245, 158, 11, 0.18)',
+    );
+
+    // Handle / Username, on the same row and clear of the rank badges
+    ctx.save();
+    ctx.fillStyle = TEXT_SECONDARY;
+    ctx.font = '22px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    fillShadowedText(
+      ctx,
+      truncateText(ctx, `@${data.username}`, serverLeft - startX - 16),
+      startX,
+      rowY + rowH / 2,
+    );
+    ctx.restore();
 
     // 3 Financial / Stats Glass Cards
-    const cardY = 118;
+    const cardY = 134;
     const cardW = 215;
-    const cardH = 64;
+    const cardH = 100;
+    const gap = (columnW - cardW * 3) / 2;
 
-    // Wallet Card
     this.drawStatCard(
       ctx,
       startX,
@@ -474,69 +638,72 @@ export class ProfileCardRenderer {
       cardW,
       cardH,
       'WALLET',
-      `🪙 ${formatNumber(data.walletBalance)}`,
+      data.walletBalance,
       '#facc15',
+      'coin',
     );
-
-    // Bank Card
     this.drawStatCard(
       ctx,
-      startX + cardW + 15,
+      startX + cardW + gap,
       cardY,
       cardW,
       cardH,
       'BANK',
-      `🏦 ${formatNumber(data.bankBalance)}`,
+      data.bankBalance,
       '#38bdf8',
+      'bank',
     );
-
-    // Total XP Card
     this.drawStatCard(
       ctx,
-      startX + (cardW + 15) * 2,
+      startX + (cardW + gap) * 2,
       cardY,
       cardW,
       cardH,
       'TOTAL EXP',
-      `⭐ ${formatNumber(data.totalXp)}`,
+      data.totalXp,
       '#c084fc',
+      'star',
     );
   }
 
+  /** Draws a rank pill whose right edge is at `right`, and returns its left edge. */
   private drawRankBadge(
     ctx: SKRSContext2D,
-    x: number,
+    right: number,
     y: number,
+    h: number,
     label: string,
     rank: number | string | undefined,
     color: string,
     bgColor: string,
-  ): void {
-    const w = 125;
-    const h = 32;
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, 8);
-    ctx.fillStyle = bgColor;
-    ctx.fill();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
+  ): number {
     const rankStr =
       rank === undefined || rank === null || rank === 0
         ? 'N/A'
         : typeof rank === 'number'
           ? `#${rank}`
           : String(rank);
+    const text = `${label} ${rankStr}`;
+
+    ctx.save();
+    ctx.font = 'bold 20px sans-serif';
+    const w = Math.max(150, Math.ceil(ctx.measureText(text).width) + 28);
+    const x = right - w;
+
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 10);
+    ctx.fillStyle = bgColor;
+    ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
 
     ctx.fillStyle = color;
-    ctx.font = 'bold 12px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`${label} ${rankStr}`, x + w / 2, y + h / 2);
+    ctx.fillText(text, x + w / 2, y + h / 2);
     ctx.restore();
+    return x;
   }
 
   private drawStatCard(
@@ -546,53 +713,58 @@ export class ProfileCardRenderer {
     w: number,
     h: number,
     label: string,
-    value: string,
+    value: number | bigint | undefined,
     valColor: string,
+    icon: IconKind,
   ): void {
     ctx.save();
     ctx.beginPath();
-    ctx.roundRect(x, y, w, h, 12);
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+    ctx.roundRect(x, y, w, h, 14);
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
     ctx.fill();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Label
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = 'bold 11px sans-serif';
+    // Icon and label on the top row
+    const iconSize = 26;
+    drawIcon(ctx, icon, x + 16 + iconSize / 2, y + 28, iconSize, valColor);
+    ctx.fillStyle = TEXT_SECONDARY;
+    ctx.font = 'bold 20px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(label, x + 14, y + 22);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, x + 16 + iconSize + 10, y + 28);
 
-    // Value
+    // Value on its own row, with the full width of the panel
     ctx.fillStyle = valColor;
-    ctx.font = 'bold 18px sans-serif';
-    const truncatedVal = truncateText(ctx, value, w - 24);
-    ctx.fillText(truncatedVal, x + 14, y + 48);
+    const text = fitMainValue(ctx, value, w - 32);
+    ctx.fillText(text, x + 16, y + 68);
     ctx.restore();
   }
 
   private drawProgressBarSection(ctx: SKRSContext2D, data: ProfileCardData): void {
-    const startX = 240;
-    const barW = 675;
-    const barH = 20;
-    const barY = 240;
+    const startX = COLUMN_X;
+    const barW = COLUMN_RIGHT - COLUMN_X;
+    const barH = 32;
+    const barY = 284;
 
     // Header Info
     ctx.save();
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = 'bold 13px sans-serif';
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 22px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('EXP PROGRESS', startX, 226);
+    ctx.textBaseline = 'middle';
+    fillShadowedText(ctx, 'EXP PROGRESS', startX, 266);
 
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '13px sans-serif';
+    ctx.fillStyle = TEXT_SECONDARY;
+    ctx.font = '22px sans-serif';
     ctx.textAlign = 'right';
     const percentClamped = Math.min(100, Math.max(0, data.progressPercent));
-    ctx.fillText(
+    fillShadowedText(
+      ctx,
       `${formatNumber(data.currentLevelXp)} / ${formatNumber(data.xpForNextLevel)} XP (${percentClamped.toFixed(1)}%)`,
       startX + barW,
-      226,
+      266,
     );
 
     // Progress Bar Track
@@ -600,200 +772,141 @@ export class ProfileCardRenderer {
     ctx.roundRect(startX, barY, barW, barH, barH / 2);
     ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
     ctx.fill();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.lineWidth = 1;
     ctx.stroke();
 
     // Progress Fill
     const fillW = Math.max(barH, Math.min(barW, (percentClamped / 100) * barW));
-    if (fillW > 0) {
-      ctx.beginPath();
-      ctx.roundRect(startX, barY, fillW, barH, barH / 2);
-      const fillGrad = ctx.createLinearGradient(startX, barY, startX + barW, barY);
-      fillGrad.addColorStop(0, '#00f2fe');
-      fillGrad.addColorStop(0.5, '#4facfe');
-      fillGrad.addColorStop(1, '#8b5cf6');
-      ctx.fillStyle = fillGrad;
-      ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(startX, barY, fillW, barH, barH / 2);
+    const fillGrad = ctx.createLinearGradient(startX, barY, startX + barW, barY);
+    fillGrad.addColorStop(0, '#00f2fe');
+    fillGrad.addColorStop(0.5, '#4facfe');
+    fillGrad.addColorStop(1, '#8b5cf6');
+    ctx.fillStyle = fillGrad;
+    ctx.fill();
 
-      // Top gloss highlight
-      ctx.beginPath();
-      ctx.roundRect(startX, barY, fillW, barH / 2, [barH / 2, barH / 2, 0, 0]);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-      ctx.fill();
-    }
+    // Top gloss highlight
+    ctx.beginPath();
+    ctx.roundRect(startX, barY, fillW, barH / 2, [barH / 2, barH / 2, 0, 0]);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.fill();
 
     // Remaining XP Subtext
     const remaining = Math.max(0, data.xpForNextLevel - data.currentLevelXp);
-    ctx.fillStyle = '#64748b';
-    ctx.font = '12px sans-serif';
+    ctx.fillStyle = TEXT_SECONDARY;
+    ctx.font = '22px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(`${formatNumber(remaining)} XP required for Level ${data.level + 1}`, startX, 282);
-
-    // Bottom Watermark
-    ctx.fillStyle = 'rgba(148, 163, 184, 0.4)';
-    ctx.font = '11px sans-serif';
-    ctx.fillText('RIRIKO AI 2.0 • LEVELING & FINANCIAL ENGINE', startX, 360);
+    fillShadowedText(ctx, `${formatNumber(remaining)} XP to Level ${data.level + 1}`, startX, 346);
     ctx.restore();
   }
 
-  private async drawTcgCardSlot(ctx: SKRSContext2D, card?: EquippedTcgCardView): Promise<void> {
-    const slotX = 955;
-    const slotY = 32;
-    const slotW = 205;
-    const slotH = 336;
-    const radius = 16;
+  /** Loads the equipped card's image from its buffer or URL; null when it cannot be loaded. */
+  private async loadCardImage(card: EquippedTcgCardView): Promise<Image | null> {
+    try {
+      if (card.imageBuffer) return await loadImage(card.imageBuffer);
+      if (card.imageUrl) {
+        const res = await fetch(card.imageUrl, { signal: AbortSignal.timeout(3000) });
+        if (res.ok) return await loadImage(Buffer.from(await res.arrayBuffer()));
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  }
 
-    const rarity = card?.rarity?.toUpperCase() ?? 'COMMON';
-    const rarityColor = RARITY_COLORS[rarity] ?? RARITY_COLORS.COMMON;
+  private async drawTcgCardSlot(ctx: SKRSContext2D, card?: EquippedTcgCardView): Promise<void> {
+    const centerX = SLOT_X + SLOT_W / 2;
 
     ctx.save();
 
     if (card) {
-      // Equipped Card Frame
+      const rarity = card.rarity.toUpperCase();
+      const rarityColor = RARITY_COLORS[rarity] ?? RARITY_COLORS.COMMON!;
+      const cardImg = await this.loadCardImage(card);
+
       ctx.beginPath();
-      ctx.roundRect(slotX, slotY, slotW, slotH, radius);
+      ctx.roundRect(SLOT_X, SLOT_Y, SLOT_W, SLOT_H, SLOT_RADIUS);
       ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
       ctx.fill();
 
-      // Outer Rarity Glow Border
-      ctx.strokeStyle = rarityColor!;
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-
-      // Inner Card Image Area
-      let cardImg: Image | null = null;
-      if (card.imageBuffer) {
-        try {
-          cardImg = await loadImage(card.imageBuffer);
-        } catch {
-          cardImg = null;
-        }
-      } else if (card.imageUrl) {
-        try {
-          const res = await fetch(card.imageUrl, { signal: AbortSignal.timeout(3000) });
-          if (res.ok) {
-            const arr = await res.arrayBuffer();
-            cardImg = await loadImage(Buffer.from(arr));
-          }
-        } catch {
-          cardImg = null;
-        }
-      }
-
-      const innerPad = 8;
-      const innerW = slotW - innerPad * 2;
-      const innerH = slotH - 74;
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(slotX + innerPad, slotY + innerPad, innerW, innerH, radius - 4);
-      ctx.clip();
-
       if (cardImg) {
-        ctx.drawImage(cardImg, slotX + innerPad, slotY + innerPad, innerW, innerH);
+        // The rendered card already shows its name and rarity: draw it contain-fit, nothing on top.
+        ctx.save();
+        ctx.clip();
+        const scale = Math.min(SLOT_W / cardImg.width, SLOT_H / cardImg.height);
+        const drawW = cardImg.width * scale;
+        const drawH = cardImg.height * scale;
+        ctx.drawImage(
+          cardImg,
+          SLOT_X + (SLOT_W - drawW) / 2,
+          SLOT_Y + (SLOT_H - drawH) / 2,
+          drawW,
+          drawH,
+        );
+        ctx.restore();
       } else {
-        // Stylized card art placeholder
-        const artGrad = ctx.createLinearGradient(slotX, slotY, slotX + slotW, slotY + slotH);
-        artGrad.addColorStop(0, '#1e293b');
-        artGrad.addColorStop(1, '#0f172a');
-        ctx.fillStyle = artGrad;
-        ctx.fillRect(slotX + innerPad, slotY + innerPad, innerW, innerH);
-
-        ctx.fillStyle = rarityColor!;
-        ctx.font = 'bold 36px sans-serif';
+        // The image could not be loaded: show what is known about the card.
+        drawIcon(ctx, 'card', centerX, SLOT_Y + 110, 90, rarityColor);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('🎴', slotX + slotW / 2, slotY + innerH / 2);
-      }
-      ctx.restore();
-
-      // Rarity Tag Pill at Top Right of Card
-      const tagW = 90;
-      const tagH = 22;
-      ctx.beginPath();
-      ctx.roundRect(slotX + slotW - tagW - 12, slotY + 14, tagW, tagH, 6);
-      ctx.fillStyle = 'rgba(10, 14, 24, 0.85)';
-      ctx.fill();
-      ctx.strokeStyle = rarityColor!;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      ctx.fillStyle = rarityColor!;
-      ctx.font = 'bold 10px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(rarity.replace('_', ' '), slotX + slotW - tagW / 2 - 12, slotY + 14 + tagH / 2);
-
-      // Serial Number Tag (if present)
-      if (card.serialNumber) {
-        ctx.fillStyle = '#e2e8f0';
-        ctx.font = 'bold 11px sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(card.serialNumber, slotX + 14, slotY + 28);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText(truncateText(ctx, card.name, SLOT_W - 24), centerX, SLOT_Y + 200);
+        ctx.fillStyle = rarityColor;
+        ctx.font = '20px sans-serif';
+        ctx.fillText(rarity.replace(/_/g, ' '), centerX, SLOT_Y + 232);
+        if (card.serialNumber) {
+          ctx.fillStyle = TEXT_SECONDARY;
+          ctx.fillText(card.serialNumber, centerX, SLOT_Y + 262);
+        }
       }
 
-      // Card Name Banner at bottom
-      const bannerH = 50;
-      const bannerY = slotY + slotH - bannerH - 8;
+      // Rarity border
       ctx.beginPath();
-      ctx.roundRect(slotX + innerPad, bannerY, innerW, bannerH, 10);
-      ctx.fillStyle = 'rgba(10, 14, 24, 0.88)';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-      ctx.lineWidth = 1;
+      ctx.roundRect(SLOT_X + 1.5, SLOT_Y + 1.5, SLOT_W - 3, SLOT_H - 3, SLOT_RADIUS);
+      ctx.strokeStyle = rarityColor;
+      ctx.lineWidth = 3;
       ctx.stroke();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 14px sans-serif';
-      ctx.textAlign = 'center';
-      const cardTitle = truncateText(ctx, card.name, innerW - 16);
-      ctx.fillText(cardTitle, slotX + slotW / 2, bannerY + 22);
-
-      ctx.fillStyle = rarityColor!;
-      ctx.font = '11px sans-serif';
-      ctx.fillText('EQUIPPED WAIFU TCG', slotX + slotW / 2, bannerY + 38);
     } else {
       // Empty Card Slot
       ctx.beginPath();
-      ctx.roundRect(slotX, slotY, slotW, slotH, radius);
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.4)';
+      ctx.roundRect(SLOT_X, SLOT_Y, SLOT_W, SLOT_H, SLOT_RADIUS);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.5)';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([6, 6]);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 8]);
       ctx.stroke();
+      ctx.setLineDash([]);
+
+      drawIcon(ctx, 'card', centerX, SLOT_Y + 109, 90, '#64748b');
 
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      ctx.fillStyle = TEXT_SECONDARY;
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText('NO CARD EQUIPPED', centerX, SLOT_Y + 188);
 
-      ctx.fillStyle = '#475569';
-      ctx.font = '42px sans-serif';
-      ctx.fillText('🎴', slotX + slotW / 2, slotY + 120);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '20px sans-serif';
+      ctx.fillText('Waifu TCG Showcase', centerX, SLOT_Y + 220);
 
-      ctx.fillStyle = '#64748b';
-      ctx.font = 'bold 14px sans-serif';
-      ctx.fillText('NO CARD EQUIPPED', slotX + slotW / 2, slotY + 180);
-
-      ctx.fillStyle = '#475569';
-      ctx.font = '12px sans-serif';
-      ctx.fillText('Waifu TCG Showcase', slotX + slotW / 2, slotY + 205);
-
-      // Equip Hint Pill
-      const hintW = 110;
-      const hintH = 26;
+      // Equip Hint Pill: the real slash form of the command that equips a card.
+      const hint = '/card action:equip';
+      const hintH = 40;
+      const hintW = Math.ceil(ctx.measureText(hint).width) + 24;
       ctx.beginPath();
-      ctx.setLineDash([]);
-      ctx.roundRect(slotX + slotW / 2 - hintW / 2, slotY + 240, hintW, hintH, 13);
+      ctx.roundRect(centerX - hintW / 2, SLOT_Y + 256, hintW, hintH, hintH / 2);
       ctx.fillStyle = 'rgba(0, 242, 254, 0.1)';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(0, 242, 254, 0.3)';
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.35)';
       ctx.lineWidth = 1;
       ctx.stroke();
 
       ctx.fillStyle = '#00f2fe';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillText('/tcg equip', slotX + slotW / 2, slotY + 240 + hintH / 2);
+      ctx.fillText(hint, centerX, SLOT_Y + 256 + hintH / 2);
     }
 
     ctx.restore();

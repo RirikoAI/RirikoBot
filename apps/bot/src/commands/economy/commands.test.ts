@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, type MockInstance } from 'vitest';
 import { createDatabaseClient, type SqliteDatabaseClient } from '@ririko/database';
 import type { CommandContext } from '@ririko/discord';
-import type { User, Guild, TextBasedChannel, Client, Message } from 'discord.js';
+import type { User, Guild, GuildMember, TextBasedChannel, Client, Message } from 'discord.js';
 import { createBotServices, type BotServices } from '../../services.js';
 import { createEconomyCommands } from './commands.js';
 import { registerMessageListener } from '../../listeners/message.listener.js';
@@ -16,6 +16,10 @@ function createMockContext(params: {
   rawArgs?: string[];
   attachments?: unknown;
   source?: 'slash' | 'prefix';
+  /** The invoking member (`ctx.member`). */
+  member?: GuildMember | null;
+  /** The member the `target` option resolves to (`ctx.options.getMember`). */
+  targetMember?: GuildMember | null;
 }): CommandContext {
   const user = {
     id: params.userId ?? 'user_commander_01',
@@ -41,7 +45,7 @@ function createMockContext(params: {
       send: vi.fn().mockResolvedValue({} as unknown as Message),
     } as unknown as TextBasedChannel,
     channelId: 'channel-1',
-    member: null,
+    member: params.member ?? null,
     user,
     commandName: 'economy',
     invokedName: 'economy',
@@ -55,7 +59,7 @@ function createMockContext(params: {
       getNumber: (name: string) => (optionsMap[name] as number | undefined) ?? null,
       getBoolean: (name: string) => (optionsMap[name] as boolean | undefined) ?? null,
       getUser: async (name: string) => (optionsMap[name] as User | undefined) ?? null,
-      getMember: async () => null,
+      getMember: async () => params.targetMember ?? null,
       getChannel: async () => null,
       getAttachment: () => null,
       getRawArgs: () => params.rawArgs ?? [],
@@ -281,7 +285,30 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
         exp INTEGER NOT NULL DEFAULT 0,
         battles_won INTEGER NOT NULL DEFAULT 0,
         state TEXT NOT NULL DEFAULT 'IDLE',
+        is_favorite INTEGER NOT NULL DEFAULT 0,
         obtained_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE waifu_sources (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        base_url TEXT NOT NULL,
+        attribution_text TEXT NOT NULL,
+        is_active INTEGER NOT NULL DEFAULT 1
+      );
+
+      CREATE TABLE waifu_assets (
+        id TEXT PRIMARY KEY,
+        source_id TEXT NOT NULL,
+        source_image_id TEXT NOT NULL,
+        character_name TEXT NOT NULL,
+        anime_title TEXT NOT NULL,
+        image_hash TEXT NOT NULL UNIQUE,
+        local_storage_path TEXT,
+        discord_cdn_url TEXT,
+        is_deleted_by_request INTEGER NOT NULL DEFAULT 0,
+        tags TEXT NOT NULL DEFAULT '[]',
+        created_at INTEGER NOT NULL
       );
     `);
 
@@ -584,6 +611,233 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
       expect(callArgs.files).toHaveLength(1);
       expect(callArgs.files[0].name).toBe(`profile_${userId}.png`);
       expect(Buffer.isBuffer(callArgs.files[0].attachment)).toBe(true);
+    });
+
+    describe('equipped card, server name and presence (BUG-0054)', () => {
+      const userId = 'user_prof_card';
+      const CARD_PNG = Buffer.from('rendered-card-png');
+      const PROFILE_PNG = Buffer.from('profile-card-png');
+
+      async function seedCard(options: {
+        state: string;
+        withAsset?: boolean;
+      }): Promise<{ cardId: string; userCardId: string }> {
+        if (options.withAsset ?? true) {
+          client.raw.exec(`
+            INSERT INTO waifu_sources (id, name, base_url, attribution_text)
+              VALUES ('src_1', 'Test Source', 'https://src.test', 'Art by Test Source');
+            INSERT INTO waifu_assets (id, source_id, source_image_id, character_name, anime_title, image_hash, created_at)
+              VALUES ('asset_1', 'src_1', 'img_1', 'Holo', 'Spice and Wolf', 'hash_1', 0);
+          `);
+        }
+        const card = await services.waifuCardRepo.create({
+          id: 'card_holo',
+          assetId: 'asset_1',
+          name: 'Holo the Wise Wolf',
+          rarity: 'LEGENDARY',
+          element: 'EARTH',
+          attack: 100,
+          defense: 80,
+          speed: 90,
+          health: 900,
+          collectionNumber: 1,
+        });
+        const userCard = await services.waifuCardRepo.createUserCard({
+          id: 'ucard_holo',
+          userId,
+          cardId: card.id,
+          serialNumber: 1,
+          state: options.state,
+        });
+        return { cardId: card.id, userCardId: userCard.id };
+      }
+
+      function spyOnRenderer(): MockInstance<
+        BotServices['profileCardRenderer']['renderFromRepositories']
+      > {
+        return vi
+          .spyOn(services.profileCardRenderer, 'renderFromRepositories')
+          .mockResolvedValue(PROFILE_PNG);
+      }
+
+      it('shows the equipped card, loading its image like /card inspect does', async () => {
+        const { cardId, userCardId } = await seedCard({ state: 'EQUIPPED' });
+        const getCardImage = vi
+          .spyOn(services.cardImageService, 'getCardImage')
+          .mockResolvedValue(CARD_PNG);
+        const render = spyOnRenderer();
+        const replyFn = vi.fn().mockResolvedValue(undefined);
+
+        await commands.get('profile')!(createMockContext({ userId, username: 'Holo', replyFn }));
+
+        expect(getCardImage).toHaveBeenCalledTimes(1);
+        const [card, asset, imageOptions] = getCardImage.mock.calls[0]!;
+        expect(card.id).toBe(cardId);
+        expect(asset?.id).toBe('asset_1');
+        expect(imageOptions).toEqual({
+          attributionText: 'Art by Test Source',
+          maxCollectionNumber: 1,
+        });
+
+        const options = render.mock.calls[0]?.[2];
+        expect(options?.equippedCard).toEqual({
+          id: userCardId,
+          name: 'Holo the Wise Wolf',
+          rarity: 'LEGENDARY',
+          imageBuffer: CARD_PNG,
+        });
+        expect(replyFn.mock.calls[0]?.[0].files[0].attachment).toBe(PROFILE_PNG);
+      });
+
+      it('uses the default attribution when the card has no source row', async () => {
+        await seedCard({ state: 'EQUIPPED', withAsset: false });
+        const getCardImage = vi
+          .spyOn(services.cardImageService, 'getCardImage')
+          .mockResolvedValue(CARD_PNG);
+        spyOnRenderer();
+
+        await commands.get('profile')!(createMockContext({ userId }));
+
+        const [, asset, imageOptions] = getCardImage.mock.calls[0]!;
+        expect(asset).toBeNull();
+        expect(imageOptions?.attributionText).toBe('Image source: waifu.im');
+      });
+
+      it('shows the equipped card of the target member, not the invoker', async () => {
+        await seedCard({ state: 'EQUIPPED' });
+        const getCardImage = vi
+          .spyOn(services.cardImageService, 'getCardImage')
+          .mockResolvedValue(CARD_PNG);
+        const render = spyOnRenderer();
+        const target = { id: userId, username: 'Holo' } as User;
+
+        await commands.get('profile')!(
+          createMockContext({ userId: 'someone_else', optionsMap: { target } }),
+        );
+
+        expect(getCardImage).toHaveBeenCalledTimes(1);
+        expect(render.mock.calls[0]?.[0]).toBe(userId);
+        expect(render.mock.calls[0]?.[2]?.equippedCard).toBeDefined();
+      });
+
+      it('still posts the profile, without the card, when the card image fails', async () => {
+        await seedCard({ state: 'EQUIPPED' });
+        vi.spyOn(services.cardImageService, 'getCardImage').mockRejectedValue(
+          new Error('canvas boom'),
+        );
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+        const render = spyOnRenderer();
+        const replyFn = vi.fn().mockResolvedValue(undefined);
+
+        await commands.get('profile')!(createMockContext({ userId, replyFn }));
+
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(String(warn.mock.calls[0]?.[0])).toContain('[profile]');
+        expect(render.mock.calls[0]?.[2]?.equippedCard).toBeUndefined();
+        expect(replyFn.mock.calls[0]?.[0].files[0].attachment).toBe(PROFILE_PNG);
+      });
+
+      it('passes no card when none is equipped', async () => {
+        await seedCard({ state: 'IDLE' });
+        const getCardImage = vi.spyOn(services.cardImageService, 'getCardImage');
+        const render = spyOnRenderer();
+
+        await commands.get('profile')!(createMockContext({ userId }));
+
+        expect(getCardImage).not.toHaveBeenCalled();
+        expect(render.mock.calls[0]?.[2]?.equippedCard).toBeUndefined();
+      });
+
+      it('passes no card when the equipped card definition is gone', async () => {
+        await services.waifuCardRepo.createUserCard({
+          id: 'ucard_orphan',
+          userId,
+          cardId: 'card_missing',
+          serialNumber: 1,
+          state: 'EQUIPPED',
+        });
+        const getCardImage = vi.spyOn(services.cardImageService, 'getCardImage');
+        const render = spyOnRenderer();
+
+        await commands.get('profile')!(createMockContext({ userId }));
+
+        expect(getCardImage).not.toHaveBeenCalled();
+        expect(render.mock.calls[0]?.[2]?.equippedCard).toBeUndefined();
+      });
+
+      it("uses the invoker's server name and real presence", async () => {
+        const render = spyOnRenderer();
+        const member = {
+          displayName: 'Nick Name',
+          presence: { status: 'dnd' },
+        } as unknown as GuildMember;
+
+        await commands.get('profile')!(createMockContext({ userId, username: 'Saber', member }));
+
+        const options = render.mock.calls[0]?.[2];
+        expect(options?.displayName).toBe('Nick Name');
+        expect(options?.presenceStatus).toBe('dnd');
+        expect(options?.username).toBe('Saber');
+      });
+
+      it("uses the target's server name and presence, and maps invisible to offline", async () => {
+        const render = spyOnRenderer();
+        const target = {
+          id: 'user_target',
+          username: 'Arthur',
+          displayName: 'Global Arthur',
+        } as User;
+        const targetMember = {
+          displayName: 'Sir Arthur',
+          presence: { status: 'invisible' },
+        } as unknown as GuildMember;
+
+        await commands.get('profile')!(
+          createMockContext({
+            userId,
+            member: {
+              displayName: 'Invoker Nick',
+              presence: { status: 'online' },
+            } as unknown as GuildMember,
+            optionsMap: { target },
+            targetMember,
+          }),
+        );
+
+        const options = render.mock.calls[0]?.[2];
+        expect(options?.displayName).toBe('Sir Arthur');
+        expect(options?.presenceStatus).toBe('offline');
+      });
+
+      it('leaves the presence unknown and uses the account name when there is no member', async () => {
+        const render = spyOnRenderer();
+        const target = {
+          id: 'user_target',
+          username: 'Arthur',
+          displayName: 'Global Arthur',
+        } as User;
+        const noName = { id: 'user_plain', username: 'plain_user' } as User;
+
+        await commands.get('profile')!(createMockContext({ userId, optionsMap: { target } }));
+        await commands.get('profile')!(
+          createMockContext({ userId, optionsMap: { target: noName } }),
+        );
+        // A member the gateway sent without a presence (the bot has no presence intent).
+        await commands.get('profile')!(
+          createMockContext({
+            userId,
+            member: { displayName: 'No Presence' } as unknown as GuildMember,
+          }),
+        );
+
+        const [first, second, third] = render.mock.calls.map((c) => c[2]);
+        expect(first?.displayName).toBe('Global Arthur');
+        expect(first?.presenceStatus).toBeUndefined();
+        expect(second?.displayName).toBe('plain_user');
+        expect(second?.presenceStatus).toBeUndefined();
+        expect(third?.displayName).toBe('No Presence');
+        expect(third?.presenceStatus).toBeUndefined();
+      });
     });
   });
 
