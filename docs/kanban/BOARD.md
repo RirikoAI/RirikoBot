@@ -5,7 +5,9 @@
 > **WIP rule**: at most 1 ticket in `IN_PROGRESS` on the whole board. Any agent (Claude, Gemini, Codex, or another) may hold it.
 
 ## ⚡ In Progress
-*None.*
+| ID | Type | Title | Pts | Parent | Worker | Claimed | Model | Handover |
+|---|---|---|---|---|---|---|---|---|
+| `BUG-0055` | Bug | Lavalink Trusts the Compromised eMudhra CAs, and Next.js 16.3 Has Critical Advisories | 5 | — | claude-medium | 2026-10-26T11:29:00Z | medium | [BUG-0055.md](./handovers/BUG-0055.md) |
 
 ## 🚧 Blocked
 *None.*
