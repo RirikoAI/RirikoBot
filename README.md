@@ -39,7 +39,7 @@ npx ririko --docker
 
 It downloads the release files, runs the setup wizard and asks if it should start Ririko. Leave out `--docker` and it asks you to choose between Docker and a source install. The steps below do the same by hand.
 
-You need [Docker](https://docs.docker.com/engine/install/) 23 or newer with Compose v2, Git, and a Discord account. The steps below are the short form of [Deploy Ririko With Docker](https://ririko.ai/docs/deployment), which explains each one.
+You need [Docker](https://docs.docker.com/engine/install/) 23 or newer with Compose 2.24.4 or newer, Git, and a Discord account. The steps below are the short form of [Deploy Ririko With Docker](https://ririko.ai/docs/deployment), which explains each one.
 
 1. Clone the repository and check out the release:
 

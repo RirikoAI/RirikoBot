@@ -16182,6 +16182,60 @@
         "BUG-0054"
       ],
       "status": "DONE"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "BUG-0055",
+      "parent": null,
+      "points": 5,
+      "title": "Lavalink Trusts the Compromised eMudhra CAs, and Next.js 16.3 Has Critical Advisories",
+      "description": "Found 2026-10-26 during the Node2Shell (CVE-2026-111497) and eMudhra (CVE-2026-111943) response. The bot and dashboard images are already patched (Node 22.23.4, Debian ca-certificates 20250419+deb13u1). Lavalink is not: ghcr.io/lavalink-devs/lavalink:4.2.2 runs Temurin 18.0.2.1 (eclipse-temurin:18-jre-jammy, last rebuilt 2022-09-02, Java 18 is end of life), whose lib/security/blocked.certs has no eMudhra entries, so a holder of a compromised key could impersonate YouTube, Spotify or the plugin repositories to Lavalink. pnpm audit also reports next 16.3.8 (2 critical, 1 high; fixed in 16.4.1) and tinypool 1.1.1 in the Docusaurus build (2 critical; fixed in 2.1.2).",
+      "context": {
+        "files": [
+          "deploy/lavalink/docker-compose.yml",
+          "docker-compose.production.yml",
+          "scripts/compose-production.test.ts",
+          "docs/deployment.md",
+          "README.md",
+          "apps/web/package.json",
+          "package.json",
+          "pnpm-workspace.yaml",
+          "pnpm-lock.yaml"
+        ],
+        "symbols": [
+          "lavalink-production",
+          "lavalink-staging",
+          "lavalink",
+          "java-blocked-certs"
+        ],
+        "entry_points": [
+          "deploy/host/bin/ririko-deploy.sh (Lavalink host deploy: up -d lavalink-<instance>)"
+        ],
+        "codegraph_queries": [
+          "compose-production.test.ts Lavalink image pin deploy/lavalink/docker-compose.yml"
+        ]
+      },
+      "acceptance": [
+        "deploy/lavalink/docker-compose.yml and docker-compose.production.yml each define a top-level Compose config `java-blocked-certs` whose inline `content` is byte-identical to the vendor blocked.certs (sha256 2596bb6dda83c66d96c5a252d7b2ae1f24cc1ae3f1890223b4f3591a8d52bf10, 87 lines: Algorithm=SHA-256 and 86 fingerprints), with a comment that says what it is, where it comes from and when to remove it.",
+        "lavalink-production, lavalink-staging (host compose) and lavalink (production compose) mount it at /opt/java/openjdk/lib/security/blocked.certs; the plugins init services do not. Image tags, application.yml and every other setting are unchanged.",
+        "scripts/compose-production.test.ts checks the sha256 of both contents and the mounts above; `docker compose config --quiet` accepts both files.",
+        "docs/deployment.md (section 1 and the services table) and README.md say Docker Compose 2.24.4 or newer is needed, and the deployment guide says why Lavalink gets a Java blocklist.",
+        "next is ~16.4.3 in apps/web and @next/eslint-plugin-next is ~16.4.3 at the root; the lockfile resolves next 16.4.3; pnpm build:web passes.",
+        "pnpm-workspace.yaml overrides tinypool to ^2.2.0 with a comment in the BUG-0049 style, and pnpm docs:build passes. If docs:build cannot pass with it, the override is removed and the PROGRESS entry says so.",
+        "pnpm audit --audit-level critical reports no critical advisory (unless the tinypool override had to be removed)."
+      ],
+      "verify_cmd": "pnpm install && pnpm vitest run scripts/compose-production.test.ts && WG_ADDRESS=10.0.0.1 LAVALINK_PRODUCTION_ENV_FILE=/dev/null LAVALINK_STAGING_ENV_FILE=/dev/null docker compose -f deploy/lavalink/docker-compose.yml config --quiet && POSTGRES_PASSWORD=x LAVALINK_PASSWORD=x RIRIKO_ENV_FILE=/dev/null docker compose -f docker-compose.production.yml config --quiet && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm build:web && pnpm docs:build && pnpm test:coverage && pnpm audit --audit-level critical",
+      "model": "medium",
+      "handovers": [
+        "BUG-0055"
+      ],
+      "status": "DONE"
     }
   ],
   "active_in_progress_ticket": null

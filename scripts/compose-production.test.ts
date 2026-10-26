@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
@@ -16,6 +17,7 @@ interface ComposeService {
   security_opt?: string[];
   logging?: { driver?: string; options?: Record<string, string> };
   environment?: Record<string, string>;
+  configs?: { source: string; target?: string }[];
 }
 
 const compose = parse(
@@ -296,5 +298,66 @@ describe('Lavalink plugin volume ownership (BUG-0036)', () => {
     expect(doc).toContain('lavalink-plugins');
     expect(doc).toContain('uid/gid 322');
     expect(doc).toContain('service_completed_successfully');
+  });
+});
+
+describe('Java blocklist for Lavalink (BUG-0055)', () => {
+  // The Java in the Lavalink image (Temurin 18, end of life) has no fix for the eMudhra CA
+  // compromise (CVE-2026-111943). Both compose files replace its lib/security/blocked.certs with the
+  // one of Amazon Corretto 17.0.21 and SapMachine 21.0.13.0.2. The content is inline because the
+  // hosts get no other file than the compose file (and application.yml). The hash is the proof that
+  // it is the vendor's file, so never change it to make this test pass: replace the whole list.
+  const vendorSha256 = '2596bb6dda83c66d96c5a252d7b2ae1f24cc1ae3f1890223b4f3591a8d52bf10';
+  const target = '/opt/java/openjdk/lib/security/blocked.certs';
+  type WithConfigs = {
+    services: Record<string, ComposeService>;
+    configs?: Record<string, { content?: string }>;
+  };
+  const cases = [
+    {
+      file: 'docker-compose.production.yml',
+      compose: parse(read('../docker-compose.production.yml'), { merge: true }) as WithConfigs,
+      mounted: ['lavalink'],
+    },
+    {
+      file: 'deploy/lavalink/docker-compose.yml',
+      compose: parse(read('../deploy/lavalink/docker-compose.yml'), { merge: true }) as WithConfigs,
+      mounted: ['lavalink-production', 'lavalink-staging'],
+    },
+  ];
+
+  it.each(cases)(
+    '$file: java-blocked-certs is the vendor blocked.certs, byte for byte',
+    ({ compose }) => {
+      const content = compose.configs?.['java-blocked-certs']?.content ?? '';
+      expect(createHash('sha256').update(content).digest('hex')).toBe(vendorSha256);
+      const lines = content.split('\n');
+      expect(lines.pop()).toBe('');
+      expect(lines).toHaveLength(87);
+      expect(lines[0]).toBe('Algorithm=SHA-256');
+      expect(lines.slice(1).every((line) => /^[0-9A-F]{64}$/.test(line))).toBe(true);
+    },
+  );
+
+  it.each(cases)(
+    '$file: only the Lavalink service mounts it, at the Java path',
+    ({ compose, mounted }) => {
+      for (const [name, service] of Object.entries(compose.services)) {
+        expect(service.configs, name).toEqual(
+          mounted.includes(name) ? [{ source: 'java-blocked-certs', target }] : undefined,
+        );
+      }
+      for (const name of mounted) {
+        expect(compose.services[name]).toBeDefined();
+      }
+    },
+  );
+
+  it('is explained in the deployment guide, with the Compose version that inline content needs', () => {
+    const doc = read('../docs/deployment.md');
+    expect(doc).toContain('blocked.certs');
+    expect(doc).toContain('CVE-2026-111943');
+    expect(doc).toMatch(/Compose plugin version 2\.24\.4 or newer/);
+    expect(read('../README.md')).toMatch(/Compose 2\.24\.4 or newer/);
   });
 });
