@@ -149,6 +149,7 @@
 | `STORY-201` | Story | Starboard: Repost Popular Messages to a Highlights Channel | 21 | EPIC-021 | [STORY-201.md](./handovers/STORY-201.md) |
 | `STORY-202` | Story | Set Up Tickets, Starboard, Event Logs and Level Role Stacking with Commands | 21 | EPIC-021 | [STORY-202.md](./handovers/STORY-202.md) |
 | `STORY-204` | Story | Scripted Releases: Plan Mode, One Merge Stop, Assisted Tag and Images | 21 | EPIC-022 | [STORY-204.md](./handovers/STORY-204.md) |
+| `STORY-205` | Story | Claim Card Drops with a Button, Send the Card by DM, Edit the Drop Message | 8 | EPIC-010 | [STORY-205.md](./handovers/STORY-205.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -571,7 +572,7 @@
 | `EPIC-007` | Moderation 2.0 with Escalation & AutoMod | DONE | 13 | STORY-070, STORY-071, STORY-072, STORY-073 | — |
 | `EPIC-008` | Streamer Notifications & Free Games Announcer | DONE | 8 | STORY-080, STORY-081 | — |
 | `EPIC-009` | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | DONE | 13 | STORY-090, STORY-091, STORY-092 | — |
-| `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | DONE | 21 | STORY-100, STORY-101, STORY-102, STORY-103, STORY-104, STORY-105 | [EPIC-010.md](./handovers/EPIC-010.md) |
+| `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | DONE | 21 | STORY-100, STORY-101, STORY-102, STORY-103, STORY-104, STORY-105, STORY-205 | [EPIC-010.md](./handovers/EPIC-010.md) |
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | DONE | 21 | STORY-110, STORY-111, STORY-112, STORY-167, STORY-168, STORY-113, STORY-114, STORY-115, STORY-165, STORY-116, STORY-166, STORY-117, STORY-118, STORY-119, STORY-163, STORY-164 | — |
 | `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | DONE | 13 | STORY-120, STORY-121, STORY-122, STORY-123, STORY-124, STORY-125, STORY-126, STORY-127, STORY-128 | [EPIC-012.md](./handovers/EPIC-012.md) |
 | `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | DONE | 21 | STORY-130, STORY-131, STORY-132, STORY-133 | — |

@@ -8,7 +8,7 @@ Server admins should read [waifu-tcg.md](waifu-tcg.md) to turn on card drops.
 
 1. Run `/dungeon action:tutorial`. This is free. If you have no cards, Ririko gives you a starter card. It also gives you a **Novice Blade** and 3 **Minor HP Potions**. Finish all 4 tutorial floors to unlock the tower.
 2. Run `/cards` to see your album.
-3. Chat in your server. Cards drop from time to time. Claim one with `/card action:claim`.
+3. Chat in your server. Cards drop from time to time. Press **Claim** on a drop to keep it.
 4. Run `/dungeon action:status` to see your energy and the next floor.
 5. Run `/dungeon action:climb` to fight.
 
@@ -17,7 +17,7 @@ You can also run `/tcg-info` for an in-game guide.
 ### 1.1. Ways to Get Cards
 
 - **The tutorial.** One starter card, if you have none.
-- **Chat drops.** Ririko drops a card after enough members chat. Use `/card action:claim` before the time runs out (60 seconds by default). If you claimed the last drop, you wait a few minutes before you can claim again (5 minutes by default).
+- **Chat drops.** Ririko drops a card after enough members chat. Press **Claim** on the drop before the time runs out (60 seconds by default). `/card action:claim` does the same. Ririko sends the full card to your DMs. If your DMs are closed, you still keep the card, and you can see it with `/cards`. If you claimed the last drop, you wait a few minutes before you can claim again (5 minutes by default).
 - **The market.** Buy cards from other players with credits. See section 9.
 - **Trades.** Swap cards with a friend. See section 8.
 - **Achievements.** Some achievements give cards. See section 11.
@@ -442,7 +442,7 @@ Bot owners can change the text and rewards of achievements. The XP counts toward
 |---|---|
 | `/tcg-info [topic]` | Opens the in-game guide. |
 | `/cards` | Opens your album. |
-| `/card action:claim` | Claims a chat drop. |
+| `/card action:claim` | Claims a chat drop, like the **Claim** button. |
 | `/card action:inspect id:<card>` | Shows a card. |
 | `/card action:equip id:<card>` | Sets your active card. |
 | `/card action:favorite id:<card>` | Protects a card. |

@@ -27,8 +27,9 @@ export default async function TcgSettingsPage({
         <h1 className="text-2xl font-bold">Waifu TCG</h1>
         <p className="mt-1 text-sm text-zinc-400">
           Card drops reward active chat: once enough different members have chatted, a card drops
-          and the first member to run <code>/card action:claim</code> keeps it. Game rules such as
-          energy and market tax are the same on every server and are set by the bot owner.
+          and the first member to press its <strong>Claim</strong> button (or run{' '}
+          <code>/card action:claim</code>) keeps it. Game rules such as energy and market tax are
+          the same on every server and are set by the bot owner.
         </p>
       </header>
       <SettingsForm action={saveTcgSettings.bind(null, guildId)}>
