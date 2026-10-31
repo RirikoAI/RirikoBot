@@ -7,7 +7,7 @@ Ririko has credits (money) and XP (experience). Members earn both by chatting, b
 - **Credits** are the money of Ririko. Your credits are the same in every server. Each member has a wallet and a bank.
 - **XP** is kept for each server. XP gives you a level in that server.
 - **Karma** is a small score that members give each other in a server.
-- A **profile card** is a picture that shows your level, rank and credits.
+- A **profile card** is a picture that shows your level, rank and credits, and the Waifu TCG card you have equipped.
 
 Server admins cannot set the number of credits that members earn. This stops one server from creating credits for everyone. Bot owners set the global values (see section 9).
 
@@ -36,18 +36,21 @@ The reply to `/balance` shows the wallet, the bank and the net worth:
 | Command | Aliases | Options | What it does |
 |---|---|---|---|
 | `/leaderboard` | `lb`, `top` | `scope` (`server` or `global`), `page` | Shows the XP ranking. |
-| `/profile` | `rank` | `target` (member), `background` (link) | Shows a profile card. With a link or an attached image, it sets your own background. |
+| `/profile` | `rank` | `target` (member), `background` (link) | Shows a profile card. It also shows the Waifu TCG card the member has equipped. With a link or an attached image, it sets your own background. |
 | `/karma` | `k` | `action` (`view` or `give`), `target` (member) | Shows karma. With `give`, you give 1 karma to another member. You cannot give karma to yourself. Server only. |
 
 The reply to `/leaderboard` ranks members by level and XP:
 
 ![The reply to /leaderboard: the top two members with their level and XP.](img/leaderboard.webp)
 
+The profile card uses the member's server nickname, and a status dot only when Discord reports the member's status. The right side of the card shows the member's equipped Waifu TCG card. To equip one, use `/card action:equip id:<card>` (see the [player guide](tcg-player-guide.md)). A member with no equipped card sees an empty slot with this hint. If the card picture cannot be loaded, the profile card still posts without it.
+
 Profile background rules:
 
 - The image can be at most 1200 x 400 pixels and 5 MB.
 - The link must be public. Ririko saves a copy of the image.
 - You can use a link, or attach an image when you use the prefix form.
+- An image that is smaller than the card, or has another shape, is scaled to cover the card and cropped at the centre. It is not stretched.
 
 ### 2.3. Shop and Items
 

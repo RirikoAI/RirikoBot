@@ -24,6 +24,8 @@ ignoredBuiltDependencies:
 # Remove an entry once the packages that pull it in resolve a fixed version by themselves.
 # - sharp: a dependency of next (image optimization); fixed in 0.35.5.
 # - source-map-js: a dependency of postcss, which next pins; fixed in 1.2.2.
+# - tinypool: a dependency of @docusaurus/core, in the docs build only; fixed in 2.1.2 (BUG-0055).
 overrides:
   sharp: ^0.35.5
   source-map-js: ^1.2.2
+  tinypool: ^2.2.0
