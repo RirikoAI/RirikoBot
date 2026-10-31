@@ -11,6 +11,7 @@ const ticketHandlers = vi.hoisted(() => ({
   modal: vi.fn(),
 }));
 const helpHandler = vi.hoisted(() => vi.fn());
+const cardDropClaimHandler = vi.hoisted(() => vi.fn());
 
 vi.mock('./index.js', () => ({
   handleGiveawayButtonInteraction: vi.fn(),
@@ -18,6 +19,10 @@ vi.mock('./index.js', () => ({
   handleTicketButton: ticketHandlers.button,
   handleTicketModal: ticketHandlers.modal,
   isTicketCustomId: (id: string) => id.startsWith('ticket:'),
+}));
+vi.mock('./commands/tcg/card-drop-claim.js', () => ({
+  CARD_DROP_CLAIM_PREFIX: 'carddrop:claim:',
+  handleCardDropClaimButton: cardDropClaimHandler,
 }));
 vi.mock('@ririko/discord', () => ({ handleHelpInteraction: helpHandler }));
 
@@ -64,6 +69,15 @@ describe('component interaction routing (TASK-1984)', () => {
     await emit(interaction);
     expect(ticketHandlers.button).toHaveBeenCalledWith(
       expect.objectContaining({ customId: 'ticket:open' }),
+      services,
+    );
+    expect(helpHandler).not.toHaveBeenCalled();
+  });
+
+  it('sends the Claim button of a card drop to the claim handler', async () => {
+    await emit({ isButton: () => true, customId: 'carddrop:claim:drop-1' });
+    expect(cardDropClaimHandler).toHaveBeenCalledWith(
+      expect.objectContaining({ customId: 'carddrop:claim:drop-1' }),
       services,
     );
     expect(helpHandler).not.toHaveBeenCalled();

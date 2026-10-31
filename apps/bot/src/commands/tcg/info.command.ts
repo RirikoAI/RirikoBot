@@ -55,7 +55,7 @@ export function buildTcgInfoEmbed(
             `• **TUTORIAL_COMPLETE Achievement**: Grants +100 EXP & +250 Credits!\n\n` +
             `### 2. Chat Drops (Free Cards Just for Chatting!)\n` +
             `• Cards drop randomly into active server chat channels.\n` +
-            `• When a card appears, type \`/card action:claim\` or \`${prefix}card claim\` to claim it!\n` +
+            `• When a card appears, press its **Claim** button, or type \`/card action:claim\` or \`${prefix}card claim\`. The card comes to your DMs!\n` +
             `• Follows 8 rarity tiers: Common (50%), Uncommon (25%), Rare (12%), Super Rare (7%), Ultra Rare (4%), Secret Rare (1.5%), SIR (0.45%), Mythic (0.05%).\n\n` +
             `### 3. Community Marketplace\n` +
             `• Buy cards listed by other players with \`/market action:browse\` and \`/market action:buy\`!`,

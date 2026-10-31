@@ -9,6 +9,10 @@ import {
   handleTicketModal,
   isTicketCustomId,
 } from './index.js';
+import {
+  CARD_DROP_CLAIM_PREFIX,
+  handleCardDropClaimButton,
+} from './commands/tcg/card-drop-claim.js';
 import { handleAiConsentButton } from './privacy/ai-consent.js';
 import type { BotServices } from './services.js';
 import { MessageFlags } from 'discord.js';
@@ -22,7 +26,8 @@ export interface ComponentInteractionOptions {
 
 /**
  * Routes button, select menu and modal submit interactions that commands leave behind (adventure, music
- * controller, AI consent, imagine, giveaways, reaction roles, verification, tickets, help center) by custom id.
+ * controller, AI consent, imagine, giveaways, card drops, reaction roles, verification, tickets, help center)
+ * by custom id.
  * Slash commands reach the command router instead.
  */
 export function registerComponentInteractions(
@@ -51,6 +56,10 @@ export function registerComponentInteractions(
         }
         if (interaction.customId.startsWith('giveaway:enter:')) {
           await handleGiveawayButtonInteraction(interaction, services);
+          return;
+        }
+        if (interaction.customId.startsWith(CARD_DROP_CLAIM_PREFIX)) {
+          await handleCardDropClaimButton(interaction, services);
           return;
         }
         if (isTicketCustomId(interaction.customId)) {

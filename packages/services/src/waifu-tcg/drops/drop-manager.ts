@@ -43,6 +43,8 @@ export interface ActiveDrop {
   expiresAt: number;
   claimed: boolean;
   claimedBy: string | null;
+  /** The posted drop message; null until it is sent. */
+  messageId: string | null;
 }
 
 export interface ClaimResult {
@@ -172,8 +174,15 @@ export class DropManager {
     return drop;
   }
 
+  /** Remembers the posted message of a drop, so a claim can edit it. */
+  setDropMessage(dropId: string, messageId: string): void {
+    const drop = this.activeDrops.get(dropId);
+    if (drop) drop.messageId = messageId;
+  }
+
   private clearDrop(guildId: string, dropId: string): void {
-    this.guildActiveDrops.delete(guildId);
+    // A late press on an old claimed drop must not unlink a newer drop of the guild.
+    if (this.guildActiveDrops.get(guildId) === dropId) this.guildActiveDrops.delete(guildId);
     this.activeDrops.delete(dropId);
   }
 
@@ -298,6 +307,7 @@ export class DropManager {
       expiresAt: nowMs + config.claimTimeoutSeconds * 1000,
       claimed: false,
       claimedBy: null,
+      messageId: null,
     };
 
     this.activeDrops.set(dropId, activeDrop);
@@ -350,15 +360,25 @@ export class DropManager {
     this.lastClaimants.set(drop.guildId, { userId, timestamp: now });
 
     // Persist card in player's inventory
-    const userCard = await this.cardRepo.createUserCard({
-      userId,
-      cardId: drop.card.id,
-      serialNumber: drop.serialNumber,
-      level: 1,
-      exp: 0,
-      state: 'IDLE',
-      isFavorite: false,
-    });
+    let userCard: UserCard;
+    try {
+      userCard = await this.cardRepo.createUserCard({
+        userId,
+        cardId: drop.card.id,
+        serialNumber: drop.serialNumber,
+        level: 1,
+        exp: 0,
+        state: 'IDLE',
+        isFavorite: false,
+      });
+    } catch (error) {
+      // Nothing was minted, so undo the lock and keep the drop claimable.
+      drop.claimed = false;
+      drop.claimedBy = null;
+      if (lastClaim) this.lastClaimants.set(drop.guildId, lastClaim);
+      else this.lastClaimants.delete(drop.guildId);
+      throw error;
+    }
 
     // Remove active drop pointer from guild so new drop can spawn later
     this.guildActiveDrops.delete(drop.guildId);

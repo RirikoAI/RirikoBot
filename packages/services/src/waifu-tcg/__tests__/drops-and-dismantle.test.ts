@@ -321,6 +321,85 @@ describe('Waifu Chat Drops & Dismantle Engine (TASK-1012)', () => {
       expect(claim2Other.userCard?.userId).toBe('user_fair');
     });
 
+    it('starts without a message and remembers the one it was posted in', async () => {
+      const drop = await dropManager.spawnDrop('guild_msg', 'channel_drops');
+      expect(drop?.messageId).toBeNull();
+
+      dropManager.setDropMessage(drop!.id, 'message_1');
+      expect(dropManager.getActiveDropById(drop!.id)?.messageId).toBe('message_1');
+
+      expect(() => dropManager.setDropMessage('unknown', 'message_2')).not.toThrow();
+    });
+
+    it('undoes the claim lock when the card cannot be saved, so the drop stays claimable', async () => {
+      const guildId = 'guild_rollback';
+      const drop = await dropManager.spawnDrop(guildId, 'channel_drops');
+      const createUserCard = vi
+        .spyOn(cardRepo, 'createUserCard')
+        .mockRejectedValueOnce(new Error('db down'));
+
+      await expect(dropManager.claimDrop(drop!.id, 'user_unlucky')).rejects.toThrow('db down');
+
+      expect(drop?.claimed).toBe(false);
+      expect(drop?.claimedBy).toBeNull();
+      expect(dropManager.getActiveDrop(guildId)?.id).toBe(drop!.id);
+      expect(createUserCard).toHaveBeenCalledTimes(1);
+
+      // No cooldown came from the failed claim: the same member can try again.
+      const retry = await dropManager.claimDrop(drop!.id, 'user_unlucky');
+      expect(retry.success).toBe(true);
+      expect(retry.userCard?.userId).toBe('user_unlucky');
+    });
+
+    it('restores the previous claimant when a later claim cannot be saved', async () => {
+      const guildId = 'guild_rollback_previous';
+      const now = Date.now();
+      const first = await dropManager.spawnDrop(guildId, 'channel_drops');
+      expect((await dropManager.claimDrop(first!.id, 'user_first', now)).success).toBe(true);
+
+      const second = await dropManager.spawnDrop(guildId, 'channel_drops');
+      vi.spyOn(cardRepo, 'createUserCard').mockRejectedValueOnce(new Error('db down'));
+      await expect(dropManager.claimDrop(second!.id, 'user_other', now + 1000)).rejects.toThrow(
+        'db down',
+      );
+
+      // user_first is still the last claimant, so the cooldown still holds them back.
+      const sniper = await dropManager.claimDrop(second!.id, 'user_first', now + 2000);
+      expect(sniper.error).toContain('Anti-sniping cooldown active');
+      const other = await dropManager.claimDrop(second!.id, 'user_other', now + 3000);
+      expect(other.success).toBe(true);
+    });
+
+    it('mints one card for two claims at the same time', async () => {
+      const drop = await dropManager.spawnDrop('guild_race', 'channel_drops');
+      const createUserCard = vi.spyOn(cardRepo, 'createUserCard');
+
+      const [a, b] = await Promise.all([
+        dropManager.claimDrop(drop!.id, 'user_a'),
+        dropManager.claimDrop(drop!.id, 'user_b'),
+      ]);
+
+      expect(a.success).toBe(true);
+      expect(b.success).toBe(false);
+      expect(b.error).toContain('<@user_a>');
+      expect(createUserCard).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the newer drop of a guild when an old claimed drop is cleared', async () => {
+      const guildId = 'guild_late_press';
+      const now = Date.now();
+      const old = await dropManager.spawnDrop(guildId, 'channel_drops');
+      expect((await dropManager.claimDrop(old!.id, 'user_a', now)).success).toBe(true);
+      const newer = await dropManager.spawnDrop(guildId, 'channel_drops');
+      newer!.expiresAt = now + 3_600_000;
+
+      // A late press on the old message after its window ends.
+      old!.expiresAt = now - 1;
+      expect(dropManager.getActiveDropById(old!.id)).toBeNull();
+
+      expect(dropManager.getActiveDrop(guildId)?.id).toBe(newer!.id);
+    });
+
     it('should reject claim if 60-second claim window has expired', async () => {
       const guildId = 'guild_5';
       const channelId = 'channel_drops';

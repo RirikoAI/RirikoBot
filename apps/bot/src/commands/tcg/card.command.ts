@@ -1,14 +1,5 @@
-import { EmbedBuilder } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
-import {
-  formatCardEmbedFooter,
-  getCardAttribution,
-  RARITY_TIERS,
-  formatCardSerialNumber,
-  type CardRarity,
-} from '@ririko/services';
-import type { WaifuAsset, WaifuCard } from '@ririko/database';
 import { buildTcgInfoEmbed, buildTcgInfoSelectMenu } from './info.command.js';
 import { openGearMenu } from './gear-menu.js';
 import {
@@ -17,35 +8,12 @@ import {
   buildCardInspectComponents,
 } from './cards.command.js';
 import { resolveUserCard } from './card-resolver.js';
-import { syncCollectionAchievements } from './achievement-progress.js';
+import {
+  buildClaimConfirmation,
+  buildPrefixClaimReply,
+  completeCardDropClaim,
+} from './card-drop-claim.js';
 import { resolveContextPrefix } from '../shared/prefix-resolver.js';
-
-const CARD_IMAGE_NAME = 'card.png';
-
-/**
- * Renders the full card PNG (art, frame, foil, stats) and points the embed at it.
- * Returns the reply `files` entry, or an empty list when rendering fails so the text embed
- * still goes out.
- */
-async function attachCardImage(
-  services: BotServices,
-  embed: EmbedBuilder,
-  card: WaifuCard,
-  asset: WaifuAsset | null,
-  attributionText: string,
-): Promise<Array<{ attachment: Buffer; name: string }>> {
-  try {
-    const png = await services.cardImageService.getCardImage(card, asset, {
-      attributionText,
-      maxCollectionNumber: await services.waifuCardRepo.count(),
-    });
-    embed.setImage(`attachment://${CARD_IMAGE_NAME}`);
-    return [{ attachment: png, name: CARD_IMAGE_NAME }];
-  } catch (err) {
-    console.warn(`[card] Failed to render card image for ${card.id}:`, err);
-    return [];
-  }
-}
 
 /**
  * Standalone `/loadout` (prefix `loadout`, `gear`, `equipment`): a shortcut for `/card action:gear`,
@@ -320,6 +288,9 @@ export function createCardCommand(services: BotServices): Command {
             return;
           }
 
+          // The mint, the DM and the render can take longer than Discord's 3 seconds.
+          if (ctx.source !== 'prefix') await ctx.deferReply({ ephemeral: true });
+
           const claimResult = await services.dropManager.claimDrop(activeDrop.id, ctx.user.id);
           if (!claimResult.success) {
             await ctx.reply({
@@ -328,38 +299,13 @@ export function createCardCommand(services: BotServices): Command {
             });
             return;
           }
-          await syncCollectionAchievements(services, ctx.user.id);
 
-          const tier = RARITY_TIERS[(claimResult.card?.rarity as CardRarity) ?? 'COMMON'];
-          const claimSource = claimResult.asset
-            ? await services.waifuAssetRepo.findSourceById(claimResult.asset.sourceId)
-            : null;
-          const footer = formatCardEmbedFooter(claimSource, claimResult.formattedSerial);
-
-          const embed = new EmbedBuilder()
-            .setTitle(`🎉 Card Claimed: ${claimResult.card?.name}!`)
-            .setColor(0xff69b4)
-            .setDescription(
-              `Congratulations <@${ctx.user.id}>! You were the first to claim this card drop!\n\n` +
-                `• **Rarity**: \`${tier.name}\` (${tier.foilEffect})\n` +
-                `• **Element**: \`${claimResult.card?.element}\`\n` +
-                `• **Serial**: \`${claimResult.formattedSerial}\`\n` +
-                `• **Level**: \`1 / ${tier.maxLevel}\`\n` +
-                `• **Stats**: HP \`${claimResult.card?.health}\` | ATK \`${claimResult.card?.attack}\` | DEF \`${claimResult.card?.defense}\` | SPD \`${claimResult.card?.speed}\``,
-            )
-            .setFooter(footer);
-
-          const files = claimResult.card
-            ? await attachCardImage(
-                services,
-                embed,
-                claimResult.card,
-                claimResult.asset ?? null,
-                getCardAttribution(claimSource).footerText,
-              )
-            : [];
-
-          await ctx.reply({ embeds: [embed], files });
+          const completed = await completeCardDropClaim(ctx.user, activeDrop, services);
+          if (ctx.source === 'prefix') {
+            await ctx.reply({ content: buildPrefixClaimReply(activeDrop, completed.dmSent) });
+          } else {
+            await ctx.reply({ ...buildClaimConfirmation(activeDrop, completed), ephemeral: true });
+          }
           break;
         }
 
