@@ -3,6 +3,6 @@ import { CORE_VERSION } from './index.js';
 
 describe('Core Module', () => {
   it('should export valid semantic version', () => {
-    expect(CORE_VERSION).toBe('2.1.2');
+    expect(CORE_VERSION).toBe('2.2.0');
   });
 });

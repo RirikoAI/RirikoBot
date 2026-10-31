@@ -1,4 +1,4 @@
-export const CORE_VERSION = '2.1.2';
+export const CORE_VERSION = '2.2.0';
 
 export * from './config/index.js';
 export * from './errors/index.js';
