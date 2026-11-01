@@ -50,10 +50,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@google/genai": "^2.31.0",
+    "@google/genai": "^2.32.0",
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*",
-    "openai": "^7.43.0",
+    "openai": "^7.45.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {
