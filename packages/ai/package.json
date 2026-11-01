@@ -54,7 +54,7 @@
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*",
     "openai": "^7.43.0",
-    "zod": "^3.24.2"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",
