@@ -186,14 +186,20 @@ describe('Card Command Suite (TASK-1012)', () => {
     guildId?: string;
     args?: Record<string, unknown>;
     rawArgs?: string[];
-  }): { ctx: CommandContext; replies: any[] } {
+    source?: CommandContext['source'];
+    dm?: ReturnType<typeof vi.fn>;
+    client?: unknown;
+  }): { ctx: CommandContext; replies: any[]; dm: ReturnType<typeof vi.fn> } {
     const replies: any[] = [];
+    const dm = options.dm ?? vi.fn().mockResolvedValue(undefined);
     const userId = options.userId ?? 'user_commander_1';
     const guildId = options.guildId ?? 'guild_tcg_1';
     const rawArgs = options.rawArgs ?? (options.subcommand ? [options.subcommand] : []);
 
     const ctx: Partial<CommandContext> = {
-      user: { id: userId, username: 'Commander' } as any,
+      source: options.source ?? 'slash',
+      deferReply: vi.fn().mockResolvedValue(undefined),
+      user: { id: userId, username: 'Commander', client: options.client, send: dm } as any,
       guild: { id: guildId, name: 'Anime Guild' } as any,
       options: {
         getSubcommand: () => options.subcommand ?? '',
@@ -219,7 +225,7 @@ describe('Card Command Suite (TASK-1012)', () => {
       },
     };
 
-    return { ctx: ctx as CommandContext, replies };
+    return { ctx: ctx as CommandContext, replies, dm };
   }
 
   it('should handle /card claim when active drop exists', async () => {
@@ -239,25 +245,147 @@ describe('Card Command Suite (TASK-1012)', () => {
     expect(drop).not.toBeNull();
 
     // Claim active drop
-    const { ctx: ctxClaim, replies: repliesClaim } = createMockContext({
+    const {
+      ctx: ctxClaim,
+      replies: repliesClaim,
+      dm,
+    } = createMockContext({
       subcommand: 'claim',
       guildId,
       userId: 'user_lucky',
     });
     await command.execute(ctxClaim);
-    expect(repliesClaim[0].embeds).toHaveLength(1);
-    expect(repliesClaim[0].embeds[0].data.title).toContain('Card Claimed: Rias Gremory');
-    expect(repliesClaim[0].embeds[0].data.footer?.text).toContain('Image source: waifu.im');
-    expect(repliesClaim[0].embeds[0].data.image?.url).toBe('attachment://card.png');
-    expect(repliesClaim[0].files).toEqual([
+
+    // The full card goes to the claimer by DM.
+    expect(dm).toHaveBeenCalledTimes(1);
+    const dmPayload = dm.mock.calls[0]![0];
+    expect(dmPayload.embeds).toHaveLength(1);
+    expect(dmPayload.embeds[0].data.title).toContain('Card Claimed: Rias Gremory');
+    expect(dmPayload.embeds[0].data.footer?.text).toContain('Image source: waifu.im');
+    expect(dmPayload.embeds[0].data.image?.url).toBe('attachment://card.png');
+    expect(dmPayload.files).toEqual([
       { attachment: Buffer.from('rendered-card-png'), name: 'card.png' },
     ]);
+
+    // The channel only gets a private confirmation, without the card.
+    expect(ctxClaim.deferReply).toHaveBeenCalledWith({ ephemeral: true });
+    expect(repliesClaim).toHaveLength(1);
+    expect(repliesClaim[0].ephemeral).toBe(true);
+    expect(repliesClaim[0].content).toContain('Rias Gremory');
+    expect(repliesClaim[0].content).toContain('in your DMs');
+    expect(repliesClaim[0].embeds).toEqual([]);
+    expect(repliesClaim[0].files).toEqual([]);
+
     expect(syncCollection.mock.calls).toEqual([['user_lucky']]);
     expect(getCardImage).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Rias Gremory' }),
       expect.objectContaining({ characterName: 'Rias Gremory' }),
       expect.objectContaining({ attributionText: 'Image source: waifu.im' }),
     );
+  });
+
+  it('edits the drop message on a command claim, like the button', async () => {
+    const command = createCardCommand(services);
+    const guildId = 'guild_tcg_1';
+    const drop = await dropManager.spawnDrop(guildId, 'channel_main');
+    dropManager.setDropMessage(drop!.id, 'drop_message');
+    const editMessage = vi.fn().mockResolvedValue(undefined);
+    const fetchChannel = vi
+      .fn()
+      .mockResolvedValue({ isTextBased: () => true, messages: { edit: editMessage } });
+
+    const { ctx } = createMockContext({
+      subcommand: 'claim',
+      guildId,
+      userId: 'user_lucky',
+      client: { channels: { fetch: fetchChannel } },
+    });
+    await command.execute(ctx);
+
+    expect(fetchChannel).toHaveBeenCalledWith('channel_main');
+    const [messageId, edit] = editMessage.mock.calls[0]!;
+    expect(messageId).toBe('drop_message');
+    expect(edit.components).toEqual([]);
+    expect(edit.attachments).toEqual([]);
+    expect(edit.embeds[0].data.description).toContain('<@user_lucky>');
+    expect(edit.embeds[0].data.image).toBeUndefined();
+  });
+
+  it('carries the card in the ephemeral reply when a slash claimer has closed DMs', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const command = createCardCommand(services);
+    const guildId = 'guild_tcg_1';
+    await dropManager.spawnDrop(guildId, 'channel_main');
+
+    const { ctx, replies } = createMockContext({
+      subcommand: 'claim',
+      guildId,
+      userId: 'user_private',
+      dm: vi.fn().mockRejectedValue(new Error('Cannot send messages to this user')),
+    });
+    await command.execute(ctx);
+
+    expect(replies[0].ephemeral).toBe(true);
+    expect(replies[0].content).toContain('could not DM you');
+    expect(replies[0].embeds[0].data.image?.url).toBe('attachment://card.png');
+    expect(replies[0].files).toEqual([
+      { attachment: Buffer.from('rendered-card-png'), name: 'card.png' },
+    ]);
+    expect(syncCollection.mock.calls).toEqual([['user_private']]);
+    warn.mockRestore();
+  });
+
+  it('answers a prefix claim with one line of text and never the card', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const command = createCardCommand(services);
+
+    await dropManager.spawnDrop('guild_prefix_open', 'channel_main');
+    const open = createMockContext({
+      rawArgs: ['claim'],
+      guildId: 'guild_prefix_open',
+      userId: 'user_open',
+      source: 'prefix',
+    });
+    await command.execute(open.ctx);
+    expect(open.ctx.deferReply).not.toHaveBeenCalled();
+    expect(open.dm).toHaveBeenCalledTimes(1);
+    expect(open.replies).toEqual([
+      { content: '🎉 You claimed **Rias Gremory**! The full card is in your DMs.' },
+    ]);
+
+    await dropManager.spawnDrop('guild_prefix_closed', 'channel_main');
+    const closed = createMockContext({
+      rawArgs: ['claim'],
+      guildId: 'guild_prefix_closed',
+      userId: 'user_closed',
+      source: 'prefix',
+      dm: vi.fn().mockRejectedValue(new Error('Cannot send messages to this user')),
+    });
+    await command.execute(closed.ctx);
+    expect(closed.replies).toHaveLength(1);
+    expect(closed.replies[0].content).toContain('could not DM you');
+    expect(closed.replies[0].content).toContain('`/cards`');
+    expect(closed.replies[0].embeds).toBeUndefined();
+    expect(closed.replies[0].files).toBeUndefined();
+    warn.mockRestore();
+  });
+
+  it('answers privately when the drop is already claimed', async () => {
+    const command = createCardCommand(services);
+    const guildId = 'guild_tcg_1';
+    const drop = await dropManager.spawnDrop(guildId, 'channel_main');
+    await dropManager.claimDrop(drop!.id, 'user_first');
+
+    const { ctx, replies, dm } = createMockContext({
+      subcommand: 'claim',
+      userId: 'user_second',
+      args: { drop_id: drop!.id },
+    });
+    await command.execute(ctx);
+
+    expect(replies[0].ephemeral).toBe(true);
+    expect(replies[0].content).toContain('<@user_first>');
+    expect(dm).not.toHaveBeenCalled();
   });
 
   it('should handle /card collection, inspect, favorite, equip, and dismantle', async () => {
@@ -470,18 +598,20 @@ describe('Card Command Suite (TASK-1012)', () => {
     await command.execute(bare);
     expect(bareReplies[0].content).toContain('no gear equipped');
   });
-  it('still replies with the text embed when card rendering fails', async () => {
+  it('still sends the text embed by DM when card rendering fails', async () => {
     getCardImage.mockRejectedValueOnce(new Error('canvas exploded'));
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const command = createCardCommand(services);
     await dropManager.spawnDrop('guild_tcg_1', 'channel_main');
 
-    const { ctx, replies } = createMockContext({ subcommand: 'claim', userId: 'user_unlucky' });
+    const { ctx, replies, dm } = createMockContext({ subcommand: 'claim', userId: 'user_unlucky' });
     await command.execute(ctx);
 
-    expect(replies[0].embeds[0].data.title).toContain('Card Claimed');
-    expect(replies[0].embeds[0].data.image).toBeUndefined();
-    expect(replies[0].files).toEqual([]);
+    const dmPayload = dm.mock.calls[0]![0];
+    expect(dmPayload.embeds[0].data.title).toContain('Card Claimed');
+    expect(dmPayload.embeds[0].data.image).toBeUndefined();
+    expect(dmPayload.files).toEqual([]);
+    expect(replies[0].content).toContain('in your DMs');
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });

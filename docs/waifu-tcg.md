@@ -50,7 +50,9 @@ As members chat, Ririko drops a card. The first member to claim it keeps it.
 
 The server time zone is on the dashboard **General** page.
 
-A member claims a drop with `/card action:claim` (or `!card claim`).
+A member claims a drop by pressing **Claim** on the drop message. `/card action:claim` (or `!card claim`) does the same.
+
+Ririko sends the full card to the member by DM and changes the drop message to say who claimed it, so the channel gets no new message. If the member's DMs are closed, the claim still counts: the button and the slash command show the card in a private reply, and `!card claim` points to `/cards`. If nobody claims in time, the drop message changes to say the drop expired.
 
 ## 4. Commands
 

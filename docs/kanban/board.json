@@ -258,7 +258,8 @@
         "STORY-102",
         "STORY-103",
         "STORY-104",
-        "STORY-105"
+        "STORY-105",
+        "STORY-205"
       ],
       "requires": [
         "EPIC-002",
@@ -3578,6 +3579,80 @@
       "handovers": [
         "STORY-204",
         "EPIC-022"
+      ],
+      "status": "DONE"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "STORY-205",
+      "parent": "EPIC-010",
+      "points": 8,
+      "title": "Claim Card Drops with a Button, Send the Card by DM, Edit the Drop Message",
+      "description": "Maintainer (2026-10-31): claiming a chat drop only works by command, and every claim posts a new message with the full card, which floods the channel. Add a Claim button to the drop message. On success, send the full card design to the claimer by DM and edit the drop message into a short success message instead of posting a new one. /card action:claim and <prefix>card claim keep working (AGENTS.md rule 5.2) and end the same way.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/tcg/card-drop-claim.ts",
+          "apps/bot/src/commands/tcg/card-drop-claim.test.ts",
+          "apps/bot/src/listeners/card-drop.ts",
+          "apps/bot/src/listeners/card-drop.test.ts",
+          "apps/bot/src/commands/tcg/card.command.ts",
+          "apps/bot/src/commands/tcg/__tests__/card.command.test.ts",
+          "apps/bot/src/commands/tcg/info.command.ts",
+          "apps/bot/src/component-interactions.ts",
+          "apps/bot/src/component-interactions.test.ts",
+          "packages/services/src/waifu-tcg/drops/drop-manager.ts",
+          "packages/services/src/waifu-tcg/__tests__/drops-and-dismantle.test.ts",
+          "apps/web/src/app/dashboard/[guildId]/tcg/page.tsx",
+          "docs/waifu-tcg.md",
+          "docs/tcg-player-guide.md"
+        ],
+        "symbols": [
+          "handleCardDrop",
+          "DropManager.claimDrop",
+          "DropManager.spawnDrop",
+          "ActiveDrop",
+          "registerComponentInteractions",
+          "createCardCommand",
+          "attachCardImage",
+          "syncCollectionAchievements",
+          "CardImageService.getCardImage",
+          "formatCardEmbedFooter",
+          "getCardAttribution"
+        ],
+        "entry_points": [
+          "apps/bot/src/listeners/message.listener.ts (handleCardDrop)",
+          "apps/bot/src/component-interactions.ts (interactionCreate button routing)",
+          "apps/bot/src/commands/tcg/card.command.ts (case claim)"
+        ],
+        "codegraph_queries": [
+          "handleCardDrop DropManager claimDrop spawnDrop ActiveDrop ClaimResult",
+          "registerComponentInteractions handleGiveawayButtonInteraction handleAiConsentButton",
+          "createCardCommand attachCardImage syncCollectionAchievements formatCardEmbedFooter getCardAttribution"
+        ]
+      },
+      "acceptance": [
+        "A drop message has one Claim button (custom id `carddrop:claim:<dropId>`), routed in registerComponentInteractions. Its text tells members to press Claim and still shows the relative expiry.",
+        "Pressing Claim as the first valid member: the card is minted once, collection achievements sync, the claimer gets a DM with the full rendered card image and its details, and the existing drop message is edited to a short success embed that names the claimer and the card, with no button and no card image. No new channel message is posted.",
+        "The claimer gets an ephemeral confirmation. If the DM fails (closed DMs), the claim stays valid and the ephemeral message carries the full card instead.",
+        "A failed press answers only the presser, ephemerally: already claimed (names the winner), anti-sniping cooldown (the button stays for others), or a drop that no longer exists, which also removes the button from the clicked message (this covers a bot restart).",
+        "A drop nobody claims is edited at expiry to a short expired embed with no button and no card image. A failed edit (message deleted, missing permission) is logged and never throws.",
+        "/card action:claim and <prefix>card claim still work and use the same completion: DM, edit of the drop message, no card image in the channel. Slash gets an ephemeral confirmation (with the card if the DM failed). Prefix gets a one-line text reply and never the card image.",
+        "A command claim made while the drop is still being posted (before its message id is known) still ends with the posted message in the claimed state, without a live button.",
+        "DropManager.claimDrop undoes its lock when createUserCard rejects (claimed, claimedBy, lastClaimants), so the drop stays claimable; the button answers with an ephemeral error.",
+        "Concurrent presses mint exactly one card and one DM: a test claims the same drop twice without awaiting between calls.",
+        "User text is updated to the button flow: info.command.ts starter line, the dashboard TCG page, docs/waifu-tcg.md and docs/tcg-player-guide.md. The command stays documented as the alternative."
+      ],
+      "verify_cmd": "pnpm test:file-coverage apps/bot/src/commands/tcg/card-drop-claim.ts && pnpm vitest run apps/bot/src/listeners/card-drop.test.ts apps/bot/src/commands/tcg apps/bot/src/component-interactions.test.ts packages/services/src/waifu-tcg && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm docs:build",
+      "model": "large",
+      "handovers": [
+        "STORY-205",
+        "EPIC-010"
       ],
       "status": "DONE"
     }
