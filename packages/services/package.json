@@ -93,7 +93,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@google/genai": "^2.31.0",
+    "@google/genai": "^2.32.0",
     "@napi-rs/canvas": "^0.1.66",
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*",
