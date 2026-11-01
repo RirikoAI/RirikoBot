@@ -50,16 +50,16 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@google/genai": "^2.22.0",
+    "@google/genai": "^2.31.0",
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*",
-    "openai": "^7.17.0",
+    "openai": "^7.43.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.2",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.5"
   }
 }
