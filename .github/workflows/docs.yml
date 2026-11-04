@@ -34,7 +34,7 @@ jobs:
       # Also writes website/static/install/ from the production compose file and env example.
       - run: pnpm docs:build
       # v3 keeps dotfiles; install/.env.example must be uploaded. Do not move to v4 without checking.
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: website/build
 
