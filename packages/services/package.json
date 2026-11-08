@@ -93,17 +93,17 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@google/genai": "^2.31.0",
+    "@google/genai": "^2.32.0",
     "@napi-rs/canvas": "^0.1.66",
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*",
     "chrono-node": "^2.10.3",
-    "discord.js": "^14.27.0",
+    "discord.js": "^14.28.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",
-    "rimraf": "^6.0.1",
+    "rimraf": "^6.1.4",
     "typescript": "^5.8.2"
   }
 }
