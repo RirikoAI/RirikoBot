@@ -18,11 +18,11 @@
     "@ririko/music": "workspace:*",
     "@ririko/ai": "workspace:*",
     "@ririko/services": "workspace:^",
-    "discord.js": "^14.27.0"
+    "discord.js": "^14.28.1"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",
-    "rimraf": "^6.0.1",
+    "rimraf": "^6.1.4",
     "tsx": "^4.23.15",
     "typescript": "^5.8.2"
   }
