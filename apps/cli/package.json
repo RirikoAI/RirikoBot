@@ -19,7 +19,7 @@
     "@ririko/discord": "workspace:*",
     "@ririko/music": "workspace:*",
     "@ririko/services": "workspace:*",
-    "commander": "^13.1.0",
+    "commander": "^15.1.0",
     "discord.js": "^14.28.1",
     "picocolors": "^1.1.1"
   },

@@ -129,8 +129,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/services
       commander:
-        specifier: ^13.1.0
-        version: 13.1.0
+        specifier: ^15.1.0
+        version: 15.1.0
       discord.js:
         specifier: ^14.28.1
         version: 14.28.1
@@ -4136,9 +4136,9 @@ packages:
     resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==}
     engines: {node: '>=14'}
 
-  commander@13.1.0:
-    resolution: {integrity: sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw==}
-    engines: {node: '>=18'}
+  commander@15.1.0:
+    resolution: {integrity: sha512-cgnQ88TRrWcC7pVq46RzJVRMktu3W2RcbnoidnfBsl1bmDCBwJS/udcIZpKoCrbAYYaCqsz1yZCVIgbIaU3ddQ==}
+    engines: {node: '>=22.12.0'}
 
   commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
@@ -12809,7 +12809,7 @@ snapshots:
 
   commander@10.0.1: {}
 
-  commander@13.1.0: {}
+  commander@15.1.0: {}
 
   commander@2.20.3: {}
 
