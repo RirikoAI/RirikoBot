@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@ririko/core": "workspace:*",
-    "better-sqlite3": "^13.0.3",
+    "better-sqlite3": "^13.1.1",
     "drizzle-orm": "^0.45.4",
     "pg": "^8.23.1"
   },
@@ -37,7 +37,7 @@
     "@types/node": "^22.13.9",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.31.11",
-    "rimraf": "^6.0.1",
+    "rimraf": "^6.1.4",
     "typescript": "^5.8.2"
   }
 }
