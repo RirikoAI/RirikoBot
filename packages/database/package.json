@@ -38,6 +38,6 @@
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.31.11",
     "rimraf": "^6.1.4",
-    "typescript": "^5.8.2"
+    "typescript": "^6.0.3"
   }
 }
