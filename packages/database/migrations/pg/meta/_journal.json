@@ -71,6 +71,20 @@
       "when": 1792648832750,
       "tag": "0009_mixed_living_lightning",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795872224932,
+      "tag": "0010_energy_item_names",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795872659414,
+      "tag": "0011_items_command_settings",
+      "breakpoints": true
     }
   ]
 }

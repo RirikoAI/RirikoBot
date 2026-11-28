@@ -14,6 +14,14 @@ const DEFAULT_ITEM_CATEGORIES = [
   { code: 'cosmetic', name: 'Cosmetics', description: 'Profile customization.' },
 ] as const;
 
+/**
+ * Shop item codes that were renamed. Old codes still resolve to the new item, so a
+ * remembered `stamina_potion` keeps working in `/shop` and `/items`.
+ */
+export const LEGACY_SHOP_ITEM_CODES: Readonly<Record<string, string>> = Object.freeze({
+  stamina_potion: 'energy_potion',
+});
+
 /** Items of the default catalog; the bot seeds any that are missing, by code. */
 const DEFAULT_SHOP_ITEMS: (Omit<NewEconomyItem, 'id' | 'categoryId' | 'code'> & {
   code: string;
@@ -23,17 +31,17 @@ const DEFAULT_SHOP_ITEMS: (Omit<NewEconomyItem, 'id' | 'categoryId' | 'code'> & 
     code: 'candy_minor',
     categoryCode: 'consumable',
     name: 'Minor Energy Candy',
-    description: 'A sweet candy that restores 20 stamina. Town shop limit: 1 per user per day.',
+    description: 'A sweet candy that restores 20 energy. Town shop limit: 1 per user per day.',
     price: 100,
     rarity: 'COMMON',
     isPurchasable: true,
     metadata: { itemType: 'ENERGY_RESTORE', energyRestored: 20, dailyPurchaseLimit: 1 },
   },
   {
-    code: 'stamina_potion',
+    code: 'energy_potion',
     categoryCode: 'consumable',
-    name: 'Stamina Potion',
-    description: 'Restores 50 stamina. Hard anti-abuse ceiling: max 3 potions consumed per day.',
+    name: 'Energy Potion',
+    description: 'Restores 50 energy. Hard anti-abuse ceiling: max 3 potions consumed per day.',
     price: 350,
     rarity: 'UNCOMMON',
     isPurchasable: true,

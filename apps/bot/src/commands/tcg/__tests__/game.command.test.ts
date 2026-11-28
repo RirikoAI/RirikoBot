@@ -61,8 +61,8 @@ describe('Game Command Suite (TASK-1022)', () => {
       getCatalog: async (category?: string) => [
         {
           id: 'shop_pot_1',
-          code: 'STAMINA_POTION',
-          name: 'Stamina Elixir',
+          code: 'ENERGY_POTION',
+          name: 'Energy Elixir',
           category: 'POTION',
           rarity: 'UNCOMMON',
           shopPrice: 1000,
@@ -74,7 +74,7 @@ describe('Game Command Suite (TASK-1022)', () => {
       buyItem: async (userId: string, itemCode: string, quantity: number, guildId?: string) => {
         if (itemCode === 'INVALID') throw new Error('Item not found in shop');
         return {
-          item: { name: 'Stamina Elixir', code: 'STAMINA_POTION' },
+          item: { name: 'Energy Elixir', code: 'ENERGY_POTION' },
           quantity,
           totalPrice: 1000 * quantity,
           walletBalanceAfter: 49000,
@@ -402,7 +402,7 @@ describe('Game Command Suite (TASK-1022)', () => {
     expect(replies).toHaveLength(1);
     const embed = replies[0].embeds[0];
     expect(embed.data.title).toContain('Town Item Shop Catalog');
-    expect(embed.data.description).toContain('Stamina Elixir');
+    expect(embed.data.description).toContain('Energy Elixir');
     expect(embed.data.description).toContain('1,000 credits');
   });
 
@@ -410,7 +410,7 @@ describe('Game Command Suite (TASK-1022)', () => {
     const command = createGameCommand(services);
     const { ctx, replies } = createMockContext({
       action: 'buy',
-      item: 'STAMINA_POTION',
+      item: 'ENERGY_POTION',
       quantity: 2,
     });
 
@@ -419,7 +419,7 @@ describe('Game Command Suite (TASK-1022)', () => {
     expect(replies).toHaveLength(1);
     const embed = replies[0].embeds[0];
     expect(embed.data.title).toContain('Town Shop Purchase Successful');
-    expect(embed.data.description).toContain('2x Stamina Elixir');
+    expect(embed.data.description).toContain('2x Energy Elixir');
     expect(embed.data.description).toContain('2,000 credits');
   });
 });

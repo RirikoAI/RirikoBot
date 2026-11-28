@@ -155,7 +155,7 @@ export function createTcgAdminCommand(services: BotServices): Command {
         },
         {
           name: 'pot_limit',
-          description: 'Bot owners: daily stamina potion usage limit (1 - 10)',
+          description: 'Bot owners: daily energy potion usage limit (1 - 10)',
           type: 'INTEGER',
           required: false,
         },

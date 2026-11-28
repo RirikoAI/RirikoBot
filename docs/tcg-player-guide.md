@@ -133,11 +133,11 @@ What things cost:
 Energy items:
 
 - `candy_minor` restores 20 energy. The shop sells 1 each day.
-- `stamina_potion` restores 50 energy.
+- `energy_potion` restores 50 energy.
 - The TCG town shop sells a Daily Energy Biscuit (1 each day).
 - You can use only 3 energy potions each day.
 
-Buy and use them with `/shop` and `/use`. See [economy.md](economy.md).
+Buy and use them with `/shop` and `/items`. See [economy.md](economy.md).
 
 ## 5. Gear
 
@@ -170,8 +170,8 @@ You can also use commands:
 
 ### 5.2. Your Items
 
-- `/item action:inventory` lists your items. Use `filter` to show only `EQUIPMENT`, `ACCESSORY` or `CONSUMABLE`.
-- `/item action:use id:<item> card_id:<card>` drinks a potion. HP and mana potions heal a card.
+- `/items` (or `/inventory`) opens your items. Pick a category (equipment, accessories, potions, energy, materials, bag) and an item from the menus.
+- `/items action:use item:<id or code>` drinks an energy potion, or press **Use** in the menu. HP and mana potions are used in battle.
 
 ### 5.3. Enhance
 
@@ -193,7 +193,7 @@ You can raise a piece of gear from +0 to +10. Each level costs Crafting Dust and
 
 Enhancing never fails. Each level adds 8% to the base stats. The special effect of an item gets stronger at +5 and again at +10.
 
-Run `/item action:enhance id:<item>`, or use the **Enhance** button in `/loadout`.
+Run `/items action:enhance item:<item>`, or use the **Enhance** button in `/loadout`.
 
 ### 5.4. Crafting
 
@@ -429,10 +429,10 @@ Run `/achievement action:list` to see your progress. Claim a reward with `/achie
 | `COLL_ELEMENTAL` | Collector | Silver | Own a card of each of the 7 elements | 1,500 XP, 5,000 credits, the title Prismatic Adept |
 | `COLL_MYTHIC_LEGEND` | Collector | Mythic | Own a Mythic card | 10,000 XP, 50,000 credits, a Celestial Ambrosia, the title Celestial Architect |
 | `BATTLE_FIRST_BLOOD` | Combatant | Bronze | Win a PvP duel | 250 XP, 500 credits, a Mana Draught |
-| `BATTLE_DUNGEON_50` | Combatant | Gold | Clear floor 50 | 5,000 XP, 20,000 credits, 2 Grand Stamina Flasks, the title Abyssal Conqueror |
+| `BATTLE_DUNGEON_50` | Combatant | Gold | Clear floor 50 | 5,000 XP, 20,000 credits, 2 Grand Energy Flasks, the title Abyssal Conqueror |
 | `BATTLE_BOSS_SLAYER` | Combatant | Platinum | Deal 1,000,000 damage to raid bosses | 8,000 XP, 35,000 credits, the title Dragonbane |
 | `CRAFT_MASTER_FORGE` | Blacksmith | Gold | Enhance any gear to +10 | 4,000 XP, 15,000 credits, 500 Crafting Dust, the title Master Blacksmith |
-| `DEVOTION_STREAK_30` | Devotion | Gold | Keep a 30-day `/daily` streak | 6,000 XP, 25,000 credits, 3 Grand Stamina Flasks, the title Unyielding Flame |
+| `DEVOTION_STREAK_30` | Devotion | Gold | Keep a 30-day `/daily` streak | 6,000 XP, 25,000 credits, 3 Grand Energy Flasks, the title Unyielding Flame |
 
 Bot owners can change the text and rewards of achievements. The XP counts toward your account level. Titles show on your profile card.
 
@@ -448,8 +448,8 @@ Bot owners can change the text and rewards of achievements. The XP counts toward
 | `/card action:favorite id:<card>` | Protects a card. |
 | `/card action:dismantle id:<card>` | Turns a card into dust. |
 | `/loadout [card_id]` | Opens the gear menu. |
-| `/item action:inventory` | Lists your items. |
-| `/item action:enhance id:<item>` | Enhances gear. |
+| `/items` | Browse your items by category. |
+| `/items action:enhance item:<item>` | Enhances gear. |
 | `/craft [recipe]` | Crafts gear and potions. |
 | `/dungeon action:tutorial` | Starts the tutorial. |
 | `/dungeon action:status` | Shows your energy and next floor. |

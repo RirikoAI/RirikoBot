@@ -3655,6 +3655,54 @@
         "EPIC-010"
       ],
       "status": "DONE"
+    },
+    {
+      "children": [
+        "TASK-2071",
+        "TASK-2072"
+      ],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "STORY-207",
+      "parent": "EPIC-010",
+      "points": 13,
+      "status": "DONE",
+      "model": "large",
+      "title": "One /items Command for Gear, Potions and Bag Items, and Stamina Renamed to Energy",
+      "description": "Maintainer (2026-11-28): merge /items, /inventory, /use and /item use into one dual-dispatch /items command (/inventory stays as an alias), with menus and category dropdowns, and use items such as energy potions from it. Rename every stamina to energy, because two names for one resource confuse players. The dismantle command for enhanced gear is a separate story (STORY-206) and is out of scope.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/tcg/item.command.ts",
+          "apps/bot/src/commands/economy/commands.ts",
+          "apps/bot/src/command-set.ts",
+          "packages/services/src/waifu-tcg/equipment/catalog.ts",
+          "packages/database/src/repositories/item.repository.ts"
+        ],
+        "symbols": [
+          "createItemCommand",
+          "syncCanonicalItems",
+          "ItemRepository.seedDefaultCatalog",
+          "InventoryService.useItem",
+          "ConsumableService.useItem"
+        ],
+        "entry_points": [
+          "apps/bot/src/command-set.ts (registerBotCommands)"
+        ],
+        "codegraph_queries": []
+      },
+      "acceptance": [
+        "TASK-2071 and TASK-2072 are DONE.",
+        "pnpm test:coverage passes every threshold in vitest.config.ts."
+      ],
+      "verify_cmd": "pnpm test:coverage && pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm build",
+      "handovers": [
+        "STORY-207",
+        "EPIC-010"
+      ]
     }
   ],
   "tasks": [
@@ -13495,6 +13543,178 @@
         "EPIC-022"
       ],
       "status": "DONE"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-2071",
+      "parent": "STORY-207",
+      "points": 5,
+      "status": "DONE",
+      "model": "medium",
+      "title": "Rename Stamina to Energy in Item Codes, Names, Messages and Docs, with a Data Migration",
+      "description": "Every player-facing \"stamina\" becomes \"energy\": TCG catalog items, the economy shop potion, service messages, command text and docs. Stored rows are renamed by a data-only migration for both dialects, and old codes keep resolving through alias maps.",
+      "context": {
+        "files": [
+          "packages/services/src/waifu-tcg/equipment/catalog.ts",
+          "packages/services/src/waifu-tcg/equipment/item-grant.service.ts",
+          "packages/services/src/waifu-tcg/equipment/consumable-service.ts",
+          "packages/services/src/waifu-tcg/achievements/seeds.ts",
+          "packages/services/src/waifu-tcg/__tests__/equipment-and-enhancement.test.ts",
+          "packages/services/src/economy/inventory.service.ts",
+          "packages/services/src/economy/inventory.service.test.ts",
+          "packages/services/src/economy/profile-background.manager.test.ts",
+          "packages/database/src/repositories/item.repository.ts",
+          "packages/database/src/repositories/item.repository.behaviour.test.ts",
+          "packages/database/src/repositories/repositories.test.ts",
+          "packages/database/src/repositories/player-energy.repository.ts",
+          "packages/database/scripts/generate-migrations-sql.mjs",
+          "packages/database/migrations/sqlite/",
+          "packages/database/migrations/pg/",
+          "packages/database/src/migrations/generated/sqlite.ts",
+          "packages/database/src/migrations/generated/pg.ts",
+          "packages/database/src/migrations/runner.test.ts",
+          "apps/bot/src/commands/tcg/admin.command.ts",
+          "apps/bot/src/commands/tcg/energy.command.ts",
+          "apps/bot/src/commands/tcg/item.command.ts",
+          "apps/bot/src/commands/tcg/__tests__/energy.command.test.ts",
+          "apps/bot/src/commands/tcg/__tests__/item.command.test.ts",
+          "apps/bot/src/commands/tcg/__tests__/game.command.test.ts",
+          "apps/bot/src/commands/economy/commands.test.ts",
+          "docs/economy.md",
+          "docs/tcg-player-guide.md",
+          "docs/database.md",
+          "docs/commands.md",
+          "packages/services/src/waifu-tcg/__tests__/item-grants.test.ts",
+          "packages/database/src/migrations/energy-item-names.test.ts"
+        ],
+        "symbols": [
+          "CANONICAL_ITEMS",
+          "CANONICAL_ITEM_IDS",
+          "syncCanonicalItems",
+          "LEGACY_ITEM_CODE_ALIASES",
+          "DEFAULT_SHOP_ITEMS",
+          "ItemRepository.seedDefaultCatalog",
+          "InventoryService.getItem",
+          "InventoryService.useItem",
+          "ConsumableService.useItem",
+          "PlayerEnergyRepository.consumeEnergyPotion",
+          "createEnergyCommand"
+        ],
+        "entry_points": [
+          "packages/services/src/waifu-tcg/equipment/catalog.ts (syncCanonicalItems at boot)",
+          "packages/database/src/repositories/item.repository.ts (seedDefaultCatalog at boot)",
+          "packages/database/src/migrations/runner.ts (migrateDatabase)"
+        ],
+        "codegraph_queries": []
+      },
+      "acceptance": [
+        "TCG catalog: RESTORE_STAMINA_CANDY becomes RESTORE_ENERGY_CANDY named \"Energy Candy\", and RESTORE_GRAND_STAMINA_FLASK becomes RESTORE_GRAND_ENERGY_FLASK named \"Grand Energy Flask\". Each keeps its UUID in CANONICAL_ITEM_IDS. Achievement seeds and LEGACY_ITEM_CODE_ALIASES use the new codes, and the alias map also maps both old codes to the new ones, so stored achievement rewards with old codes still grant the item.",
+        "Economy shop default: stamina_potion becomes energy_potion named \"Energy Potion\" with description \"Restores 50 energy. Hard anti-abuse ceiling: max 3 potions consumed per day.\"; candy_minor says \"restores 20 energy\". InventoryService.getItem resolves the old code stamina_potion to energy_potion (a small exported legacy-code map next to DEFAULT_SHOP_ITEMS), so /shop buy stamina_potion and using stamina_potion keep working. A test covers it.",
+        "A data-only migration for both dialects (next number after 0009, for example 0010_energy_item_names, generated with drizzle-kit --custom and embedded) renames stored rows: game_items code for the two TCG items (only where the new code does not exist yet); economy_items code stamina_potion to energy_potion (only where no energy_potion row exists); name and description of those rows only where they still equal the old default text, so owner edits stay. It never deletes or changes column types, needs no contract marker, and running it on a fresh database is a no-op. pnpm db:check passes.",
+        "A SQLite test migrates a database holding the old rows (and an inventory row pointing at the economy item) and checks the renamed code, name, description and that the inventory row still points at the same item id. The PostgreSQL path uses the same SQL; if the repository has a dual-dialect migration test helper, the test uses it.",
+        "Player-facing messages say energy: the daily potion limit in ConsumableService.useItem and PlayerEnergyRepository.consumeEnergyPotion, InventoryService.useItem effectSummary (\"Restored N energy. Current energy: ...\"), the tcg-admin potion limit option description, and the \"Energy Replenished!\" title in item.command.ts.",
+        "/energy keeps `stamina` only as a prefix alias, so old habits still work; its examples no longer show !stamina.",
+        "Docs updated: docs/economy.md, docs/tcg-player-guide.md (including the achievement rewards table), docs/database.md player_energy line and docs/commands.md. docs/archive and docs/kanban are history and stay unchanged.",
+        "`grep -rniI stamina apps packages docs/*.md --exclude-dir=node_modules --exclude-dir=.next` finds only: the legacy alias maps and their tests, the new migration SQL, embedded migration modules and their test, and the /energy `stamina` alias with its test."
+      ],
+      "verify_cmd": "pnpm vitest run packages/database/src packages/services/src/economy packages/services/src/waifu-tcg apps/bot/src/commands/tcg apps/bot/src/commands/economy && pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-2071",
+        "STORY-207",
+        "EPIC-010"
+      ]
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-2071"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-2072",
+      "parent": "STORY-207",
+      "points": 8,
+      "status": "DONE",
+      "model": "medium",
+      "title": "One /items Command with Category Menus, an /inventory Alias and Item Use",
+      "description": "Replace /item (TCG gear, potions, crafting), /inventory and /use (economy bag) with one dual-dispatch /items command. A category dropdown and an item dropdown browse gear, potions, energy items, materials and bag items; buttons use, enhance or craft. /inventory stays as an alias.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/tcg/item.command.ts",
+          "apps/bot/src/commands/tcg/items-menu.ts",
+          "apps/bot/src/commands/tcg/__tests__/items-menu.test.ts",
+          "apps/bot/src/commands/tcg/__tests__/item.command.test.ts",
+          "apps/bot/src/commands/tcg/index.ts",
+          "apps/bot/src/commands/tcg/gear-actions.ts",
+          "apps/bot/src/commands/tcg/craft-menu.ts",
+          "apps/bot/src/commands/tcg/achievement-progress.ts",
+          "apps/bot/src/commands/tcg/info.command.ts",
+          "apps/bot/src/commands/tcg/game.command.ts",
+          "apps/bot/src/commands/economy/commands.ts",
+          "apps/bot/src/commands/economy/commands.test.ts",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/command-set.test.ts",
+          "apps/web/src/app/owner/shop/page.tsx",
+          "packages/database/migrations/sqlite/",
+          "packages/database/migrations/pg/",
+          "packages/database/src/migrations/generated/sqlite.ts",
+          "packages/database/src/migrations/generated/pg.ts",
+          "packages/database/src/migrations/runner.test.ts",
+          "docs/commands.md",
+          "docs/economy.md",
+          "docs/waifu-tcg.md",
+          "docs/tcg-player-guide.md"
+        ],
+        "symbols": [
+          "createItemCommand",
+          "createCraftCommand",
+          "handleCraft",
+          "openCraftMenu",
+          "enhanceGear",
+          "recordEnhancementAchievement",
+          "createEconomyCommands",
+          "InventoryService.getUserInventory",
+          "InventoryService.useItem",
+          "ConsumableService.useItem",
+          "EnergyLifecycleService.getOrReconcileUserEnergy",
+          "EnhancementService.getDustBalance",
+          "registerBotCommands",
+          "CommandContext.invokedName"
+        ],
+        "entry_points": [
+          "apps/bot/src/command-set.ts (registerBotCommands)",
+          "apps/bot/src/commands/tcg/item.command.ts (execute)"
+        ],
+        "codegraph_queries": []
+      },
+      "acceptance": [
+        "/items is the primary command: TCG category, global scope (not in GUILD_SCOPED). Slash options: `action` (choices view, use, enhance, craft; default view), `item` (inventory item ID or item code), `category` (the categories below), `target` (USER, view only), `recipe` and `quantity` (1 to 10). Prefix: `items [view|use|enhance|craft] ...`, with aliases `item`, `tcgitem`, `use` and `consume`. Invoked as `use` or `consume` (ctx.invokedName), the first argument is the item and the second the quantity, so `!use energy_potion 2` works as before.",
+        "/inventory is its own slash and prefix command in the ECONOMY category (global scope) that runs the same handler, with prefix aliases `inv` and `bag`, so servers that turn the economy or TCG module off keep today's behaviour for each name. The economy /inventory and /use commands are removed from createEconomyCommands, and no /use or /item slash command is registered any more. command-set.test.ts passes, including the Discord limits and the one-scope rule.",
+        "View: an embed with an overview (energy now and cap, potions used today and the daily limit, Crafting Dust balance, item count per category) and a category select menu (custom id prefix `items:`) with Overview, Equipment, Accessories, Potions (HP and mana), Energy (TCG energy potions and bag ENERGY_RESTORE items together), Materials and Bag (the other shop items, such as EXP potions and vouchers). A category option can be preselected with `category`.",
+        "Inside a category: an item select menu with at most 25 items per page and Previous and Next buttons when there are more; the embed lists the page and the selected item's details (name, rarity, quantity or +level, the card that wears it, perks, and its ID or code). Embed text stays within Discord limits, as the current list budget does.",
+        "Buttons for the selected item: Use for TCG energy potions (ConsumableService.useItem) and for bag items whose itemType is ENERGY_RESTORE, XP_GRANT, CREDITS_GRANT or generic (InventoryService.useItem, quantity 1, guildId passed); Enhance for equipment and accessories (enhanceGear and recordEnhancementAchievement, as /item does today); Craft opens openCraftMenu. HP and mana potions show that they are used in battle and get no Use button; the profile background voucher points to /profile background and gets no Use button. The result shows as a notice in the refreshed view, and a daily-limit failure shows its reason.",
+        "Only the invoker can press the components (others get an ephemeral \"not your inventory\" reply). Viewing another member with `target` is read-only: no action buttons. When the collector ends, the components are disabled, as today.",
+        "`/items action:use item:<x> [quantity]` uses x as a TCG inventory item ID, else a TCG item code the user owns (case-insensitive, with LEGACY_ITEM_CODE_ALIASES), else a bag item code or ID (with the legacy shop codes from TASK-2071). Quantity applies to both kinds: TCG potions are consumed one at a time up to the quantity and stop at the first failure, and the reply says how many were used. Unknown items get a clear reply.",
+        "`/items action:enhance item:<id>` and `/items action:craft [recipe] [quantity]` behave like the old /item enhance and craft. /craft stays a separate command.",
+        "Server command overrides saved for `item` keep applying: a data-only migration for both dialects renames command_settings rows from `item` to `items`. Rows for `use` stay untouched (a disabled /use is not widened to all of /items); the PROGRESS entry notes it.",
+        "User text is updated: info.command.ts and game.command.ts point to /items, the owner shop page in apps/web says /items instead of /use, and docs/commands.md, docs/economy.md, docs/waifu-tcg.md and docs/tcg-player-guide.md describe /items and the /inventory alias. If `pnpm docs:commands` writes a tracked file, it is regenerated.",
+        "The new apps/bot/src/commands/tcg/items-menu.ts (embed, components and category logic) is covered by its own tests; item.command tests cover slash and prefix routing, the use/consume aliases, use of both item kinds, enhance, craft, pagination, the read-only target view and the not-your-inventory reply."
+      ],
+      "verify_cmd": "pnpm test:file-coverage apps/bot/src/commands/tcg/items-menu.ts && pnpm vitest run apps/bot/src/commands apps/bot/src/command-set.test.ts packages/database/src/migrations && pnpm db:check && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-2072",
+        "STORY-207",
+        "EPIC-010"
+      ]
     }
   ],
   "chores": [

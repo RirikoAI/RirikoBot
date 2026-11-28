@@ -6,6 +6,7 @@ import type {
   PlayerEnergyRepository,
   EconomyItem,
 } from '@ririko/database';
+import { LEGACY_SHOP_ITEM_CODES } from '@ririko/database';
 import {
   DEFAULT_RESET_SCHEDULE,
   getResetDayIndex,
@@ -101,7 +102,8 @@ export class InventoryService {
    * Finds an item by what a member typed: its code (`candy_minor`) first, then its ID.
    */
   public async getItem(ref: string): Promise<EconomyItem | null> {
-    const code = ref.trim().toLowerCase();
+    const typed = ref.trim().toLowerCase();
+    const code = LEGACY_SHOP_ITEM_CODES[typed] ?? typed;
     return (await this.itemRepository.findByCode(code)) ?? this.itemRepository.findById(ref.trim());
   }
 
@@ -336,7 +338,7 @@ export class InventoryService {
         energyRestored = potRes.energyRestored;
         currentEnergy = potRes.energy.currentEnergy;
         dailyEnergyPotsUsed = potRes.potsUsedToday;
-        effectSummary = `Restored ${energyRestored} stamina. Current stamina: ${currentEnergy}/${potRes.energy.maxEnergy + potRes.energy.bonusEnergy} (Potions used today: ${dailyEnergyPotsUsed}/${ceiling}).`;
+        effectSummary = `Restored ${energyRestored} energy. Current energy: ${currentEnergy}/${potRes.energy.maxEnergy + potRes.energy.bonusEnergy} (Potions used today: ${dailyEnergyPotsUsed}/${ceiling}).`;
         break;
       }
 

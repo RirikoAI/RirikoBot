@@ -161,8 +161,7 @@ See [economy.md](economy.md).
 | `/leaderboard` | `lb`, `top` | Shows the XP ranking. | Everyone |
 | `/profile` | `rank` | Shows a profile card or sets its background. | Everyone |
 | `/shop` | `store` | Lists the shop or buys an item. | Everyone |
-| `/inventory` | `inv`, `bag` | Lists your items. | Everyone |
-| `/use` | `consume` | Uses an item. | Everyone |
+| `/inventory` | `inv`, `bag` | Same as `/items`: browse your items by category. | Everyone |
 | `/karma` | `k` | Shows karma or gives 1 karma. | Everyone (server only to give) |
 
 ### 7.3. Music
@@ -285,7 +284,7 @@ See [waifu-tcg.md](waifu-tcg.md) for admins and [tcg-player-guide.md](tcg-player
 | `/card` | `tcg` | Manages your cards and gear. | Everyone |
 | `/cards` | `album`, `mycards` | Opens your card album. | Everyone |
 | `/game` | `battle`, `duel`, `tcggame` | Duels, expeditions, raids, quests and the town shop. | Everyone |
-| `/item` | `tcgitem`, `items` | Items, enhancing and crafting. | Everyone |
+| `/items` | `item`, `tcgitem`, `use`, `consume` | Browse gear, potions, energy items and bag items by category, and use, enhance or craft. | Everyone |
 | `/craft` | `forge` | Crafts gear and potions. | Everyone |
 | `/loadout` | `gear`, `equipment` | Opens the gear menu of a card. | Everyone |
 | `/dungeon` | `tower`, `climb`, `spire` | Climbs the dungeon tower. | Everyone |

@@ -41,8 +41,6 @@ async function loadEquippedCard(
  * - /leaderboard (lb, top)
  * - /profile (rank)
  * - /shop (store)
- * - /inventory (inv, bag)
- * - /use (consume)
  * - /karma (k)
  */
 export function createEconomyCommands(services: BotServices): Command[] {
@@ -556,102 +554,6 @@ export function createEconomyCommands(services: BotServices): Command[] {
     },
   };
 
-  // 9. Inventory Command
-  const inventoryCommand: Command = {
-    metadata: {
-      name: 'inventory',
-      category: CommandCategory.ECONOMY,
-      description: 'View items, consumables, and vouchers in your inventory bag.',
-      aliases: ['inv', 'bag'],
-      usage: '/inventory [target]',
-      options: [
-        {
-          name: 'target',
-          description: 'Member whose inventory to view',
-          type: 'USER',
-          required: false,
-        },
-      ],
-    },
-    async execute(ctx: CommandContext): Promise<void> {
-      const target = (await ctx.options.getUser('target')) ?? ctx.user;
-      const items = await services.inventoryService.getUserInventory(target.id);
-
-      if (items.length === 0) {
-        await ctx.reply({
-          content: `🎒 **${target.username}'s Inventory** is currently empty.\nVisit \`/shop\` to acquire items and potions!`,
-        });
-        return;
-      }
-
-      const lines = items.map((slot) => {
-        const itemName = slot.item?.name ?? slot.itemId;
-        const rarity = slot.item?.rarity ?? 'COMMON';
-        return `• **${itemName}** \`x${slot.quantity}\` [${rarity}] — Code: \`${slot.item?.code ?? slot.itemId}\`\n  *${slot.item?.description ?? 'No description'}*`;
-      });
-
-      await ctx.reply({
-        content: `🎒 **${target.username}'s Inventory Bag** (${items.length} unique items)\n\n${lines.join('\n\n')}\n\n*Use an item with:* \`/use <code>\``,
-      });
-    },
-  };
-
-  // 10. Use Command
-  const useCommand: Command = {
-    metadata: {
-      name: 'use',
-      category: CommandCategory.ECONOMY,
-      description: 'Consume a potion or item from your inventory bag.',
-      aliases: ['consume'],
-      usage: '/use <item> [quantity]',
-      options: [
-        {
-          name: 'item',
-          description: 'Code of the item to use, as /inventory lists it',
-          type: 'STRING',
-          required: true,
-        },
-        {
-          name: 'quantity',
-          description: 'Quantity to consume',
-          type: 'INTEGER',
-          required: false,
-          minValue: 1,
-        },
-      ],
-    },
-    async execute(ctx: CommandContext): Promise<void> {
-      const itemId = ctx.options.getString('item', true);
-      if (!itemId) {
-        await ctx.reply({ content: '❌ Please specify the code of the item to use.' });
-        return;
-      }
-
-      const quantity = ctx.options.getInteger('quantity') ?? 1;
-
-      const res = await services.inventoryService.useItem({
-        userId: ctx.user.id,
-        itemId,
-        quantity,
-        guildId: ctx.guild?.id,
-      });
-
-      if (res.success) {
-        const effectStr = res.effectSummary
-          ? `\n\n**Effects Applied:**\n• ${res.effectSummary}`
-          : '';
-
-        await ctx.reply({
-          content: `✨ **Consumed ${res.quantityUsed}x ${res.item?.name}!**${effectStr}\nRemaining in inventory: \`${res.remainingQuantity}\``,
-        });
-      } else {
-        await ctx.reply({
-          content: `❌ **Cannot Use Item**: ${res.reason}`,
-        });
-      }
-    },
-  };
-
   // 11. Karma Command
   const karmaCommand: Command = {
     metadata: {
@@ -717,8 +619,6 @@ export function createEconomyCommands(services: BotServices): Command[] {
     leaderboardCommand,
     profileCommand,
     shopCommand,
-    inventoryCommand,
-    useCommand,
     karmaCommand,
   ];
 }

@@ -533,7 +533,7 @@ async function handleBuy(
         `Acquired **${receipt.quantity}x ${receipt.item.name}**!\n\n` +
           `• **Total Price**: \`${receipt.totalPrice.toLocaleString()} credits\`\n` +
           `• **Remaining Wallet**: \`${receipt.walletBalanceAfter.toLocaleString()} credits\`\n\n` +
-          `*View your new items with:* \`/item action:inventory\``,
+          `*View your new items with:* \`/items\``,
       )
       .setFooter({ text: 'Audited via double-entry financial ledger (SHOP_BUY)' });
 

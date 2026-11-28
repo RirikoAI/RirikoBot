@@ -122,11 +122,11 @@ describeDialects('ItemRepository behaviour', (db) => {
   it('only adds the default items that are missing', async () => {
     const repo = new ItemRepository(db.client);
     await repo.seedDefaultCatalog();
-    const stamina = (await repo.findByCode('stamina_potion'))!;
-    await repo.delete(stamina.id);
+    const potion = (await repo.findByCode('energy_potion'))!;
+    await repo.delete(potion.id);
 
     expect(await repo.seedDefaultCatalog()).toBe(1);
-    expect(await repo.findByCode('stamina_potion')).not.toBeNull();
+    expect(await repo.findByCode('energy_potion')).not.toBeNull();
   });
 
   it('files legacy items, stored with their code as the id, under their code and category', async (ctx) => {

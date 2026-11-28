@@ -491,10 +491,10 @@ describeDialects('Core Domain Repositories & ACID Financial Ledger', (db) => {
 
     it('keeps owner edits to seeded items', async () => {
       await itemRepo.seedDefaultCatalog();
-      const potion = await itemRepo.findByCode('stamina_potion');
+      const potion = await itemRepo.findByCode('energy_potion');
       await itemRepo.update(potion!.id, { price: 999, isPurchasable: false });
       await itemRepo.seedDefaultCatalog();
-      expect(await itemRepo.findByCode('stamina_potion')).toMatchObject({
+      expect(await itemRepo.findByCode('energy_potion')).toMatchObject({
         price: 999,
         isPurchasable: false,
       });
@@ -594,7 +594,7 @@ describeDialects('Core Domain Repositories & ACID Financial Ledger', (db) => {
       },
     );
 
-    it('tracks stamina consumption and enforces anti-abuse ceiling', async () => {
+    it('tracks energy consumption and enforces anti-abuse ceiling', async () => {
       const initial = await playerEnergyRepo.getOrCreate('energy_tester');
       expect(initial.currentEnergy).toBe(100);
       expect(initial.dailyEnergyPotsUsed).toBe(0);
@@ -622,7 +622,7 @@ describeDialects('Core Domain Repositories & ACID Financial Ledger', (db) => {
       // Pot 4: fails due to ceiling (max 3/day)
       const pot4 = await playerEnergyRepo.consumeEnergyPotion('energy_tester', 50, 3);
       expect(pot4.success).toBe(false);
-      expect(pot4.reason).toContain('Daily stamina potion ceiling reached');
+      expect(pot4.reason).toContain('Daily energy potion ceiling reached');
       expect(pot4.potsUsedToday).toBe(3);
 
       // Simulate next day rollover: lastResetDate in the past
