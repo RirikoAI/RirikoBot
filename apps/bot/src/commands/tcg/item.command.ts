@@ -1,368 +1,219 @@
 import {
   EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  StringSelectMenuBuilder,
+  type ActionRowBuilder,
+  type ButtonBuilder,
   type Message,
+  type StringSelectMenuBuilder,
   MessageFlags,
 } from 'discord.js';
-import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
+import {
+  CommandCategory,
+  type Command,
+  type CommandContext,
+  type CommandOptionDefinition,
+} from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import { enhanceGear } from './gear-actions.js';
-import { recordEnhancementAchievement } from './achievement-progress.js';
 import { openCraftMenu } from './craft-menu.js';
-import { ALL_GEAR_SLOTS } from '@ririko/services';
+import {
+  ITEM_CATEGORIES,
+  ITEM_CUSTOM_IDS,
+  buildItemsView,
+  entriesInCategory,
+  loadItemEntries,
+  loadItemsOverview,
+  pageCount,
+  parseItemCategory,
+  selectedEntry,
+  type ItemCategory,
+  type ItemsViewState,
+} from './items-menu.js';
+import { LEGACY_ITEM_CODE_ALIASES } from '@ririko/services';
 import type { RecipeStatus } from '@ririko/services';
 
-export function createItemCommand(services: BotServices): Command {
-  return {
-    metadata: {
-      name: 'item',
-      category: CommandCategory.TCG,
-      description: 'Manage, inspect, enhance, and consume TCG equipment, accessories, and potions.',
-      aliases: ['tcgitem', 'items'],
-      usage:
-        '/item [action: inventory|enhance|use|craft] [id] [filter] [card_id] [recipe] [quantity]',
-      examples: [
-        '/item action:inventory filter:EQUIPMENT',
-        '/item action:enhance id:12345678',
-        '/item action:use id:12345678',
-        '/item action:craft',
-        '/item action:craft recipe:CRAFT_WEAPON_OBSIDIAN_KATANA',
-        '/item action:craft recipe:CRAFT_POTION_MAJOR_HP quantity:3',
-      ],
-      options: [
-        {
-          name: 'action',
-          description: 'Subcommand action to execute (inventory, enhance, use, craft)',
-          type: 'STRING',
-          required: false,
-          choices: [
-            { name: 'Inventory (View owned equipment, accessories & potions)', value: 'inventory' },
-            { name: 'Enhance (Upgrade equipment from +0 to +10)', value: 'enhance' },
-            { name: 'Use (Consume an HP, Mana, or Energy potion)', value: 'use' },
-            { name: 'Craft (Forge gear & potions from Crafting Dust)', value: 'craft' },
-          ],
-        },
-        {
-          name: 'id',
-          description: 'Inventory item ID to enhance or consume',
-          type: 'STRING',
-          required: false,
-        },
-        {
-          name: 'filter',
-          description: 'Filter inventory by item type or gear slot',
-          type: 'STRING',
-          required: false,
-          choices: [
-            { name: 'All Equipments (Weapons, Armor, Relics)', value: 'EQUIPMENT' },
-            { name: 'All Accessories (Rings, Amulets, Talismans)', value: 'ACCESSORY' },
-            { name: 'All Consumables (Potions, Energy Restores)', value: 'CONSUMABLE' },
-          ],
-        },
-        {
-          name: 'card_id',
-          description: 'Target card ID when consuming HP or Mana potions (optional)',
-          type: 'STRING',
-          required: false,
-        },
-        {
-          name: 'recipe',
-          description: 'Crafting recipe code to craft directly (omit to open the crafting menu)',
-          type: 'STRING',
-          required: false,
-        },
-        {
-          name: 'quantity',
-          description: 'How many to craft (equipment/accessories are capped at 1, potions at 10)',
-          type: 'INTEGER',
-          required: false,
-          minValue: 1,
-          maxValue: 10,
-        },
-      ],
-    },
-    async execute(ctx: CommandContext): Promise<void> {
-      const rawArgs = ctx.options.getRawArgs?.() ?? [];
-      let sub = ctx.options.getString('action')?.toLowerCase();
+const ACTION_WORDS: Record<string, 'view' | 'use' | 'enhance' | 'craft'> = {
+  view: 'view',
+  inventory: 'view',
+  inv: 'view',
+  list: 'view',
+  use: 'use',
+  consume: 'use',
+  enhance: 'enhance',
+  upgrade: 'enhance',
+  craft: 'craft',
+  forge: 'craft',
+};
 
-      if (!sub) {
-        try {
-          const optionsRecord = ctx.options as unknown as Record<string, unknown>;
-          if (typeof optionsRecord['getSubcommand'] === 'function') {
-            sub = (optionsRecord['getSubcommand'] as () => string)();
-          }
-        } catch {
-          // not slash subcommand
-        }
-      }
-
-      if (!sub && rawArgs.length > 0) {
-        const firstArg = rawArgs[0]!.toLowerCase();
-        if (
-          ['inventory', 'inv', 'enhance', 'upgrade', 'use', 'consume', 'craft', 'forge'].includes(
-            firstArg,
-          )
-        ) {
-          sub = firstArg;
-        }
-      }
-
-      if (sub === 'inv') sub = 'inventory';
-      if (sub === 'upgrade') sub = 'enhance';
-      if (sub === 'consume') sub = 'use';
-      if (sub === 'forge') sub = 'craft';
-
-      switch (sub) {
-        case 'enhance':
-          await handleEnhance(ctx, services, rawArgs);
-          break;
-        case 'use':
-          await handleUse(ctx, services, rawArgs);
-          break;
-        case 'craft':
-          await handleCraft(ctx, services, rawArgs);
-          break;
-        case 'inventory':
-        default:
-          await handleInventory(ctx, services, rawArgs);
-          break;
-      }
-    },
-  };
-}
+const ITEMS_OPTIONS: CommandOptionDefinition[] = [
+  {
+    name: 'action',
+    description: 'What to do (default: view your items)',
+    type: 'STRING',
+    required: false,
+    choices: [
+      { name: 'View (Browse your items by category)', value: 'view' },
+      { name: 'Use (Consume a potion or bag item)', value: 'use' },
+      { name: 'Enhance (Upgrade equipment from +0 to +10)', value: 'enhance' },
+      { name: 'Craft (Forge gear & potions from Crafting Dust)', value: 'craft' },
+    ],
+  },
+  {
+    name: 'item',
+    description: 'Inventory item ID or item code to use or enhance',
+    type: 'STRING',
+    required: false,
+  },
+  {
+    name: 'category',
+    description: 'Category to open when viewing',
+    type: 'STRING',
+    required: false,
+    choices: [
+      { name: 'Overview', value: 'overview' },
+      { name: 'Equipment', value: 'equipment' },
+      { name: 'Accessories', value: 'accessories' },
+      { name: 'Potions (HP and mana)', value: 'potions' },
+      { name: 'Energy', value: 'energy' },
+      { name: 'Materials', value: 'materials' },
+      { name: 'Bag (shop items)', value: 'bag' },
+    ],
+  },
+  {
+    name: 'target',
+    description: 'Member whose items to view (view only)',
+    type: 'USER',
+    required: false,
+  },
+  {
+    name: 'recipe',
+    description: 'Crafting recipe code to craft directly (omit to open the crafting menu)',
+    type: 'STRING',
+    required: false,
+  },
+  {
+    name: 'quantity',
+    description: 'How many to use or craft (1 to 10)',
+    type: 'INTEGER',
+    required: false,
+    minValue: 1,
+    maxValue: 10,
+  },
+];
 
 /**
- * Names the card that wears each distinct gear card ID, looking each card up once. A card that
- * cannot be found keeps its card ID as the name, so stranded gear never fails the inventory.
+ * `/items`: browse gear, potions, energy items, materials and bag items by category, and use,
+ * enhance or craft from the same menu or by action. `/use`, `/consume` and `/item` stay prefix
+ * aliases of it.
  */
-async function loadWearerNames(
-  services: BotServices,
-  cardIds: readonly string[],
-): Promise<Map<string, string>> {
-  const names = new Map<string, string>();
-  for (const cardId of new Set(cardIds)) {
-    let name = cardId;
-    try {
-      const userCard = await services.waifuCardRepo.findUserCardById(cardId);
-      const base = userCard ? await services.waifuCardRepo.findById(userCard.cardId) : null;
-      if (base) name = base.name;
-    } catch {
-      // Keep the card ID as the name when the lookup fails.
-    }
-    names.set(cardId, name);
-  }
-  return names;
+export function createItemsCommand(services: BotServices): Command {
+  return {
+    metadata: {
+      name: 'items',
+      category: CommandCategory.TCG,
+      description: 'Browse, use, enhance and craft your gear, potions, energy items and bag items.',
+      aliases: ['item', 'tcgitem', 'use', 'consume'],
+      usage: '/items [action: view|use|enhance|craft] [item] [category] [target] [quantity]',
+      examples: [
+        '/items',
+        '/items category:potions',
+        '/items action:use item:energy_potion quantity:2',
+        '/items action:enhance item:12345678',
+        '/items action:craft recipe:CRAFT_POTION_MAJOR_HP quantity:3',
+        '!use energy_potion 2',
+      ],
+      options: ITEMS_OPTIONS,
+    },
+    execute: (ctx) => runItems(ctx, services),
+  };
 }
 
-async function handleInventory(
+/** `/inventory` (prefix `inv`, `bag`): the same handler as `/items`, in the economy category so
+ *  a server that turns the TCG module off keeps it. */
+export function createInventoryCommand(services: BotServices): Command {
+  return {
+    metadata: {
+      name: 'inventory',
+      category: CommandCategory.ECONOMY,
+      description: 'Browse your items, potions and bag by category (same as /items).',
+      aliases: ['inv', 'bag'],
+      usage: '/inventory [action: view|use|enhance|craft] [item] [category] [target] [quantity]',
+      examples: ['/inventory', '/inventory category:bag', '/inventory target:@member'],
+      options: ITEMS_OPTIONS,
+    },
+    execute: (ctx) => runItems(ctx, services),
+  };
+}
+
+async function runItems(ctx: CommandContext, services: BotServices): Promise<void> {
+  const rawArgs = ctx.options.getRawArgs?.() ?? [];
+  const invoked = (ctx.invokedName ?? '').toLowerCase();
+  let action = ACTION_WORDS[ctx.options.getString('action')?.toLowerCase() ?? ''];
+  let args: readonly string[] = rawArgs;
+
+  if (action) {
+    // A slash action or a prefix action word: drop the word from the arguments.
+    if (ACTION_WORDS[rawArgs[0]?.toLowerCase() ?? ''] === action) args = rawArgs.slice(1);
+  } else if (invoked === 'use' || invoked === 'consume') {
+    action = 'use';
+  } else if (rawArgs[0] && ACTION_WORDS[rawArgs[0].toLowerCase()]) {
+    action = ACTION_WORDS[rawArgs[0].toLowerCase()];
+    args = rawArgs.slice(1);
+  }
+
+  switch (action) {
+    case 'use':
+      await handleUse(ctx, services, args);
+      break;
+    case 'enhance':
+      await handleEnhance(ctx, services, args);
+      break;
+    case 'craft':
+      await handleCraft(ctx, services, ['craft', ...args]);
+      break;
+    default:
+      await handleView(ctx, services, args);
+      break;
+  }
+}
+
+const parseQuantity = (value: number | string | null | undefined): number => {
+  const n = typeof value === 'string' ? Number.parseInt(value, 10) : value;
+  return n && Number.isInteger(n) && n > 0 ? n : 1;
+};
+
+type ItemsRow = ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>;
+
+async function handleView(
   ctx: CommandContext,
   services: BotServices,
-  rawArgs: readonly string[],
+  args: readonly string[],
 ): Promise<void> {
-  const userId = ctx.user.id;
-  let activeFilter: 'ALL' | 'GEAR' | 'POTIONS' = 'ALL';
+  const viewer = ctx.user;
+  const target = (await ctx.options.getUser?.('target')) ?? viewer;
+  const readOnly = target.id !== viewer.id;
+  const category: ItemCategory =
+    parseItemCategory(ctx.options.getString('category')) ??
+    parseItemCategory(args[0]) ??
+    'OVERVIEW';
 
-  const rawFilter =
-    ctx.options.getString('filter')?.toUpperCase() ?? rawArgs[1]?.toUpperCase() ?? '';
-  if (rawFilter === 'EQUIPMENT' || rawFilter === 'ACCESSORY' || rawFilter === 'GEAR') {
-    activeFilter = 'GEAR';
-  } else if (rawFilter === 'CONSUMABLE' || rawFilter === 'POTIONS' || rawFilter === 'POTION') {
-    activeFilter = 'POTIONS';
-  }
+  const load = async () => ({
+    entries: await loadItemEntries(services, target.id),
+    overview: await loadItemsOverview(services, target.id),
+  });
 
-  let selectedIndex = 0;
-
-  const loadItems = async () => {
-    const inventoryItems = await services.userInventoryItemRepo.findByUser(userId);
-    const detailed = await Promise.all(
-      inventoryItems.map(async (inv) => {
-        const def = await services.gameItemRepo.findById(inv.itemId);
-        return { inv, def };
-      }),
-    );
-
-    const visible = detailed.filter(
-      (entry): entry is { inv: typeof entry.inv; def: NonNullable<typeof entry.def> } => {
-        if (!entry.def) return false;
-        if (activeFilter === 'GEAR') {
-          return entry.def.type === 'EQUIPMENT' || entry.def.type === 'ACCESSORY';
-        }
-        if (activeFilter === 'POTIONS') {
-          return entry.def.type === 'CONSUMABLE';
-        }
-        return true;
-      },
-    );
-
-    const wearerNames = await loadWearerNames(
-      services,
-      visible.flatMap(({ inv }) =>
-        inv.state === 'EQUIPPED' && inv.equippedToCardId ? [inv.equippedToCardId] : [],
-      ),
-    );
-
-    return visible.map(({ inv, def }) => ({
-      inv,
-      def,
-      wornBy:
-        inv.state === 'EQUIPPED' && inv.equippedToCardId
-          ? wearerNames.get(inv.equippedToCardId)
-          : undefined,
-    }));
+  let state: ItemsViewState = {
+    ownerName: target.username,
+    category,
+    page: 0,
+    ...(await load()),
+    readOnly,
   };
 
-  let items = await loadItems();
-
-  if (items.length === 0) {
-    const embed = new EmbedBuilder()
-      .setColor(0x5865f2)
-      .setTitle('🎒 Summoner Gear & Item Inventory')
-      .setDescription(
-        'Your inventory is currently empty.\nVisit the Town Shop (`/game shop` or `/shop`) or explore dungeons to acquire gear and consumables!',
-      );
-    await ctx.reply({ embeds: [embed] });
-    return;
-  }
-
-  const buildInvEmbed = (itemsList: typeof items, itemIdx: number, actionNotice?: string) => {
-    const selected = itemsList[itemIdx];
-
-    const lines = itemsList.slice(0, 15).map(({ inv, def, wornBy }, idx) => {
-      const isCurrent = idx === itemIdx;
-      const marker = isCurrent ? '👉 ' : '• ';
-      const enhancementTag = inv.enhancementLevel > 0 ? ` **+${inv.enhancementLevel}**` : '';
-      const stateTag =
-        inv.state === 'EQUIPPED'
-          ? ` \`[EQUIPPED: ${inv.slot} on ${wornBy ?? 'unknown card'}]\``
-          : '';
-      const qtyTag =
-        def.type === 'CONSUMABLE' || def.type === 'MATERIAL' ? ` (x${inv.quantity})` : '';
-      const perkText =
-        def.battlePerks && def.battlePerks.length > 0
-          ? ` | *Perk: ${def.battlePerks.join(', ')}*`
-          : '';
-      return `${marker}**${def.name}**${enhancementTag}${qtyTag}${stateTag} — [${def.rarity}] · ID: \`${inv.id}\`\n  *${def.description}*${perkText}`;
-    });
-
-    // Discord rejects embed descriptions over 4096 characters, so keep whole lines within a budget.
-    const LIST_CHAR_BUDGET = 3000;
-    const shownLines: string[] = [];
-    let listChars = 0;
-    for (const line of lines) {
-      if (shownLines.length > 0 && listChars + line.length > LIST_CHAR_BUDGET) break;
-      shownLines.push(line);
-      listChars += line.length + 2;
-    }
-    const hiddenCount = itemsList.length - shownLines.length;
-
-    const embed = new EmbedBuilder()
-      .setColor(0x5865f2)
-      .setTitle(`🎒 ${ctx.user.username}'s Gear & Consumables (${itemsList.length} items)`)
-      .setDescription(
-        (actionNotice ? `${actionNotice}\n\n` : '') +
-          shownLines.join('\n\n') +
-          (hiddenCount > 0
-            ? `\n\n*${hiddenCount} more not shown. Use the filter buttons to narrow the list.*`
-            : '') +
-          (selected
-            ? `\n\n🎯 **Selected Item**: **${selected.def.name}** [${selected.def.rarity} ${selected.def.subtype}]` +
-              (selected.def.type === 'CONSUMABLE' || selected.def.type === 'MATERIAL'
-                ? ` (Quantity: ${selected.inv.quantity})`
-                : ` (Enhancement: +${selected.inv.enhancementLevel})`) +
-              ` · ID: \`${selected.inv.id}\`` +
-              `\n*${selected.def.description}*`
-            : ''),
-      )
-      .setFooter({
-        text: 'Select an item to use or enhance | Filter categories with buttons below',
-      });
-
-    return embed;
-  };
-
-  const buildInvComponents = (itemsList: typeof items, itemIdx: number) => {
-    const selected = itemsList[itemIdx];
-
-    const selectMenu = new StringSelectMenuBuilder()
-      .setCustomId('inv:select_item')
-      .setPlaceholder(selected ? `Selected: ${selected.def.name}` : 'Select an item to inspect...');
-
-    for (let i = 0; i < Math.min(25, itemsList.length); i++) {
-      const { inv, def } = itemsList[i]!;
-      const isConsumable = def.type === 'CONSUMABLE';
-      const icon =
-        def.subtype === 'HP_POTION'
-          ? '🧪'
-          : def.subtype === 'MANA_POTION'
-            ? '🔷'
-            : isConsumable
-              ? '⚡'
-              : '⚔️';
-      const detailTag = isConsumable
-        ? `(x${inv.quantity})`
-        : inv.enhancementLevel > 0
-          ? `(+${inv.enhancementLevel})`
-          : '';
-
-      selectMenu.addOptions({
-        label: `${icon} ${def.name} ${detailTag}`.trim(),
-        description: def.description ? def.description.slice(0, 100) : `${def.type} item`,
-        value: String(i),
-        default: i === itemIdx,
-      });
-    }
-
-    const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
-
-    const buttonRow = new ActionRowBuilder<ButtonBuilder>();
-
-    if (selected && selected.def.type === 'CONSUMABLE') {
-      buttonRow.addComponents(
-        new ButtonBuilder()
-          .setCustomId(`inv:action:use:${selected.inv.id}`)
-          .setLabel(`🧪 Use ${selected.def.name}`)
-          .setStyle(ButtonStyle.Success),
-      );
-    } else if (
-      selected &&
-      (selected.def.type === 'EQUIPMENT' || selected.def.type === 'ACCESSORY')
-    ) {
-      buttonRow.addComponents(
-        new ButtonBuilder()
-          .setCustomId(`inv:action:enhance:${selected.inv.id}`)
-          .setLabel(`⚡ Enhance +1`)
-          .setStyle(ButtonStyle.Primary),
-      );
-    }
-
-    buttonRow.addComponents(
-      new ButtonBuilder()
-        .setCustomId('inv:filter:ALL')
-        .setLabel('📦 All')
-        .setStyle(activeFilter === 'ALL' ? ButtonStyle.Primary : ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId('inv:filter:GEAR')
-        .setLabel('⚔️ Gear')
-        .setStyle(activeFilter === 'GEAR' ? ButtonStyle.Primary : ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId('inv:filter:POTIONS')
-        .setLabel('🧪 Potions')
-        .setStyle(activeFilter === 'POTIONS' ? ButtonStyle.Primary : ButtonStyle.Secondary),
-    );
-
-    return [selectRow, buttonRow];
-  };
-
-  const initialEmbed = buildInvEmbed(items, selectedIndex);
-  const initialComponents = buildInvComponents(items, selectedIndex);
-
-  const replyMsg = await ctx.reply({ embeds: [initialEmbed], components: initialComponents });
+  const initial = buildItemsView(state);
+  const replyMsg = await ctx.reply({ embeds: [initial.embed], components: initial.components });
   const discordMsg = (
     replyMsg && typeof replyMsg === 'object' && 'fetch' in replyMsg
-      ? await (replyMsg as any).fetch()
+      ? await (replyMsg as { fetch: () => Promise<Message> }).fetch()
       : replyMsg
   ) as Message | undefined;
 
@@ -374,12 +225,17 @@ async function handleInventory(
     return;
   }
 
-  const collector = discordMsg.createMessageComponentCollector({
-    time: 120_000,
-  });
+  const collector = discordMsg.createMessageComponentCollector({ time: 120_000 });
+
+  const refresh = async (notice?: string) => {
+    state = { ...state, ...(await load()) };
+    const inCategory = entriesInCategory(state.entries, state.category);
+    state.page = Math.min(state.page, pageCount(inCategory.length) - 1);
+    state.notice = notice;
+  };
 
   collector.on('collect', async (interaction) => {
-    if (interaction.user.id !== ctx.user.id) {
+    if (interaction.user.id !== viewer.id) {
       await interaction.reply({
         content: '⏳ This is not your inventory!',
         flags: MessageFlags.Ephemeral,
@@ -387,137 +243,210 @@ async function handleInventory(
       return;
     }
 
-    if (interaction.isStringSelectMenu() && interaction.customId === 'inv:select_item') {
-      const idx = parseInt(interaction.values[0] ?? '0', 10);
-      if (!isNaN(idx) && idx >= 0 && idx < items.length) {
-        selectedIndex = idx;
-      }
-      const updatedEmbed = buildInvEmbed(items, selectedIndex);
-      const updatedComponents = buildInvComponents(items, selectedIndex);
-      await interaction
-        .update({ embeds: [updatedEmbed], components: updatedComponents })
-        .catch(() => {});
-      return;
-    }
+    try {
+      const id = interaction.customId;
+      state.notice = undefined;
 
-    if (interaction.isButton()) {
-      const customId = interaction.customId;
-
-      if (customId.startsWith('inv:filter:')) {
-        const filterType = customId.split(':')[2] as 'ALL' | 'GEAR' | 'POTIONS';
-        activeFilter = filterType;
-        items = await loadItems();
-        selectedIndex = 0;
-        const updatedEmbed = buildInvEmbed(items, selectedIndex);
-        const updatedComponents = items.length > 0 ? buildInvComponents(items, selectedIndex) : [];
-        await interaction
-          .update({ embeds: [updatedEmbed], components: updatedComponents })
-          .catch(() => {});
-        return;
-      }
-
-      if (customId.startsWith('inv:action:use:')) {
-        const invId = customId.split(':')[3]!;
-        try {
-          const result = await services.consumableService.useItem(userId, invId);
-          let notice = '';
-          if (result.success) {
-            if (result.type === 'ENERGY') {
-              notice = `⚡ **Energy Replenished!** Recovered +${result.restoredAmount} Energy! (${result.userEnergy} Energy, ${result.potsUsedToday}/3 daily)`;
-            } else {
-              notice = `🧪 **Consumed Potion!** Restored +${result.restoredAmount} ${result.type}!`;
-            }
-          } else {
-            notice = `❌ **Consumption Failed**: ${result.reason}`;
-          }
-          items = await loadItems();
-          if (selectedIndex >= items.length) selectedIndex = Math.max(0, items.length - 1);
-          const updatedEmbed = buildInvEmbed(items, selectedIndex, notice);
-          const updatedComponents =
-            items.length > 0 ? buildInvComponents(items, selectedIndex) : [];
-          await interaction
-            .update({ embeds: [updatedEmbed], components: updatedComponents })
-            .catch(() => {});
-        } catch (err: unknown) {
-          await interaction.reply({
-            content: `❌ Error using item: ${err instanceof Error ? err.message : String(err)}`,
-            flags: MessageFlags.Ephemeral,
-          });
+      if (interaction.isStringSelectMenu() && id === ITEM_CUSTOM_IDS.category) {
+        const picked = interaction.values[0] as ItemCategory | undefined;
+        if (picked && ITEM_CATEGORIES.includes(picked)) {
+          state = { ...state, category: picked, page: 0, selectedKey: undefined };
         }
-        return;
-      }
-
-      if (customId.startsWith('inv:action:enhance:')) {
-        const invId = customId.split(':')[3]!;
-        try {
-          const balance = await services.economyRepo.getOrCreateBalance(userId);
-          const userCredits = BigInt(balance.walletBalance);
-          const enhanceResult = await services.enhancementService.enhance(
-            userId,
-            invId,
-            userCredits,
-          );
-
-          if (enhanceResult.creditsSpent > 0) {
-            await services.economyRepo.modifyBalance({
-              userId,
-              walletDelta: -enhanceResult.creditsSpent,
-              type: 'ENHANCE_ITEM',
-              source: 'TCG_FORGE',
-              metadata: { newLevel: enhanceResult.newLevel },
+      } else if (interaction.isStringSelectMenu() && id === ITEM_CUSTOM_IDS.item) {
+        state.selectedKey = interaction.values[0];
+      } else if (
+        interaction.isButton() &&
+        (id === ITEM_CUSTOM_IDS.prev || id === ITEM_CUSTOM_IDS.next)
+      ) {
+        const pages = pageCount(entriesInCategory(state.entries, state.category).length);
+        state.page = Math.min(
+          Math.max(0, state.page + (id === ITEM_CUSTOM_IDS.next ? 1 : -1)),
+          pages - 1,
+        );
+        state.selectedKey = undefined;
+      } else if (interaction.isButton() && !readOnly) {
+        const selected = selectedEntry(state);
+        if (id === ITEM_CUSTOM_IDS.craft) {
+          await interaction.deferUpdate().catch(() => {});
+          await openCraftMenu(ctx, services);
+          return;
+        }
+        let notice: string;
+        if (id === ITEM_CUSTOM_IDS.use && selected?.canUse) {
+          notice =
+            selected.source === 'tcg'
+              ? (await useTcgItem(services, viewer.id, selected.id, 1)).message
+              : await useBagItem(services, viewer.id, selected.id, 1, ctx.guild?.id);
+          await refresh(notice);
+        } else if (id === ITEM_CUSTOM_IDS.enhance && selected?.canEnhance) {
+          try {
+            const result = await enhanceGear(services, viewer.id, selected.id, {
               guildId: ctx.guild?.id,
+              itemCode: selected.code,
             });
+            notice = `✨ **Enhancement Succeeded!** +${result.previousLevel} ➜ **+${result.newLevel}**! (Spent: ${result.creditsSpent} credits, ${result.dustSpent} dust)`;
+          } catch (err: unknown) {
+            notice = `❌ **Enhancement Failed**: ${err instanceof Error ? err.message : String(err)}`;
           }
-          await recordEnhancementAchievement(services, userId, enhanceResult.newLevel);
-
-          const notice = `✨ **Enhancement Succeeded!** +${enhanceResult.previousLevel} ➜ **+${enhanceResult.newLevel}**! (Spent: ${enhanceResult.creditsSpent} credits, ${enhanceResult.dustSpent} dust)`;
-          items = await loadItems();
-          const updatedEmbed = buildInvEmbed(items, selectedIndex, notice);
-          const updatedComponents = buildInvComponents(items, selectedIndex);
-          await interaction
-            .update({ embeds: [updatedEmbed], components: updatedComponents })
-            .catch(() => {});
-        } catch (err: unknown) {
-          await interaction.reply({
-            content: `❌ **Enhancement Failed**: ${err instanceof Error ? err.message : String(err)}`,
-            flags: MessageFlags.Ephemeral,
-          });
+          await refresh(notice);
         }
-        return;
       }
+    } catch (err: unknown) {
+      state.notice = `❌ ${err instanceof Error ? err.message : String(err)}`;
     }
+
+    const view = buildItemsView(state);
+    await interaction
+      .update({ embeds: [view.embed], components: view.components as ItemsRow[] })
+      .catch(() => {});
   });
 
   collector.on('end', async () => {
-    if (items.length > 0) {
-      const disabledComponents = buildInvComponents(items, selectedIndex);
-      for (const row of disabledComponents) {
-        for (const comp of row.components) {
-          comp.setDisabled(true);
-        }
-      }
-      await discordMsg.edit({ components: disabledComponents }).catch(() => {});
-    }
+    const view = buildItemsView({ ...state, disabled: true });
+    await discordMsg.edit({ components: view.components as ItemsRow[] }).catch(() => {});
   });
+}
+
+interface UseOutcome {
+  used: number;
+  message: string;
+}
+
+/** Drinks a TCG consumable one at a time, up to `quantity`, and stops at the first failure. */
+async function useTcgItem(
+  services: BotServices,
+  userId: string,
+  userItemId: string,
+  quantity: number,
+): Promise<UseOutcome> {
+  let used = 0;
+  let restored = 0;
+  let last: Awaited<ReturnType<BotServices['consumableService']['useItem']>> | undefined;
+  let failure: string | undefined;
+
+  for (let i = 0; i < quantity; i += 1) {
+    try {
+      const result = await services.consumableService.useItem(userId, userItemId);
+      if (!result.success) {
+        failure = result.reason ?? 'The item could not be used.';
+        break;
+      }
+      used += 1;
+      restored += result.restoredAmount;
+      last = result;
+    } catch (err: unknown) {
+      failure = err instanceof Error ? err.message : String(err);
+      break;
+    }
+  }
+
+  if (used === 0 || !last) {
+    return { used, message: `❌ **Consumption Failed**: ${failure ?? 'Nothing was used.'}` };
+  }
+
+  const head =
+    last.type === 'ENERGY'
+      ? `⚡ **Energy Replenished!** Used ${used}, recovered +${restored} energy (now ${last.userEnergy}, ${last.potsUsedToday} potion(s) used today).`
+      : `🧪 **Consumed Potion!** Used ${used}, restored +${restored} ${last.type}!` +
+        (last.cleansedDebuffs ? ' Status effects were cleansed.' : '');
+  return { used, message: failure ? `${head}\n⚠️ Stopped: ${failure}` : head };
+}
+
+/** Uses a bag (economy) item. */
+async function useBagItem(
+  services: BotServices,
+  userId: string,
+  itemRef: string,
+  quantity: number,
+  guildId: string | undefined,
+): Promise<string> {
+  const res = await services.inventoryService.useItem({
+    userId,
+    itemId: itemRef,
+    quantity,
+    guildId,
+  });
+  if (!res.success) return `❌ **Cannot Use Item**: ${res.reason}`;
+  const effect = res.effectSummary ? `\n**Effects Applied:** ${res.effectSummary}` : '';
+  return `✨ **Consumed ${res.quantityUsed}x ${res.item?.name}!**${effect}\nRemaining in inventory: \`${res.remainingQuantity}\``;
+}
+
+/** Finds what a player typed to use: a TCG inventory item ID, a TCG item code they own, else a
+ *  bag item. */
+async function resolveUseTarget(
+  services: BotServices,
+  userId: string,
+  ref: string,
+): Promise<{ kind: 'tcg'; id: string } | { kind: 'bag'; ref: string } | null> {
+  const byId = await services.userInventoryItemRepo.findById(ref);
+  if (byId && byId.userId === userId) return { kind: 'tcg', id: byId.id };
+
+  const code =
+    LEGACY_ITEM_CODE_ALIASES[ref] ??
+    LEGACY_ITEM_CODE_ALIASES[ref.toLowerCase()] ??
+    ref.toUpperCase();
+  const def = await services.gameItemRepo.findByCode(code);
+  if (def) {
+    const owned = (await services.userInventoryItemRepo.findByUser(userId)).find(
+      (inv) => inv.itemId === def.id && inv.quantity > 0,
+    );
+    if (owned) return { kind: 'tcg', id: owned.id };
+  }
+
+  const bagItem = await services.inventoryService.getItem(ref);
+  return bagItem ? { kind: 'bag', ref: bagItem.id } : null;
+}
+
+async function handleUse(
+  ctx: CommandContext,
+  services: BotServices,
+  args: readonly string[],
+): Promise<void> {
+  const ref = ctx.options.getString('item') ?? args[0];
+  if (!ref) {
+    await ctx.reply({
+      content: '❌ Please say which item to use. Usage: `/items action:use item:<id or code>`',
+    });
+    return;
+  }
+  const quantity = parseQuantity(ctx.options.getInteger('quantity') ?? args[1]);
+
+  try {
+    const target = await resolveUseTarget(services, ctx.user.id, ref);
+    if (!target) {
+      await ctx.reply({
+        content: `❌ Unknown item: \`${ref}\`. Run \`/items\` to see your items and their IDs or codes.`,
+      });
+      return;
+    }
+    const message =
+      target.kind === 'tcg'
+        ? (await useTcgItem(services, ctx.user.id, target.id, quantity)).message
+        : await useBagItem(services, ctx.user.id, target.ref, quantity, ctx.guild?.id);
+    await ctx.reply({ content: message });
+  } catch (err: unknown) {
+    await ctx.reply({
+      content: `❌ **Error consuming item**: ${err instanceof Error ? err.message : String(err)}`,
+    });
+  }
 }
 
 async function handleEnhance(
   ctx: CommandContext,
   services: BotServices,
-  rawArgs: readonly string[],
+  args: readonly string[],
 ): Promise<void> {
   const userId = ctx.user.id;
-  const userItemId = ctx.options.getString('id') ?? rawArgs[1];
+  const userItemId = ctx.options.getString('item') ?? args[0];
 
   if (!userItemId) {
     await ctx.reply({
       content:
-        '❌ Please specify the inventory item ID to enhance. Usage: `/item action:enhance id:<item_id>`',
+        '❌ Please specify the inventory item ID to enhance. Usage: `/items action:enhance item:<item_id>`',
     });
     return;
   }
 
-  // 1. Fetch user item & definition
   const invItem = await services.userInventoryItemRepo.findById(userItemId);
   if (!invItem || invItem.userId !== userId) {
     await ctx.reply({ content: '❌ Item not found in your inventory.' });
@@ -561,69 +490,10 @@ async function handleEnhance(
   }
 }
 
-async function handleUse(
-  ctx: CommandContext,
-  services: BotServices,
-  rawArgs: readonly string[],
-): Promise<void> {
-  const userId = ctx.user.id;
-  const userItemId = ctx.options.getString('id') ?? rawArgs[1];
-
-  if (!userItemId) {
-    await ctx.reply({
-      content:
-        '❌ Please specify the inventory item ID to consume. Usage: `/item action:use id:<item_id>`',
-    });
-    return;
-  }
-
-  try {
-    const result = await services.consumableService.useItem(userId, userItemId);
-
-    if (!result.success) {
-      await ctx.reply({
-        content: `❌ **Consumption Failed**: ${result.reason}`,
-      });
-      return;
-    }
-
-    if (result.type === 'ENERGY') {
-      const embed = new EmbedBuilder()
-        .setColor(0xfee75c)
-        .setTitle('⚡ Stamina Replenished!')
-        .setDescription(
-          `Consumed energy potion and recovered **+${result.restoredAmount} Energy**!\n` +
-            `• **Current Energy**: \`${result.userEnergy} Energy\`\n` +
-            `• **Daily Potions Used**: \`${result.potsUsedToday} / 3\``,
-        )
-        .setFooter({ text: 'Anti-abuse limit: 3 energy potions per calendar day' });
-
-      await ctx.reply({ embeds: [embed] });
-      return;
-    }
-
-    const embed = new EmbedBuilder()
-      .setColor(0x57f287)
-      .setTitle('🧪 Consumable Used!')
-      .setDescription(
-        `Successfully restored **+${result.restoredAmount} ${result.type}**!` +
-          (result.cleansedDebuffs
-            ? '\n✨ All active status effects and debuffs were cleansed!'
-            : ''),
-      );
-
-    await ctx.reply({ embeds: [embed] });
-  } catch (err: unknown) {
-    await ctx.reply({
-      content: `❌ **Error consuming item**: ${err instanceof Error ? err.message : String(err)}`,
-    });
-  }
-}
-
 /** Resolves a user-typed recipe code against the recipe list, by recipe code, output item code, or
  *  output code with the `CRAFT_` prefix omitted (e.g. `WEAPON_OBSIDIAN_KATANA`). */
 /**
- * Standalone `/craft` (prefix `craft`, `forge`): a shortcut for `/item action:craft` so crafting shows
+ * Standalone `/craft` (prefix `craft`, `forge`): a shortcut for `/items action:craft` so crafting shows
  * up as its own entry in help.
  */
 export function createCraftCommand(services: BotServices): Command {
@@ -659,7 +529,7 @@ export function createCraftCommand(services: BotServices): Command {
       ],
     },
     async execute(ctx: CommandContext): Promise<void> {
-      // handleCraft reads prefix args after the action word, as in `item craft <recipe> <qty>`.
+      // handleCraft reads prefix args after the action word, as in `items craft <recipe> <qty>`.
       await handleCraft(ctx, services, ['craft', ...(ctx.options.getRawArgs?.() ?? [])]);
     },
   };

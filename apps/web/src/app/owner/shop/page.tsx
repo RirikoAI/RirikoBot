@@ -24,8 +24,8 @@ export default async function OwnerShopPage() {
         <div>
           <h1 className="text-2xl font-bold">Item shop</h1>
           <p className="mt-1 max-w-2xl text-sm text-zinc-400">
-            The items members buy with /shop and use with /use, on every server. Items members hold
-            can be retired (no longer sold) but not deleted.
+            The items members buy with /shop and use with /items, on every server. Items members
+            hold can be retired (no longer sold) but not deleted.
           </p>
         </div>
         <Link

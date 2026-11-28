@@ -76,7 +76,7 @@ export class ConsumableService {
           restoredAmount: 0,
           reason:
             potionResult.reason ??
-            `You have reached your daily stamina potion limit (${potionLimit}/${potionLimit}). Rest well, summoner!`,
+            `You have reached your daily energy potion limit (${potionLimit}/${potionLimit}). Rest well, summoner!`,
           userEnergy: potionResult.energy.currentEnergy,
           potsUsedToday: potionResult.potsUsedToday,
         };

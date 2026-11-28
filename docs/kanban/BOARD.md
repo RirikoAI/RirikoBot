@@ -150,6 +150,7 @@
 | `STORY-202` | Story | Set Up Tickets, Starboard, Event Logs and Level Role Stacking with Commands | 21 | EPIC-021 | [STORY-202.md](./handovers/STORY-202.md) |
 | `STORY-204` | Story | Scripted Releases: Plan Mode, One Merge Stop, Assisted Tag and Images | 21 | EPIC-022 | [STORY-204.md](./handovers/STORY-204.md) |
 | `STORY-205` | Story | Claim Card Drops with a Button, Send the Card by DM, Edit the Drop Message | 8 | EPIC-010 | [STORY-205.md](./handovers/STORY-205.md) |
+| `STORY-207` | Story | One /items Command for Gear, Potions and Bag Items, and Stamina Renamed to Energy | 13 | EPIC-010 | [STORY-207.md](./handovers/STORY-207.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -466,6 +467,8 @@
 | `TASK-2042` | Task | pnpm release:prepare: Bump on develop and Open the One Release PR | 8 | STORY-204 | [TASK-2042.md](./handovers/TASK-2042.md) |
 | `TASK-2043` | Task | pnpm release:publish: Tag, Wait for the Images, Publish, Move latest | 5 | STORY-204 | [TASK-2043.md](./handovers/TASK-2043.md) |
 | `TASK-2044` | Task | The /release Skill, the Release Prompt Nudge, and docs/release.md | 5 | STORY-204 | [TASK-2044.md](./handovers/TASK-2044.md) |
+| `TASK-2071` | Task | Rename Stamina to Energy in Item Codes, Names, Messages and Docs, with a Data Migration | 5 | STORY-207 | [TASK-2071.md](./handovers/TASK-2071.md) |
+| `TASK-2072` | Task | One /items Command with Category Menus, an /inventory Alias and Item Use | 8 | STORY-207 | [TASK-2072.md](./handovers/TASK-2072.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |

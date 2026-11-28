@@ -71,6 +71,20 @@
       "when": 1792648831521,
       "tag": "0009_slippery_donald_blake",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1795872224341,
+      "tag": "0010_energy_item_names",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1795872658928,
+      "tag": "0011_items_command_settings",
+      "breakpoints": true
     }
   ]
 }

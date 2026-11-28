@@ -152,7 +152,7 @@ describe('InventoryService', () => {
       const consumables = await inventoryService.getCatalog(await categoryIdOf('consumable'));
       expect(consumables.length).toBe(3);
       expect(consumables.map((c) => c.code)).toContain('candy_minor');
-      expect(consumables.map((c) => c.code)).toContain('stamina_potion');
+      expect(consumables.map((c) => c.code)).toContain('energy_potion');
       expect(consumables.map((c) => c.code)).toContain('exp_potion_small');
 
       const cosmetics = await inventoryService.getCatalog(await categoryIdOf('cosmetic'));
@@ -165,8 +165,10 @@ describe('InventoryService', () => {
       expect(item).not.toBeNull();
       expect(item?.price).toBe(350);
       expect(item?.rarity).toBe('UNCOMMON');
-      expect((await inventoryService.getItem(item!.id))?.code).toBe('stamina_potion');
+      expect((await inventoryService.getItem(item!.id))?.code).toBe('energy_potion');
       expect(await inventoryService.getItem('no_such_item')).toBeNull();
+      // The renamed potion still answers to its old code.
+      expect((await inventoryService.getItem('stamina_potion'))?.id).toBe(item!.id);
     });
 
     it('groups the catalog by category, uncategorized items last, retired items left out', async () => {
@@ -185,7 +187,7 @@ describe('InventoryService', () => {
       expect(sections[0]?.items.map((item) => item.code)).toEqual([
         'candy_minor',
         'exp_potion_small',
-        'stamina_potion',
+        'energy_potion',
       ]);
       expect(sections[1]?.items.map((item) => item.code)).toEqual(['loose']);
     });
@@ -286,9 +288,9 @@ describe('InventoryService', () => {
         const userId = 'bulk_potions';
         await playerEnergyRepo.getOrCreate(userId);
         await playerEnergyRepo.update(userId, { currentEnergy: 0 });
-        await inventoryRepo.addItem(userId, await idOf('stamina_potion'), 10);
+        await inventoryRepo.addItem(userId, await idOf('energy_potion'), 10);
         const use = (quantity: number) =>
-          service.useItem({ userId, itemId: 'stamina_potion', quantity });
+          service.useItem({ userId, itemId: 'energy_potion', quantity });
 
         const first = await use(2);
         expect(first).toMatchObject({
@@ -307,7 +309,7 @@ describe('InventoryService', () => {
             remainingQuantity: 8,
           });
           expect(await playerEnergyRepo.findById(userId)).toEqual(before);
-          expect(await service.getItemQuantity(userId, 'stamina_potion')).toBe(8);
+          expect(await service.getItemQuantity(userId, 'energy_potion')).toBe(8);
         }
         expect(await use(1)).toMatchObject({
           success: true,
@@ -333,30 +335,30 @@ describe('InventoryService', () => {
           rulesResolver: async () => ({ ...DEFAULT_ENERGY_RULES, dailyPotionLimit: 1 }),
         }),
       });
-      await inventoryRepo.addItem('limited_batch', await idOf('stamina_potion'), 3);
+      await inventoryRepo.addItem('limited_batch', await idOf('energy_potion'), 3);
       expect(
-        await service.useItem({ userId: 'limited_batch', itemId: 'stamina_potion', quantity: 2 }),
+        await service.useItem({ userId: 'limited_batch', itemId: 'energy_potion', quantity: 2 }),
       ).toMatchObject({ success: false, quantityUsed: 0, remainingQuantity: 3 });
       expect((await playerEnergyRepo.findById('limited_batch'))?.dailyEnergyPotsUsed).toBe(0);
     });
 
     it.each([0, -1, 0.5, NaN, Infinity])('rejects invalid potion quantity %s', async (quantity) => {
-      await inventoryRepo.addItem('invalid_batch', await idOf('stamina_potion'), 3);
+      await inventoryRepo.addItem('invalid_batch', await idOf('energy_potion'), 3);
       expect(
         await inventoryService.useItem({
           userId: 'invalid_batch',
-          itemId: 'stamina_potion',
+          itemId: 'energy_potion',
           quantity,
         }),
       ).toMatchObject({ success: false, quantityUsed: 0 });
-      expect(await inventoryService.getItemQuantity('invalid_batch', 'stamina_potion')).toBe(3);
+      expect(await inventoryService.getItemQuantity('invalid_batch', 'energy_potion')).toBe(3);
       expect(await playerEnergyRepo.findById('invalid_batch')).toBeNull();
     });
 
     it('fails if user does not own item or quantity is insufficient', async () => {
       const result = await inventoryService.useItem({
         userId: 'empty_bag_user',
-        itemId: 'stamina_potion',
+        itemId: 'energy_potion',
         quantity: 1,
       });
 
@@ -364,17 +366,17 @@ describe('InventoryService', () => {
       expect(result.reason).toContain('Insufficient item quantity');
     });
 
-    it('consumes stamina potion and restores player energy', async () => {
+    it('consumes energy potion and restores player energy', async () => {
       // Set user energy to 40/100
-      await playerEnergyRepo.getOrCreate('stamina_user');
-      await playerEnergyRepo.update('stamina_user', { currentEnergy: 40 });
+      await playerEnergyRepo.getOrCreate('energy_user');
+      await playerEnergyRepo.update('energy_user', { currentEnergy: 40 });
 
       // Give 2 potions
-      await inventoryRepo.addItem('stamina_user', await idOf('stamina_potion'), 2);
+      await inventoryRepo.addItem('energy_user', await idOf('energy_potion'), 2);
 
       const useRes = await inventoryService.useItem({
-        userId: 'stamina_user',
-        itemId: 'stamina_potion',
+        userId: 'energy_user',
+        itemId: 'energy_potion',
         quantity: 1,
       });
 
@@ -385,34 +387,34 @@ describe('InventoryService', () => {
       expect(useRes.dailyEnergyPotsUsed).toBe(1);
     });
 
-    it('enforces hard ceiling of max 3 stamina potions per day', async () => {
+    it('enforces hard ceiling of max 3 energy potions per day', async () => {
       await playerEnergyRepo.getOrCreate('chugger');
       await playerEnergyRepo.update('chugger', { currentEnergy: 10 });
-      await inventoryRepo.addItem('chugger', await idOf('stamina_potion'), 5);
+      await inventoryRepo.addItem('chugger', await idOf('energy_potion'), 5);
 
       // Pot 1 -> OK (pots used = 1)
-      const p1 = await inventoryService.useItem({ userId: 'chugger', itemId: 'stamina_potion' });
+      const p1 = await inventoryService.useItem({ userId: 'chugger', itemId: 'energy_potion' });
       expect(p1.success).toBe(true);
 
       // Pot 2 -> OK (pots used = 2)
-      const p2 = await inventoryService.useItem({ userId: 'chugger', itemId: 'stamina_potion' });
+      const p2 = await inventoryService.useItem({ userId: 'chugger', itemId: 'energy_potion' });
       expect(p2.success).toBe(true);
 
       // Pot 3 -> OK (pots used = 3)
-      const p3 = await inventoryService.useItem({ userId: 'chugger', itemId: 'stamina_potion' });
+      const p3 = await inventoryService.useItem({ userId: 'chugger', itemId: 'energy_potion' });
       expect(p3.success).toBe(true);
 
       // Pot 4 -> REJECTED (exceeds max 3/day ceiling)
-      const p4 = await inventoryService.useItem({ userId: 'chugger', itemId: 'stamina_potion' });
+      const p4 = await inventoryService.useItem({ userId: 'chugger', itemId: 'energy_potion' });
       expect(p4.success).toBe(false);
-      expect(p4.reason).toContain('Daily stamina potion ceiling reached');
+      expect(p4.reason).toContain('Daily energy potion ceiling reached');
 
       // Remaining inventory must NOT have been decremented on rejected 4th attempt
-      const remaining = await inventoryService.getItemQuantity('chugger', 'stamina_potion');
+      const remaining = await inventoryService.getItemQuantity('chugger', 'energy_potion');
       expect(remaining).toBe(2); // 5 - 3 = 2
     });
 
-    it('caps stamina potions at the global TCG potion limit (TASK-1124)', async () => {
+    it('caps energy potions at the global TCG potion limit (TASK-1124)', async () => {
       const ruled = new InventoryService({
         itemRepository: itemRepo,
         categoryRepository: new ItemCategoryRepository(client),
@@ -427,13 +429,13 @@ describe('InventoryService', () => {
       });
       await playerEnergyRepo.getOrCreate('ruled_chugger');
       await playerEnergyRepo.update('ruled_chugger', { currentEnergy: 10 });
-      await inventoryRepo.addItem('ruled_chugger', await idOf('stamina_potion'), 3);
+      await inventoryRepo.addItem('ruled_chugger', await idOf('energy_potion'), 3);
 
-      const first = await ruled.useItem({ userId: 'ruled_chugger', itemId: 'stamina_potion' });
+      const first = await ruled.useItem({ userId: 'ruled_chugger', itemId: 'energy_potion' });
       expect(first.success).toBe(true);
-      const second = await ruled.useItem({ userId: 'ruled_chugger', itemId: 'stamina_potion' });
+      const second = await ruled.useItem({ userId: 'ruled_chugger', itemId: 'energy_potion' });
       expect(second.success).toBe(false);
-      expect(await ruled.getItemQuantity('ruled_chugger', 'stamina_potion')).toBe(2);
+      expect(await ruled.getItemQuantity('ruled_chugger', 'energy_potion')).toBe(2);
     });
 
     it('consumes EXP potion and awards experience', async () => {

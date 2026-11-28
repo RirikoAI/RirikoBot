@@ -66,6 +66,10 @@ describe('Catalog item grants (BUG-0010)', () => {
     it('resolves legacy aliases and returns null for unknown keys', async () => {
       const legacy = await grants.grant('u1', 'potion_hp_minor', 1, 'TEST');
       expect(legacy?.item.code).toBe('POTION_MINOR_HP');
+      const flask = await grants.grant('u1', 'RESTORE_GRAND_STAMINA_FLASK', 1, 'TEST');
+      expect(flask?.item.code).toBe('RESTORE_GRAND_ENERGY_FLASK');
+      const candy = await grants.grant('u1', 'RESTORE_STAMINA_CANDY', 1, 'TEST');
+      expect(candy?.item.code).toBe('RESTORE_ENERGY_CANDY');
       expect(await grants.grant('u1', 'title_tower_vanquisher', 1, 'TEST')).toBeNull();
     });
 

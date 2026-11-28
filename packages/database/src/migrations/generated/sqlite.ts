@@ -249,5 +249,28 @@ export const SQLITE_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "0b66aacec62dc4db73f3ded3af81e0e6daebec95274903e6ea8cffc87af99fb0",
     "contract": false
+  },
+  {
+    "id": "0010_energy_item_names",
+    "statements": [
+      "-- Data-only: stamina becomes energy in item codes, names and descriptions.\n-- Only rows still holding the old default text are touched, so owner edits stay.\nUPDATE game_items SET code = 'RESTORE_ENERGY_CANDY' WHERE code = 'RESTORE_STAMINA_CANDY' AND NOT EXISTS (SELECT 1 FROM game_items WHERE code = 'RESTORE_ENERGY_CANDY');",
+      "UPDATE game_items SET code = 'RESTORE_GRAND_ENERGY_FLASK' WHERE code = 'RESTORE_GRAND_STAMINA_FLASK' AND NOT EXISTS (SELECT 1 FROM game_items WHERE code = 'RESTORE_GRAND_ENERGY_FLASK');",
+      "UPDATE game_items SET name = 'Energy Candy' WHERE code = 'RESTORE_ENERGY_CANDY' AND name = 'Stamina Candy';",
+      "UPDATE game_items SET name = 'Grand Energy Flask' WHERE code = 'RESTORE_GRAND_ENERGY_FLASK' AND name = 'Grand Stamina Flask';",
+      "UPDATE economy_items SET code = 'energy_potion' WHERE code = 'stamina_potion' AND NOT EXISTS (SELECT 1 FROM economy_items WHERE code = 'energy_potion');",
+      "UPDATE economy_items SET name = 'Energy Potion' WHERE code = 'energy_potion' AND name = 'Stamina Potion';",
+      "UPDATE economy_items SET description = 'Restores 50 energy. Hard anti-abuse ceiling: max 3 potions consumed per day.' WHERE code = 'energy_potion' AND description = 'Restores 50 stamina. Hard anti-abuse ceiling: max 3 potions consumed per day.';",
+      "UPDATE economy_items SET description = 'A sweet candy that restores 20 energy. Town shop limit: 1 per user per day.' WHERE code = 'candy_minor' AND description = 'A sweet candy that restores 20 stamina. Town shop limit: 1 per user per day.';"
+    ],
+    "checksum": "7446267fac3fe092bc257fdd2378e6a29f4fbe143b2497eb0de76c58e31ac164",
+    "contract": false
+  },
+  {
+    "id": "0011_items_command_settings",
+    "statements": [
+      "-- Data-only: the /item command is now /items, so its saved server overrides move with it.\n-- Rows for /use stay as they are.\nUPDATE command_settings SET command_name = 'items' WHERE command_name = 'item';"
+    ],
+    "checksum": "ea07cb7868c70db91321faa9cd6e201780172b2eefeb687b9a6b147eeeb4aa49",
+    "contract": false
   }
 ];

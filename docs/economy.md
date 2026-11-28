@@ -57,19 +57,20 @@ Profile background rules:
 | Command | Aliases | Options | What it does |
 |---|---|---|---|
 | `/shop` | `store` | `action` (`list` or `buy`), `item` (item code), `quantity` | Lists the shop. With `buy`, buys an item. |
-| `/inventory` | `inv`, `bag` | `target` (member) | Lists the items of a member. |
-| `/use` | `consume` | `item` (item code, required), `quantity` | Uses an item from your bag. |
+| `/items` | `inventory`, `inv`, `bag`, `use`, `consume` | `action` (`view`, `use`, `enhance`, `craft`), `item`, `category`, `target`, `quantity` | Browse your bag and gear by category, and use an item. `/inventory` runs the same command. |
 
-Every item has a code. `/shop` and `/inventory` show it. You type the code in `/shop buy` and in `/use`.
+Every item has a code. `/shop` and `/items` show it. You type the code in `/shop buy` and in `/items action:use` (or `!use <code> [quantity]`).
 
 The shop starts with these items:
 
 | Code | Name | Price | What it does |
 |---|---|---|---|
 | `candy_minor` | Minor Energy Candy | 100 | Restores 20 energy. You can buy 1 each day. |
-| `stamina_potion` | Stamina Potion | 350 | Restores 50 energy. You can use 3 each day. |
+| `energy_potion` | Energy Potion | 350 | Restores 50 energy. You can use 3 each day. |
 | `exp_potion_small` | Small EXP Potion | 250 | Gives 150 XP in the server where you use it. |
 | `profile_bg_voucher` | Profile Background Voucher | 1500 | A cosmetic voucher. |
+
+The Energy Potion used to be called the Stamina Potion. Its old code `stamina_potion` still works when you buy or use it.
 
 Energy is used by the card game. See [tcg-player-guide.md](tcg-player-guide.md). Bot owners can add and change items (see section 9).
 

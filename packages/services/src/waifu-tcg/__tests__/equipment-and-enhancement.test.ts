@@ -340,7 +340,7 @@ describe('Waifu TCG: Equipment, Loadouts, Enhancement & Consumables (STORY-103 /
 
   describe('4. Consumables & Anti-Abuse Daily Potion Ceiling', () => {
     it('restores energy and enforces daily 3/3 potion ceiling', async () => {
-      const candyDef = await itemRepo.findByCode('RESTORE_STAMINA_CANDY');
+      const candyDef = await itemRepo.findByCode('RESTORE_ENERGY_CANDY');
       const candy = await inventoryRepo.create({
         userId: 'summoner_1',
         itemId: candyDef!.id,
@@ -365,7 +365,7 @@ describe('Waifu TCG: Equipment, Loadouts, Enhancement & Consumables (STORY-103 /
       // Consume potion 4 -> Rejection!
       const res4 = await consumableService.useItem('summoner_1', candy.id);
       expect(res4.success).toBe(false);
-      expect(res4.reason).toMatch(/Daily stamina potion ceiling reached/);
+      expect(res4.reason).toMatch(/Daily energy potion ceiling reached/);
     });
 
     it('uses HP potions and Elixir of Full Vitality to heal and cleanse', async () => {

@@ -14,7 +14,7 @@ export function createEnergyCommand(services: BotServices): Command {
       description: 'Shows your energy, bonus energy, potions used today and the next refill.',
       aliases: ['stamina'],
       usage: '/energy',
-      examples: ['/energy', '!energy', '!stamina'],
+      examples: ['/energy', '!energy'],
     },
     async execute(ctx: CommandContext): Promise<void> {
       const lifecycle = services.energyLifecycleService;

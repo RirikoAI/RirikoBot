@@ -2,7 +2,9 @@
 // meta snapshots to migrations/sqlite and migrations/pg. Afterwards run the embedder
 // (db:generate-migrations); the root `pnpm db:generate` runs both.
 //
-//   pnpm -F @ririko/database db:generate-sql [--name <migration name>]
+//   pnpm -F @ririko/database db:generate-sql [--name <migration name>] [--custom]
+//
+// --custom writes an empty, data-only migration (no schema change) for you to fill in by hand.
 //
 // With no changes to a schema drizzle-kit writes nothing. Review the generated SQL before
 // committing it; committed migrations are never edited (docs/archive/adr/ADR-015).
@@ -16,6 +18,7 @@ const args = process.argv.slice(2);
 const nameIndex = args.indexOf('--name');
 const name = nameIndex >= 0 ? args[nameIndex + 1] : undefined;
 if (nameIndex >= 0 && !name) throw new Error('--name needs a value');
+const custom = args.includes('--custom');
 
 function sqlFiles(dir) {
   const path = fileURLToPath(new URL(`../migrations/${dir}/`, import.meta.url));
@@ -31,6 +34,7 @@ for (const [dialect, config, dir] of [
   // Drizzle Kit's snapshot serializer needs JSON-safe bigint defaults; patch only this child.
   const argv = ['node', 'drizzle-kit', 'generate', '--config', config];
   if (name) argv.push('--name', name);
+  if (custom) argv.push('--custom');
   const script = `
     BigInt.prototype.toJSON = function () { return this.toString(); };
     process.argv = ${JSON.stringify(argv)};

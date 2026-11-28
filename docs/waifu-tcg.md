@@ -100,15 +100,17 @@ The player guide explains these in detail. This is the full list of their option
 | `quest_id` | For `quests claim`: the quest. |
 | `item`, `quantity` | For `buy`: an item code and how many. |
 
-**`/item`** (aliases `tcgitem`, `items`)
+**`/items`** (aliases `item`, `tcgitem`, `use`, `consume`; `/inventory` runs the same command)
 
 | Option | What it does |
 |---|---|
-| `action` | `inventory`, `enhance`, `use` or `craft`. |
-| `id` | An inventory item ID, to enhance or use. |
-| `filter` | For `inventory`: `EQUIPMENT`, `ACCESSORY` or `CONSUMABLE`. |
-| `card_id` | For `use`: the card that takes a potion. |
-| `recipe`, `quantity` | For `craft`: a recipe code and how many (1 to 10). |
+| `action` | `view` (the default), `use`, `enhance` or `craft`. |
+| `item` | An inventory item ID or an item code, to use or enhance. |
+| `category` | For `view`: `overview`, `equipment`, `accessories`, `potions`, `energy`, `materials` or `bag`. |
+| `target` | For `view`: a member whose items you want to see (read-only). |
+| `recipe`, `quantity` | For `craft`: a recipe code. `quantity` is how many to use or craft (1 to 10). |
+
+With no action, `/items` opens an overview (energy, energy potions used today, Crafting Dust and the items per category) with a category menu and an item menu. The buttons use an energy item, enhance gear or open the crafting menu. HP and mana potions are used in battle, so they have no Use button. `!use energy_potion 2` and `!consume` still work.
 
 **`/craft`** (aliases `forge`): `recipe`, `quantity` (1 to 10). With no recipe, it opens the crafting menu.
 

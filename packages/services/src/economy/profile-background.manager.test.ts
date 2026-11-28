@@ -179,12 +179,12 @@ describe('ProfileBackgroundManager', () => {
 
       CREATE TABLE player_energy (
         user_id TEXT PRIMARY KEY,
-        stamina INTEGER NOT NULL DEFAULT 100,
-        max_stamina INTEGER NOT NULL DEFAULT 100,
+        energy INTEGER NOT NULL DEFAULT 100,
+        max_energy INTEGER NOT NULL DEFAULT 100,
         daily_energy_pots_used INTEGER NOT NULL DEFAULT 0,
         last_reset_date TEXT NOT NULL,
         last_potion_reset_date TEXT,
-        last_stamina_regen_at INTEGER NOT NULL,
+        last_energy_regen_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       );
     `);

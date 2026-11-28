@@ -856,7 +856,7 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
       expect(callArgs.content).toContain('__**Consumables**__');
       expect(callArgs.content).toContain('__**Cosmetics**__');
       expect(callArgs.content).toContain('candy_minor');
-      expect(callArgs.content).toContain('stamina_potion');
+      expect(callArgs.content).toContain('energy_potion');
       expect(callArgs.content).toContain('profile_bg_voucher');
     });
 
@@ -873,7 +873,7 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
       const replyFn = vi.fn().mockResolvedValue(undefined);
       const ctx = createMockContext({
         userId,
-        optionsMap: { action: 'buy', item: 'stamina_potion', quantity: 1 },
+        optionsMap: { action: 'buy', item: 'energy_potion', quantity: 1 },
         replyFn,
       });
 
@@ -881,57 +881,11 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
 
       const callArgs = replyFn.mock.calls[0]?.[0];
       expect(callArgs.content).toContain('Purchase Successful!');
-      expect(callArgs.content).toContain('Stamina Potion');
+      expect(callArgs.content).toContain('Energy Potion');
 
       // Check item in inventory
-      const qty = await services.inventoryService.getItemQuantity(userId, 'stamina_potion');
+      const qty = await services.inventoryService.getItemQuantity(userId, 'energy_potion');
       expect(qty).toBe(1);
-    });
-  });
-
-  describe('9. /inventory command', () => {
-    it('displays inventory items owned by user', async () => {
-      const userId = 'user_inv_01';
-      await services.inventoryRepo.addItem(
-        userId,
-        (await services.itemRepo.findByCode('candy_minor'))!.id,
-        3,
-      );
-
-      const replyFn = vi.fn().mockResolvedValue(undefined);
-      const ctx = createMockContext({ userId, replyFn });
-
-      await commands.get('inventory')!(ctx);
-
-      const callArgs = replyFn.mock.calls[0]?.[0];
-      expect(callArgs.content).toContain('Inventory Bag');
-      expect(callArgs.content).toContain('x3');
-    });
-  });
-
-  describe('10. /use command', () => {
-    it('consumes item from inventory and applies effect', async () => {
-      const userId = 'user_consumer_01';
-      await services.inventoryRepo.addItem(
-        userId,
-        (await services.itemRepo.findByCode('candy_minor'))!.id,
-        2,
-      );
-
-      const replyFn = vi.fn().mockResolvedValue(undefined);
-      const ctx = createMockContext({
-        userId,
-        optionsMap: { item: 'candy_minor', quantity: 1 },
-        replyFn,
-      });
-
-      await commands.get('use')!(ctx);
-
-      const callArgs = replyFn.mock.calls[0]?.[0];
-      expect(callArgs.content).toContain('Consumed 1x Minor Energy Candy');
-
-      const remaining = await services.inventoryService.getItemQuantity(userId, 'candy_minor');
-      expect(remaining).toBe(1);
     });
   });
 

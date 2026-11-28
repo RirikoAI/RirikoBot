@@ -21,7 +21,7 @@ export interface ConsumePotionResult {
 }
 
 /**
- * Repository for player energy tracking, stamina replenishment, and anti-abuse daily potion ceilings.
+ * Repository for player energy tracking, energy replenishment, and anti-abuse daily potion ceilings.
  */
 export class PlayerEnergyRepository extends BaseRepository<
   PlayerEnergy,
@@ -244,7 +244,7 @@ export class PlayerEnergyRepository extends BaseRepository<
       if (quantity > maxDailyLimit - currentPotsUsed) {
         return {
           success: false,
-          reason: `Daily stamina potion ceiling reached (max ${maxDailyLimit} per day; ${Math.max(0, maxDailyLimit - currentPotsUsed)} remaining, requested ${quantity})`,
+          reason: `Daily energy potion ceiling reached (max ${maxDailyLimit} per day; ${Math.max(0, maxDailyLimit - currentPotsUsed)} remaining, requested ${quantity})`,
           energy: energyRecord,
           potsUsedToday: currentPotsUsed,
           energyRestored: 0,
